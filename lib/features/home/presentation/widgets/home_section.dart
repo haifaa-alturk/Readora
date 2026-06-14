@@ -15,7 +15,7 @@ class HomeSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
           child: Text(
             title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold,color: Colors.white),
           ),
         ),
         child,

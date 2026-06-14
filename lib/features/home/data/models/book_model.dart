@@ -12,23 +12,34 @@ class BookModel extends Book {
   });
 
   factory BookModel.fromJson(Map<String, dynamic> json) {
-    // معالجة أسماء المؤلفين من العلاقة authors بالباك إند
-    List<String> authorNames = [];
-    if (json['authors'] != null) {
-      authorNames = (json['authors'] as List)
-          .map((author) => author['author_name'].toString())
-          .toList();
-    }
+    try {
+      // 1. معالجة أسماء المؤلفين
+      List<String> authorNames = [];
+      if (json['authors'] != null && json['authors'] is List) {
+        authorNames = (json['authors'] as List)
+            .map((author) => author['author_name']?.toString() ?? 'Unknown')
+            .toList();
+      }
 
-    return BookModel(
-      id: json['id'],
-      bookName: json['book_name'] ?? 'بدون عنوان',
-      description: json['description'],
-      // الروابط في اللارافيل تحتاج أحياناً لإضافة رابط السيرفر قبلها
-      coverImage: json['cover_image'], 
-      rating: double.tryParse(json['rating']?.toString() ?? '0.0') ?? 0.0,
-      sellingPrice: json['selling_price']?.toString(),
-      authors: authorNames,
-    );
-  }
-}
+      // 2. إرجاع الكائن
+      return BookModel(
+        id: json['id'] ?? 0,
+        bookName: json['book_name'] ?? 'بدون عنوان',
+        description: json['description'],
+        coverImage: json['cover_image'],
+        rating: double.tryParse(json['rating']?.toString() ?? '0.0') ?? 0.0,
+        sellingPrice: json['selling_price']?.toString(),
+        authors: authorNames,
+      );
+    } catch (e) {
+      // هذا الجزء سيطبع الخطأ في الـ Console إذا حدثت مشكلة في كتاب معين
+      print("❌ Error parsing book: $e");
+      return BookModel(
+        id: 0, 
+        bookName: "Error parsing", 
+        rating: 0, 
+        authors: [],
+      );
+    }
+  } // نهاية الـ factory
+} // نهاية الكلاس

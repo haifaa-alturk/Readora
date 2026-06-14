@@ -17,23 +17,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int currentPage = 0;
 final List<Map<String, dynamic>> data = [
   {
-    "image": "assets/images/buyB.jpg",
-    "title": "Welcome to Library",
-    "desc": "أهلا بك في شراء وتصفح الكتب بسهولة",
-    "color": Color.fromARGB(255, 239, 247, 208),
+    "image": "assets/images/on1.jpg",
+    "title": "YOUR DIGITAL LIBRARY",
+    "desc":"Access your reading list on any device.",
+   // "color": Color.fromARGB(255, 239, 247, 208),
+   "color": Color(0xFFC8E6C9)
   },
   {
-    "image": "assets/images/tenentB.jpg",
-    "title": "Borrowing Books",
-    "desc": "مع ميزة استعارة الكتب لمدة معينة",
-    "color": Color(0xFFD6EAF8),
+  "image": "assets/images/on2.jpg",
+    "title": "COMPETATION SYSTEM",
+    "desc": "More excitement and reading to win competitions",
+    // "color": Color(0xFFD6EAF8),
+     "color": Color(0xFFFFF9C4)
   },
   {
-    "image": "assets/images/raceB.jpg",
-    "title": "Competition System",
-    "desc": "المزيد من الحماس والقراءة للفوز بالمسابقات",
-    "color": Color.fromARGB(255, 208, 231, 198),
-  },
+      "image": "assets/images/on3.jpg",
+    "title": "CHOOSE A BOOK",
+    "desc": "Select and Borrow your book",
+    // "color": Color.fromARGB(255, 208, 231, 198),
+     "color": Color(0xFFE1F5FE)
+  }
 ];
 
   void nextPage() {
@@ -53,7 +56,7 @@ final List<Map<String, dynamic>> data = [
   void skip() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => SplashScreen()),
+      MaterialPageRoute(builder: (_) => LoginScreen()),
     );
   }
 
@@ -65,16 +68,20 @@ final List<Map<String, dynamic>> data = [
       body: SafeArea(
         child: Column(
           children: [
-
-            
-            Align(
-              alignment: Alignment.topRight,
-              child: TextButton(
-                onPressed: skip,
-                child: Text("تخطي"),
-              ),
-            ),
-
+         
+Align(
+  alignment: Alignment.topRight,
+  child: TextButton(
+    onPressed: skip,
+    child: Text(
+      "Skip",
+      style: TextStyle(
+        color: Color(0xFF463716), // متناسق مع لون الوصف
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+  ),
+),
             Expanded(
               child: PageView.builder(
                 controller: _controller,
@@ -91,28 +98,41 @@ final List<Map<String, dynamic>> data = [
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
 
-                     
-ClipRRect(
-  borderRadius: BorderRadius.circular(10), 
-  child: Image.asset(
-    data[i]['image']!,
-    height: 250,
-   // width: 800,
-    fit: BoxFit.cover, 
+                    
+Container(
+  height: 250,
+  width: 250,
+  decoration: BoxDecoration(
+    shape: BoxShape.circle,
+    image: DecorationImage(
+      image: AssetImage(data[i]['image']!),
+      fit: BoxFit.cover,
+    ),
+    // إضافة ظل خفيف لإبراز الصورة
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.5),
+        blurRadius: 20,
+        spreadRadius: 6,
+      ),
+    ],
   ),
 ),
                         SizedBox(height: 40),
 
                      
-                        Text(
-                          data[i]['title']!,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-
+                       
+                       
+Text(
+  data[i]['title']!,
+  style: TextStyle(
+    fontSize: 24, // أكبر قليلاً
+    color: const Color(0xFF2F3C43),
+    fontWeight: FontWeight.w900, // أثقل
+    letterSpacing: 1.5, // تباعد عصري
+  ),
+  textAlign: TextAlign.center,
+),
                         SizedBox(height: 15),
 
                        
@@ -157,17 +177,21 @@ ClipRRect(
                   ),
 
                   ElevatedButton(
+                    
                     onPressed: nextPage,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 25, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
+                   style: ElevatedButton.styleFrom(
+  backgroundColor: const Color(0xFF7CB9B9), // لون ثيم Readora
+  foregroundColor: Colors.white, // نص أبيض
+  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+  elevation: 5, // ظل خفيف للزر
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(30), // حواف أنعم
+  ),
+),
                     child: Text(
                       currentPage == data.length - 1
-                          ? "ابدأ"
-                          : "التالي",
+                          ? "Get Started"
+                          : "Next",
                     ),
                   ),
                 ],

@@ -8,9 +8,13 @@ class BookCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // تذكري وضع رابط السيرفر قبل الصورة
-    String imageUrl = "http://127.0.0.1:8000/storage/${book.coverImage}";
+    //String imageUrl = "http://127.0.0.1:8000/storage/${book.coverImage}";
+String imageUrl = book.coverImage?.startsWith('http') == true 
+    ? book.coverImage!
+    : "http://127.0.0.1:8000/storage/${book.coverImage}";
 
     return Container(
+    //  color: Colors.white,
       width: 140,
       margin: const EdgeInsets.symmetric(horizontal: 8),
       child: Column(
@@ -23,14 +27,16 @@ class BookCard extends StatelessWidget {
                 imageUrl,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => 
-                  Container(color: Colors.grey[300], child: const Icon(Icons.book)),
+                  Container(color: const Color.fromARGB(255, 56, 55, 58), child: const Icon(Icons.book)),
               ),
             ),
           ),
           const SizedBox(height: 5),
           Text(book.bookName, maxLines: 1, overflow: TextOverflow.ellipsis, 
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-          Text(book.authors.join(", "), maxLines: 1, 
+            style: const TextStyle(color: Color.fromARGB(255, 99, 93, 93),fontWeight: FontWeight.bold)),
+        Text(
+  book.authors.isNotEmpty ? book.authors.join(", ") : "مؤلف غير معروف",
+
             style: const TextStyle(color: Color.fromARGB(255, 21, 16, 16), fontSize: 12)),
         ],
       ),

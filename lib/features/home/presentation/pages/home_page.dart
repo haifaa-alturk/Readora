@@ -11,56 +11,105 @@ import 'package:library_app1/features/home/presentation/widgets/home_section.dar
 import 'package:library_app1/features/home/presentation/widgets/recommended_books_list.dart';
 import 'package:library_app1/features/home/presentation/widgets/top_rated_books_list.dart';
 
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: const Color.fromARGB(255, 70, 55, 20),
+//       body: BlocBuilder<HomeBloc, HomeState>(
+//         builder: (context, homeState) {
+//           if (homeState is HomeLoading) {
+//             return const Center(child: CircularProgressIndicator());
+//           } 
+          
+//           if (homeState is HomeLoaded) {
+//             return SingleChildScrollView(
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   // تمرير النقاط (استخدمنا 250 كقيمة افتراضية مؤقتاً للتجربة)
+//                   const HomeHeader(points: 250),
+
+//                   HomeSection(
+//                     title: "كتب مقترحة حسب اهتماماتك",
+//                     child: RecommendedBooksList(books: homeState.recommendedBooks),
+//                   ),
+
+//                   HomeSection(
+//                     title: "الكتب الأكثر مبيعاً وتقييماً",
+//                     child: TopRatedBooksList(books: homeState.topRatedBooks),
+//                   ),
+
+//                   HomeSection(
+//                     title: "جميع الكتب (من الأحدث للأقدم)",
+//                     child: AllBooksGrid(books: homeState.newBooks),
+//                   ),
+//                 ],
+//               ),
+//             );
+//           }
+
+//           if (homeState is HomeError) {
+//             return Center(child: Text("حدث خطأ: ${homeState.message}"));
+//           }
+
+//           return const Center(child: CircularProgressIndicator());
+//         },
+//       ),
+//     );
+//   }
+// }
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 70, 55, 20),
-      body: BlocBuilder<HomeBloc, HomeState>(
-        builder: (context, homeState) {
-          if (homeState is HomeLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } 
-          
-          if (homeState is HomeLoaded) {
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // تمرير النقاط (استخدمنا 250 كقيمة افتراضية مؤقتاً للتجربة)
-                  const HomeHeader(points: 250),
-
-                  HomeSection(
-                    title: "كتب مقترحة حسب اهتماماتك",
-                    child: RecommendedBooksList(books: homeState.recommendedBooks),
-                  ),
-
-                  HomeSection(
-                    title: "الكتب الأكثر مبيعاً وتقييماً",
-                    child: TopRatedBooksList(books: homeState.topRatedBooks),
-                  ),
-
-                  HomeSection(
-                    title: "جميع الكتب (من الأحدث للأقدم)",
-                    child: AllBooksGrid(books: homeState.newBooks),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          if (homeState is HomeError) {
-            return Center(child: Text("حدث خطأ: ${homeState.message}"));
-          }
-
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: const Color.fromARGB(255, 195, 231, 241), // لون خلفيتك الداكنة
+    body: BlocBuilder<HomeBloc, HomeState>(
+      builder: (context, state) {
+        if (state is HomeLoading) {
           return const Center(child: CircularProgressIndicator());
-        },
-      ),
-    );
-  }
+        } else if (state is HomeLoaded) {
+          // 💡 الهيكل الصحيح لمنع التعليق
+          return SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+
+                // 1. إعادة الهيدر (شريط البحث والترحيب) 👈
+      const HomeHeader(points: 250,),
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text("Suggested Books ", style: TextStyle(color: Color.fromARGB(255, 143, 76, 225), fontSize: 20,fontWeight: FontWeight.bold)),
+                ),
+                RecommendedBooksList(books: state.recommendedBooks),
+
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(" Top Reated Books", style: TextStyle(color: Color.fromARGB(255, 143, 76, 225), fontSize: 20,fontWeight: FontWeight.bold)),
+                ),
+                TopRatedBooksList(books: state.topRatedBooks),
+
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text("All Books ", style: TextStyle(color: Color.fromARGB(255, 143, 76, 225), fontSize: 20,fontWeight: FontWeight.bold)),
+                ),
+                AllBooksGrid(books: state.newBooks), // الـ Grid المعدل لح يشتغل بسلاسة هنا
+              ],
+            ),
+          );
+        } else if (state is HomeError) {
+          return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+        }
+        return const Center(child: Text("اضغط لتحميل البيانات"));
+      },
+    ),
+  );
 }
+}
+
  // BlocBuilder<HomeBloc, HomeState>(
       //   builder: (context, state) {
       //     if (state is HomeLoading) {

@@ -267,7 +267,8 @@ class _LoginScreenState extends State<LoginScreen> {
             // نجاح التسجيل: رسالة ترحيب ثم انتقال
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text("Welcome back, ${state.user.name}!"),
+                content: Text("Welcome back, ${state.user.name}!"
+                ),
                 backgroundColor: Colors.green,
               ),
             );
@@ -327,10 +328,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           const Text(
                             "Welcome To Readora",
                             style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
+                           fontSize: 24, // أكبر قليلاً
+    fontWeight: FontWeight.w900, // أثقل
+    letterSpacing: 1.5, // تباعد عصري,
                               color: Colors.white,
-                              letterSpacing: 1.0,
+                             
                             ),
                           ),
                           const SizedBox(height: 10),
