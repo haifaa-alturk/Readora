@@ -1,3 +1,22 @@
+// class Book {
+//   final int id;
+//   final String bookName;
+//   final String? description;
+//   final String? coverImage;
+//   final double rating;
+//   final String? sellingPrice;
+//   final List<String> authors; // سنخزن أسماء المؤلفين هنا
+
+//   Book({
+//     required this.id,
+//     required this.bookName,
+//     this.description,
+//     this.coverImage,
+//     required this.rating,
+//     this.sellingPrice,
+//     required this.authors,
+//   });
+// }
 class Book {
   final int id;
   final String bookName;
@@ -5,7 +24,8 @@ class Book {
   final String? coverImage;
   final double rating;
   final String? sellingPrice;
-  final List<String> authors; // سنخزن أسماء المؤلفين هنا
+  final String? pdfFile; // رابط ملف الكتاب
+  final List<String> authors;
 
   Book({
     required this.id,
@@ -14,6 +34,7 @@ class Book {
     this.coverImage,
     required this.rating,
     this.sellingPrice,
+    this.pdfFile,
     required this.authors,
   });
 }
