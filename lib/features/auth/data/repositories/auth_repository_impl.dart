@@ -54,8 +54,8 @@ class AuthRepositoryImpl implements AuthRepository {
       id: user.id,
       name: user.name,
       email: user.email,
-      userImage: user.userImage, // أضيفي هذا هنا أيضاً
-      interests: user.interests, // أضيفي هذا هنا أيضاً
+      userImage: user.userImage, 
+      interests: user.interests,
     );
   }
  @override
@@ -67,7 +67,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required List<int> interests, 
     String? imagePath
   }) async {
-    // التعديل هنا: استخدمي remote وليس remoteDataSource
+    
     final userModel = await remote.register(
       name: name,
       email: email,
@@ -83,8 +83,8 @@ class AuthRepositoryImpl implements AuthRepository {
   id: userModel.id,
   name: userModel.name,
   email: userModel.email,
-  userImage: userModel.userImage, // مرري الصورة من الموديل للـ Entity
-  interests: userModel.interests, // مرري الاهتمامات
+  userImage: userModel.userImage, 
+  interests: userModel.interests, //  الاهتمامات
 );
   }
 

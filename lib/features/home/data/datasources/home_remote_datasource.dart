@@ -25,8 +25,8 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
   @override
   Future<List<BookModel>> getNewBooks() async {
-    // نستخدم الـ endpoint الذي يعيد جميع الكتب مرتبة
-    final response = await dio.get('/books');
+    // ن يعيد 30 كتاب مضاف حديثا
+    final response = await dio.get('/books/new');
     print("📡 Data from Server: ${response.data}"); // 🔥 أضيفي هذا السطر مؤقتاً
     return (response.data as List).map((e) => BookModel.fromJson(e)).toList();
   }

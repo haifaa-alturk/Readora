@@ -60,11 +60,11 @@ class UserModel {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    // نصل لبيانات المستخدم من مفتاح 'user' كما في الـ JSON الخاص بكِ
+   
     final userData = json['user'];
 
     return UserModel(
-      // 1. تغيير المفتاح ليطابق رد السيرفر (لاحظي الإملاء: acceses token)
+    
       token: json['acceses token'] ?? json['token'] ?? '', 
       
       id: userData['id'] ?? 0,
@@ -72,7 +72,7 @@ class UserModel {
       email: userData['email'] ?? '',
       userImage: userData['user_image'], 
       
-      // 2. تحويل الـ categories إلى List من CategoryModel
+    
       interests: userData['categories'] != null 
           ? (userData['categories'] as List)
               .map((i) => CategoryModel.fromJson(i))

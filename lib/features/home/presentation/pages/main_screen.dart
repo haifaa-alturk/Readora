@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart'; // ✅ هذا هو الاستيراد الصحيح للـ read
-import 'package:library_app1/features/home/presentation/bloc/home_bloc.dart';
-import 'package:library_app1/features/home/presentation/bloc/home_event.dart';
+import 'package:library_app1/core/api/api_client.dart';
+import 'package:library_app1/features/home/data/datasources/LibraryRemoteDataSource.dart';
+import 'package:library_app1/features/home/presentation/bloc/Home_Bloc/home_bloc.dart';
+import 'package:library_app1/features/home/presentation/bloc/Home_Bloc/home_event.dart';
+import 'package:library_app1/features/home/presentation/bloc/Library_Bloc/library_bloc.dart';
+import 'package:library_app1/features/home/presentation/bloc/Library_Bloc/library_event.dart';
+import 'package:library_app1/features/home/presentation/pages/Library_view.dart';
+
 import 'package:library_app1/features/home/presentation/pages/home_page.dart';
 
 class MainScreen extends StatefulWidget {
@@ -14,10 +20,24 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = [
+// دالة بناء شاشة المكتبة باستخدام الـ ApiClient الجاهز الخاص بكِ
+  Widget _buildLibraryPage() {
+    // 1. إنشاء نسخة من كلاس الـ ApiClient الخاص بمشروعكِ
+    final apiClient = ApiClient();
+
+    // 2. تمرير الـ dio المجهز بالرابط والتوكن إلى الـ DataSource
+    return BlocProvider(
+      create: (context) => LibraryBloc(
+        dataSource: LibraryRemoteDataSourceImpl(dio: apiClient.dio),
+      )..add(FetchAllBooks()), // جلب الكتب فوراً
+      child: const LibraryPage(),
+    );
+  }
+
+  List<Widget> get _pages => [
     const HomeScreen(), 
     const Center(child: Text("المفضلة")),
-    const Center(child: Text("كتبي")),
+ _buildLibraryPage(),
     const Center(child: Text("حسابي")),
   ];
 

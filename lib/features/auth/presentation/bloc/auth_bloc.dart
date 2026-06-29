@@ -73,11 +73,11 @@ AuthBloc(this.loginUseCase, this.registerUseCase, this.getCategoriesUseCase) : s
           interests: event.interests,
           imagePath: event.imagePath,
         );
-// ✅ الوصول للتوكن مباشرة من كائن المستخدم الذي أعاده الـ Use Case
+//  الوصول للتوكن مباشرة من كائن المستخدم يلي أعاده  Use Case
         final prefs = await SharedPreferences.getInstance();
         await prefs.clear(); 
         
-        // هنا نستخدم user.token (تأكدي أن الموديل الخاص بك يحتوي على حقل token)
+        //  user.token ( أن الموديل الخاص ب يحتوي على حقل token)
         await prefs.setString('auth_token', user.token);
         await prefs.setBool('is_logged_in', true);
         
@@ -96,7 +96,7 @@ AuthBloc(this.loginUseCase, this.registerUseCase, this.getCategoriesUseCase) : s
       }
     });
 
-    // --- معالجة تسجيل الدخول (Login) ---
+    //  معالجة تسجيل الدخول (Login) 
     on<LoginEvent>((event, emit) async {
       emit(AuthLoading());
       try {
@@ -105,7 +105,7 @@ AuthBloc(this.loginUseCase, this.registerUseCase, this.getCategoriesUseCase) : s
           event.password,
         );
 
-        // ✅ حفظ التوكن عند نجاح تسجيل الدخول
+        //  حفظ التوكن عند نجاح تسجيل الدخول
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', user.token);
         await prefs.setBool('is_logged_in', true);

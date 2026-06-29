@@ -3,8 +3,8 @@ class User {
   final int id;
   final String name;
   final String email;
-  final String? userImage; // أضفنا الصورة (nullable لأنها قد لا توجد)
-  final List<dynamic>? interests; // أضفنا الاهتمامات
+  final String? userImage; 
+  final List<dynamic>? interests; //  الاهتمامات
 
   User({
     required this.token,

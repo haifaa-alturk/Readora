@@ -89,8 +89,8 @@ import 'package:library_app1/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:library_app1/features/home/data/datasources/home_remote_datasource.dart';
 import 'package:library_app1/features/home/data/repositories/home_repository_impl.dart';
 import 'package:library_app1/features/home/domain/repositories/home_repository.dart';
-import 'package:library_app1/features/home/presentation/bloc/home_bloc.dart';
-import 'package:library_app1/features/home/presentation/bloc/home_event.dart';
+import 'package:library_app1/features/home/presentation/bloc/Home_Bloc/home_bloc.dart';
+import 'package:library_app1/features/home/presentation/bloc/Home_Bloc/home_event.dart';
 import 'package:library_app1/onboarding/splash_screen.dart';
 import 'package:library_app1/features/book_details/domain/usecases/get_book_details.dart';
 
