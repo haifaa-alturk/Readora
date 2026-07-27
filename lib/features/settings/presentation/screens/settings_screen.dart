@@ -1,0 +1,276 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:library_app1/features/settings/presentation/bloc/settings_bloc.dart';
+import 'package:library_app1/features/settings/presentation/bloc/settings_event.dart';
+import 'package:library_app1/features/settings/presentation/bloc/settings_state.dart';
+
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<SettingsBloc>().add(const LoadSettingsEvent());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SizedBox(
+        width: 420,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Scaffold(
+            backgroundColor: const Color(0xfffcfbfa),
+            appBar: AppBar(
+              backgroundColor: const Color(0xfffcfbfa),
+              elevation: 0,
+              title: const Text(
+                'Settings',
+                style: TextStyle(
+                  color: Color(0xff2d2d2d),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            body: BlocConsumer<SettingsBloc, SettingsState>(
+              listenWhen: (previous, current) =>
+                  current is SettingsError || current is LoggedOut,
+              listener: (context, state) {
+                if (state is SettingsError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.message)),
+                  );
+                } else if (state is LoggedOut) {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Logged out successfully')),
+                  );
+                }
+              },
+              builder: (context, state) {
+                if (state is SettingsLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (state is SettingsError) {
+                  return Center(
+                    child: Text(
+                      state.message,
+                      style: const TextStyle(color: Color(0xff2d2d2d)),
+                    ),
+                  );
+                }
+                if (state is SettingsLoaded || state is LoggedOut) {
+                  final settings = state is SettingsLoaded ? state.settings : null;
+
+                  return Center(
+                    child: SingleChildScrollView(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 450),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              _buildAccountSection(),
+                              const SizedBox(height: 16),
+                              if (settings != null)
+                                _buildNotificationsSection(settings.notificationsEnabled),
+                              const SizedBox(height: 16),
+                              _buildPreferencesSection(),
+                              const SizedBox(height: 16),
+                              _buildPrivacySection(),
+                              const SizedBox(height: 24),
+                              _buildLogoutButton(),
+                              const SizedBox(height: 24),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                return const Center(child: CircularProgressIndicator());
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionCard(List<Widget> children) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xff2d2d2d).withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(children: children),
+    );
+  }
+
+  Widget _buildRowTile({
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    Widget? trailing,
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Icon(icon, size: 22, color: const Color(0xff2d2d2d).withValues(alpha: 0.6)),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xff2d2d2d),
+                    ),
+                  ),
+                  if (subtitle != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: const Color(0xff2d2d2d).withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            if (trailing != null) trailing,
+            if (onTap != null && trailing == null)
+              Icon(
+                Icons.chevron_right,
+                size: 20,
+                color: const Color(0xff2d2d2d).withValues(alpha: 0.3),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionDivider() {
+    return Divider(
+      height: 1,
+      thickness: 1,
+      indent: 16,
+      endIndent: 16,
+      color: const Color(0xff2d2d2d).withValues(alpha: 0.06),
+    );
+  }
+
+  Widget _buildAccountSection() {
+    return _buildSectionCard([
+      _buildRowTile(
+        icon: Icons.person_outline,
+        title: 'Account Settings',
+        subtitle: 'Edit your name, email, and profile photo',
+        onTap: () {
+          // TODO: Navigate to EditProfileScreen when Profile feature is available
+        },
+      ),
+    ]);
+  }
+
+  Widget _buildNotificationsSection(bool enabled) {
+    return _buildSectionCard([
+      _buildRowTile(
+        icon: Icons.notifications_outlined,
+        title: 'Notifications',
+        trailing: Switch(
+          value: enabled,
+          activeTrackColor: const Color(0xffe61b72).withValues(alpha: 0.4),
+          activeThumbColor: const Color(0xffe61b72),
+          onChanged: (_) {
+            context.read<SettingsBloc>().add(const ToggleNotificationsEvent());
+          },
+        ),
+      ),
+    ]);
+  }
+
+  Widget _buildPreferencesSection() {
+    return _buildSectionCard([
+      _buildRowTile(
+        icon: Icons.language,
+        title: 'Language',
+        subtitle: 'English',
+      ),
+      _buildSectionDivider(),
+      _buildRowTile(
+        icon: Icons.dark_mode_outlined,
+        title: 'Dark Mode',
+        subtitle: 'Coming soon',
+      ),
+    ]);
+  }
+
+  Widget _buildPrivacySection() {
+    return _buildSectionCard([
+      _buildRowTile(
+        icon: Icons.privacy_tip_outlined,
+        title: 'Privacy Policy',
+      ),
+      _buildSectionDivider(),
+      _buildRowTile(
+        icon: Icons.description_outlined,
+        title: 'Terms of Service',
+      ),
+    ]);
+  }
+
+  Widget _buildLogoutButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: OutlinedButton.icon(
+        onPressed: () {
+          context.read<SettingsBloc>().add(const LogoutRequested());
+        },
+        icon: const Icon(Icons.logout, size: 20),
+        label: const Text(
+          'Logout',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xffe61b72),
+          side: const BorderSide(color: Color(0xffe61b72), width: 1.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+    );
+  }
+}
