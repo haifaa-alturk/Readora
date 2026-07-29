@@ -13,7 +13,7 @@ This document tracks all cross-feature references, commented-out code, TODOs, an
 | 8 | `// import 'package:library_app1/features/individual_challenge/presentation/individual_challenge_entry.dart'; // TODO: uncomment when Individual Challenge is integrated` | Import for Individual Challenge entry point | Phase 3.2 (Individual Challenge integration) |
 | 313-318 | Commented-out `TextButton.icon` with `onPressed: () => openIndividualChallengeFlow(context, bookId: book.id, bookTitle: book.title)` | "Take the Challenge" button for completed books | Phase 3.2 (Individual Challenge integration) |
 
-**Status:** Import and call site commented out. Must be re-enabled when Individual Challenge feature is integrated.
+**Status:** ✅ RESOLVED as of commit 766ef25 (Individual Challenge integration). The import on line 8 and the TextButton.icon call (previously lines 313-318) in library_screen.dart have been uncommented and are now active.
 
 ---
 
