@@ -85,6 +85,7 @@ import 'package:library_app1/features/home/presentation/bloc/Search_Bloc/search_
 import 'package:library_app1/features/home/presentation/pages/Library_view.dart';
 import 'package:library_app1/features/home/presentation/pages/home_page.dart';
 import 'package:library_app1/features/profile/presentation/screens/profile_main_screen.dart';
+import 'package:library_app1/features/group_challenge/presentation/screens/group_challenge_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -118,7 +119,7 @@ class _MainScreenState extends State<MainScreen> {
         const Center(child: Text("المفضلة")), // (1)
         _buildLibraryPage(), // واجهة المكتبة (2)
         const ProfileMainScreen(), // (3)
-        const Center(child: Text("مسابقات")), // (4)
+        const GroupChallengeScreen(), // (4)
       ];
 
   @override
