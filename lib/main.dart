@@ -125,6 +125,12 @@ import 'package:library_app1/features/profile/presentation/bloc/profile_bloc.dar
 import 'package:library_app1/features/profile/presentation/bloc/purchase_history_bloc.dart';
 import 'package:library_app1/features/profile/presentation/bloc/profile_event.dart';
 import 'package:library_app1/features/profile/presentation/bloc/purchase_history_event.dart';
+import 'package:library_app1/features/group_challenge/data/datasources/group_challenge_remote_datasource.dart';
+import 'package:library_app1/features/group_challenge/data/repositories/group_challenge_repository_impl.dart';
+import 'package:library_app1/features/group_challenge/presentation/bloc/group_challenge_bloc.dart';
+import 'package:library_app1/features/individual_challenge/data/datasources/individual_challenge_remote_datasource.dart';
+import 'package:library_app1/features/individual_challenge/data/repositories/individual_challenge_repository_impl.dart';
+import 'package:library_app1/features/individual_challenge/domain/repositories/individual_challenge_repository_interface.dart';
 import 'package:library_app1/onboarding/splash_screen.dart';
 
 void main() {
@@ -194,9 +200,27 @@ void main() {
   final profileRemoteDataSource = ProfileRemoteDataSource(dev3ApiClient);
   final profileRepository = ProfileRepositoryImpl(profileRemoteDataSource);
 
+  // Group Challenge (dev3) — uses same Dev3ApiClient & mock data
+  final groupChallengeRemoteDataSource =
+      GroupChallengeRemoteDataSourceImpl(dev3ApiClient);
+  final groupChallengeRepository =
+      GroupChallengeRepositoryImpl(groupChallengeRemoteDataSource);
+
+  // Individual Challenge (dev3) — uses same Dev3ApiClient & mock data
+  final individualChallengeRemoteDataSource =
+      IndividualChallengeRemoteDataSourceImpl(dev3ApiClient);
+  final individualChallengeRepository =
+      IndividualChallengeRepositoryImpl(individualChallengeRemoteDataSource);
+
   runApp(
-    MultiBlocProvider(
+    MultiRepositoryProvider(
       providers: [
+        RepositoryProvider<IndividualChallengeRepositoryInterface>.value(
+          value: individualChallengeRepository,
+        ),
+      ],
+      child: MultiBlocProvider(
+        providers: [
         BlocProvider<AuthBloc>(
           create: (context) => AuthBloc(
             loginUseCase,
@@ -243,8 +267,14 @@ void main() {
           create: (context) => PurchaseHistoryBloc(repository: profileRepository)
             ..add(const LoadPurchaseHistoryEvent()),
         ),
-      ],
-      child: MyApp(),
+          BlocProvider<GroupChallengeBloc>(
+            create: (context) => GroupChallengeBloc(
+              repository: groupChallengeRepository,
+            ),
+          ),
+        ],
+        child: MyApp(),
+      ),
     ),
   );
 }

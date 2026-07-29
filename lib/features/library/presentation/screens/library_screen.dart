@@ -5,7 +5,7 @@ import '../bloc/library_bloc.dart';
 import '../bloc/library_event.dart';
 import '../bloc/library_state.dart';
 import '../../domain/entities/library_book_entity.dart';
-// import 'package:library_app1/features/individual_challenge/presentation/individual_challenge_entry.dart'; // TODO: uncomment when Individual Challenge is integrated
+import 'package:library_app1/features/individual_challenge/presentation/individual_challenge_entry.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -310,24 +310,24 @@ class _LibraryScreenState extends State<LibraryScreen> {
               ],
               // TEMPORARY entry point for dev/testing — replace with the real
               // reader's 'reached final page' event once that screen is integrated.
-              // if (book.status == 'completed')
-              //   TextButton.icon(
-              //     onPressed: () => openIndividualChallengeFlow(
-              //       context,
-              //       bookId: book.id,
-              //       bookTitle: book.title,
-              //     ),
-              //     icon: const Icon(Icons.emoji_events, size: 16),
-              //     label: const Text(
-              //       'Take the Challenge',
-              //       style: TextStyle(fontSize: 12),
-              //     ),
-              //     style: TextButton.styleFrom(
-              //       foregroundColor: const Color(0xff7c5cbf),
-              //       padding: EdgeInsets.zero,
-              //       visualDensity: VisualDensity.compact,
-              //     ),
-              //   ),
+              if (book.status == 'completed')
+                TextButton.icon(
+                  onPressed: () => openIndividualChallengeFlow(
+                    context,
+                    bookId: book.id,
+                    bookTitle: book.title,
+                  ),
+                  icon: const Icon(Icons.emoji_events, size: 16),
+                  label: const Text(
+                    'Take the Challenge',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xff7c5cbf),
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ),
             ],
           ),
         ],
