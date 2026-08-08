@@ -19,7 +19,7 @@ class HomeScreen extends StatelessWidget {
 @override
 Widget build(BuildContext context) {
   return Scaffold(
-    backgroundColor: const Color.fromARGB(255, 195, 231, 241), // لون خلفيتك الداكنة
+    backgroundColor: const Color.fromARGB(255, 241, 243, 244), // لون خلفيتك الداكنة
     body: BlocBuilder<HomeBloc, HomeState>(
       builder: (context, state) {
         if (state is HomeLoading) {

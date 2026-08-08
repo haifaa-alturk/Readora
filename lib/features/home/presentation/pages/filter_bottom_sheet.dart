@@ -176,7 +176,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
       decoration: const BoxDecoration(
-        color: Color.fromARGB(255, 48, 68, 118),
+        color: Color.fromARGB(255, 254, 252, 255),
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
       child: SingleChildScrollView(
@@ -189,7 +189,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               child: Container(
                 width: 50, height: 5,
                 decoration: BoxDecoration(
-                  color: Colors.white24, 
+                  color: const Color.fromARGB(93, 165, 0, 146), 
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -197,23 +197,23 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             const SizedBox(height: 15),
             const Center(
               child: Text(
-                "تصفية متقدمة",
-                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                "Search ",
+                style: TextStyle(color: Color.fromARGB(255, 216, 14, 203), fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 25),
 
             // ✍️ فلتر اسم المؤلف
-            const Text("اسم المؤلف", style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
+            const Text("Author Name ", style: TextStyle(color: Color.fromARGB(255, 154, 2, 143), fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             TextField(
               controller: _authorCtrl,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                hintText: "ابحث باسم كاتب معين...",
-                hintStyle: const TextStyle(color: Colors.white38),
+                hintText: "Search by Name of Author...",
+                hintStyle: const TextStyle(color: Color.fromARGB(97, 131, 121, 121)),
                 filled: true,
-                fillColor: const Color.fromARGB(255, 38, 54, 94),
+                fillColor: const Color.fromARGB(255, 254, 163, 236),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 prefixIcon: const Icon(Icons.person_search, color: Colors.white70),
               ),
@@ -221,13 +221,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             const SizedBox(height: 20),
             
             // 🌍 فلتر اللغة
-            const Text("اللغة", style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
+            const Text("Language", style: TextStyle(color: Color.fromARGB(255, 154, 2, 143), fontWeight: FontWeight.bold)),
             DropdownButton<String>(
               value: _selectedLanguage,
               isExpanded: true,
-              dropdownColor: const Color.fromARGB(255, 38, 54, 94),
-              style: const TextStyle(color: Colors.white),
-              hint: const Text("اختر لغة الكتاب", style: TextStyle(color: Colors.white38)),
+              dropdownColor: const Color.fromARGB(255, 240, 255, 180),
+              style: const TextStyle(color: Color.fromARGB(255, 119, 14, 126)),
+              hint: const Text(" Chosse Book Language ", style: TextStyle(color: Color.fromARGB(97, 162, 151, 151))),
               items: _languages.map((lang) {
                 return DropdownMenuItem(value: lang, child: Text(lang.toUpperCase()));
               }).toList(),
@@ -236,15 +236,15 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             const SizedBox(height: 20),
 
             // 📄 فلتر عدد الصفحات
-            const Text("عدد الصفحات", style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
+            const Text("Number of Page ", style: TextStyle(color: Color.fromARGB(255, 154, 2, 143), fontWeight: FontWeight.bold)),
             Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: _pagesFromCtrl,
                     keyboardType: TextInputType.number,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(hintText: "من", hintStyle: TextStyle(color: Colors.white38)),
+                    style: const TextStyle(color: Color.fromARGB(255, 84, 4, 134)),
+                    decoration: const InputDecoration(hintText: "from", hintStyle: TextStyle(color: Color.fromARGB(100, 109, 9, 163))),
                   ),
                 ),
                 const SizedBox(width: 20),
@@ -252,55 +252,112 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   child: TextField(
                     controller: _pagesToCtrl,
                     keyboardType: TextInputType.number,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(hintText: "إلى", hintStyle: TextStyle(color: Colors.white38)),
+                    style: const TextStyle(color: Color.fromARGB(255, 84, 4, 134)),
+                    decoration: const InputDecoration(hintText: "to", hintStyle: TextStyle(color: Color.fromARGB(100, 109, 9, 163))),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 25),
 
-            // 🔄 تحسين التصميم: زر الاختيار بين نوع السعر (بيع أو إيجار)
-            const Text("نوع المعاملة المادية", style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: ChoiceChip(
-                    label: const Center(child: Text("شراء / بيع")),
-                    selected: _isSellingPrice,
-                    selectedColor: const Color.fromARGB(255, 128, 118, 174),
-                    backgroundColor: const Color.fromARGB(255, 38, 54, 94),
-                    labelStyle: TextStyle(color: _isSellingPrice ? Colors.white : Colors.white60, fontWeight: FontWeight.bold),
-                    onSelected: (val) => setState(() => _isSellingPrice = true),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ChoiceChip(
-                    label: const Center(child: Text("استعارة / إيجار")),
-                    selected: !_isSellingPrice,
-                    selectedColor: const Color.fromARGB(255, 128, 118, 174),
-                    backgroundColor: const Color.fromARGB(255, 38, 54, 94),
-                    labelStyle: TextStyle(color: !_isSellingPrice ? Colors.white : Colors.white60, fontWeight: FontWeight.bold),
-                    onSelected: (val) => setState(() => _isSellingPrice = false),
-                  ),
-                ),
-              ],
+            // 🔄 زر الاختيار بين نوع السعر (بيع أو إيجار) مع التوهج
+const Text(
+  "Type",
+  style: TextStyle(
+    color: Color.fromARGB(255, 154, 2, 143),
+    fontWeight: FontWeight.bold,
+  ),
+),
+const SizedBox(height: 10),
+Row(
+  children: [
+    // 1️⃣ خيار شراء / بيع
+    Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _isSellingPrice = true),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: _isSellingPrice
+                ? const Color.fromARGB(255, 240, 255, 180) // اللون الأصفر المختار
+                : const Color.fromARGB(255, 198, 129, 235), // اللون البنفسجي
+            borderRadius: BorderRadius.circular(20),
+            
+            // 🌟 إضافة التوهج الأصفر عند الاختيار
+            boxShadow: _isSellingPrice
+                ? [
+                    BoxShadow(
+                      color: const Color.fromARGB(255, 240, 255, 180).withOpacity(0.8), // لون هالة التوهج
+                      blurRadius: 12,  // مدى انتشار الضوء
+                      spreadRadius: 2, // حجم هالة التوهج
+                    ),
+                  ]
+                : [],
+          ),
+          child: Center(
+            child: Text(
+              " Buying ",
+              style: TextStyle(
+                color: const Color.fromARGB(255, 69, 0, 55),
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            const SizedBox(height: 20),
+          ),
+        ),
+      ),
+    ),
+    const SizedBox(width: 12),
 
+    // 2️⃣ خيار استعارة / إيجار
+    Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _isSellingPrice = false),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: !_isSellingPrice
+                ? const Color.fromARGB(255, 240, 255, 180) // اللون الأصفر المختار
+                : const Color.fromARGB(255, 198, 129, 235), // اللون البنفسجي
+            borderRadius: BorderRadius.circular(20),
+            
+            // 🌟 إضافة التوهج الأصفر عند الاختيار
+            boxShadow: !_isSellingPrice
+                ? [
+                    BoxShadow(
+                      color: const Color.fromARGB(255, 240, 255, 180).withOpacity(0.8), // لون هالة التوهج
+                      blurRadius: 12,  // مدى انتشار الضوء
+                      spreadRadius: 2, // حجم هالة التوهج
+                    ),
+                  ]
+                : [],
+          ),
+          child: Center(
+            child: Text(
+              " Borrowing",
+              style: TextStyle(
+                color: const Color.fromARGB(255, 69, 0, 55),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  ],
+),
             // 💰 شريط السعر المتغير ديناميكياً
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   _isSellingPrice ? "نطاق سعر البيع" : "نطاق سعر الإيجار", 
-                  style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.bold),
+                  style: const TextStyle(color: Color.fromARGB(255, 255, 252, 252), fontWeight: FontWeight.bold),
                 ),
                 Text(
                   "من SYP${currentRange.start.round()} إلى SYP${currentRange.end.round()}",
-                  style: const TextStyle(color: Color.fromARGB(255, 180, 208, 219), fontWeight: FontWeight.bold),
+                  style: const TextStyle(color: Color.fromARGB(255, 233, 0, 221), fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -310,7 +367,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               max: 100000,
               divisions: 100,
               activeColor: const Color.fromARGB(255, 128, 118, 174),
-              inactiveColor: Colors.white24,
+              inactiveColor: const Color.fromARGB(139, 243, 0, 211),
               onChanged: (RangeValues values) {
                 setState(() {
                   if (_isSellingPrice) {
@@ -347,7 +404,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     'rental_price_to': !_isSellingPrice ? _rentalPriceRange.end : null,
                   });
                 },
-                child: const Text("تطبيق الفلترة والبحث", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                child: const Text("Save and Search  ", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
           ],

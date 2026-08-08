@@ -71,7 +71,7 @@ class HomeHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.only(top: 50, left: 20, right: 20, bottom: 20),
       decoration: const BoxDecoration(
-        color: Color.fromARGB(255, 99, 152, 172),
+        color: Color.fromARGB(255, 159, 120, 194),
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
       ),
       child: Column(
@@ -83,7 +83,7 @@ class HomeHeader extends StatelessWidget {
               const Icon(Icons.notifications_none, color: Color.fromARGB(255, 231, 230, 227), size: 30),
               Row(
                 children: [
-                  Text("نقاطك: $points", style: const TextStyle(color: Color.fromARGB(255, 243, 7, 180), fontSize: 16)),
+                  Text("نقاطك: $points", style: const TextStyle(color: Color.fromARGB(255, 39, 8, 31), fontSize: 16)),
                   const SizedBox(width: 10),
                   const CircleAvatar(
                     radius: 20, 
@@ -115,7 +115,7 @@ GestureDetector(
     width: double.infinity,
     height: 55,
     decoration: BoxDecoration(
-      color: const Color.fromARGB(167, 160, 224, 243), // لون متناسق مع ثيم التطبيق
+      color: Color(0xffc9b6f5), // لون متناسق مع ثيم التطبيق
       borderRadius: BorderRadius.circular(15),
       boxShadow: [
         BoxShadow(
@@ -128,16 +128,20 @@ GestureDetector(
     child: const Row(
       mainAxisAlignment: MainAxisAlignment.center, // لجعل النص والأيقونة في المنتصف كزر
       children: [
-        Icon(Icons.tune, color: Colors.white, size: 22), // أيقونة الفلترة والبحث
-        SizedBox(width: 12),
-        Text(
-          "البحث والفلترة المتقدمة",
-          style: TextStyle(
-            color: Colors.white, 
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+       
+
+        Center(
+          child: Text(
+            "  Search",
+            style: TextStyle(
+              color: Colors.white, 
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          
         ),
+         Icon(Icons.search, color: Colors.white, size: 22), // أيقونة الفلترة والبحث
       ],
     ),
   ),

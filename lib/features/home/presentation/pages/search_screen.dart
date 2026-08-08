@@ -276,17 +276,17 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 38, 54, 94),
+      backgroundColor: const Color.fromARGB(255, 237, 238, 240),
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 48, 68, 118),
+        backgroundColor:  const Color(0xffc9b6f5),
         elevation: 0,
         title: TextField(
           controller: _searchController,
           autofocus: true,
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: Color.fromARGB(255, 254, 251, 251)),
           decoration: const InputDecoration(
-            hintText: "ابحث باسم الكتاب...",
-            hintStyle: TextStyle(color: Colors.white60),
+            hintText: "Search by Book Title..",
+            hintStyle: TextStyle(color: Color.fromARGB(255, 251, 251, 251)),
             border: InputBorder.none,
           ),
           onChanged: (value) => _dispatchSearch(),
@@ -325,61 +325,68 @@ class _SearchScreenState extends State<SearchScreen> {
       body: Column(
         children: [
          
-          Container(
-            height: 60,
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: _staticCategories.length + 1, // +1 من أجل زر "الكل"
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              itemBuilder: (context, index) {
-                
-                
-                if (index == 0) {
-                  final isSelected = selectedCategoryId == null;
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: ChoiceChip(
-                      label: const Text('الكل'),
-                      selected: isSelected,
-                      selectedColor: const Color.fromARGB(255, 128, 118, 174),
-                      backgroundColor: const Color.fromARGB(255, 48, 68, 118),
-                      labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.white70),
-                      onSelected: (_) {
-                        setState(() => selectedCategoryId = null);
-                        _dispatchSearch();
-                      },
-                    ),
-                  );
-                }
+         Container(
+  height: 50,
+  padding: const EdgeInsets.symmetric(vertical: 6),
+  child: ListView.builder(
+    scrollDirection: Axis.horizontal,
+    itemCount: _staticCategories.length + 1, // +1 من أجل زر "الكل"
+    padding: const EdgeInsets.symmetric(horizontal: 12),
+    itemBuilder: (context, index) {
+      final bool isAll = index == 0;
+      final category = isAll ? null : _staticCategories[index - 1];
+      final isSelected = isAll 
+          ? selectedCategoryId == null 
+          : selectedCategoryId == category!['id'];
 
-                // 2. أزرار التصنيفات
-                final category = _staticCategories[index - 1];
-                final isSelected = selectedCategoryId == category['id']; 
+      final String label = isAll ? 'الكل' : category!['name'];
 
-                return Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: ChoiceChip(
-                    label: Text(category['name']), 
-                    selected: isSelected,
-                    selectedColor: const Color.fromARGB(255, 128, 118, 174),
-                    backgroundColor: const Color.fromARGB(255, 48, 68, 118),
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : Colors.white70,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      return GestureDetector(
+        onTap: () {
+          setState(() {
+            selectedCategoryId = isAll ? null : category!['id'];
+          });
+          _dispatchSearch();
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          margin: const EdgeInsets.only(left: 8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            // اللون الأصفر الدائري للمحدد والبنفسجي للغير محدد
+            color: isSelected 
+                ? const Color(0xFFFFE57F) // أصفر مائل الذهبي الفاتح
+                : const Color(0xFFC9B6F5), // البنفسجي
+            borderRadius: BorderRadius.circular(25), // يجعل الشكل كبسولة/دائري
+            
+            // إضافة التوهج الأصفر (Glow Effect) عند التحديد
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFFFFE57F).withOpacity(0.6), // لون التوهج
+                      blurRadius: 12, // انتشار التوهج والنعومة
+                      spreadRadius: 2, // حجم هالة التوهج
                     ),
-                    onSelected: (bool selected) {
-                      setState(() {
-                        selectedCategoryId = selected ? category['id'] : null;
-                      });
-                      _dispatchSearch(); 
-                    },
-                  ),
-                );
-              },
+                  ]
+                : [],
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: isSelected 
+                    ? const Color(0xFF2C2C2C) // لون النص غامق عند اختيار الأصفر
+                    : Colors.white,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontSize: 13,
+              ),
             ),
           ),
-          
+        ),
+      );
+    },
+  ),
+),
           // نتائج البحث في الـ GridView
           Expanded(
             child: BlocBuilder<SearchBloc, SearchState>(

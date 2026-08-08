@@ -50,7 +50,7 @@ class AllBooksGrid extends StatelessWidget {
           child: Text(
             "لا توجد كتب متاحة حالياً",
             style: TextStyle(
-              color: Color.fromARGB(255, 139, 163, 235),
+              color: Color.fromARGB(255, 241, 199, 244),
               fontSize: 16,
               fontWeight: FontWeight.w500,
             ),

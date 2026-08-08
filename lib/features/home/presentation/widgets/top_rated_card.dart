@@ -50,7 +50,7 @@ class TopRatedCard extends StatelessWidget {
         : "http://127.0.0.1:8000/storage/${book.coverImage}";
 
     return Card(
-      color: const Color.fromARGB(255, 131, 166, 195),
+      color: const Color.fromARGB(255, 240, 204, 218),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: ListTile(
@@ -74,7 +74,7 @@ class TopRatedCard extends StatelessWidget {
           children: [
           Text(
   book.authors.isNotEmpty ? book.authors.join(", ") : "مؤلف غير معروف",
-  style: const TextStyle(color: Color.fromARGB(255, 88, 81, 81)),
+  style: const TextStyle(color: Color.fromARGB(255, 48, 1, 46)),
 ),
             Row(
               children: [

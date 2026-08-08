@@ -126,16 +126,16 @@ class _BookCardState extends State<BookCard> {
       },
   
       child: Container(
-        width: 150,
+        width: 100,
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B), // خلفية كرت كحلية فخمة ومناسبة للثيم الداكن
+          color:  const Color.fromARGB(255, 240, 204, 218), // خلفية كرت كحلية فخمة ومناسبة للثيم الداكن
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
+              color: const Color.fromARGB(255, 214, 4, 237).withOpacity(0.2),
+              blurRadius: 9,
+              offset: const Offset(0, 5),
             ),
           ],
         ),
@@ -153,14 +153,14 @@ class _BookCardState extends State<BookCard> {
                     child: Container(
                       width: double.infinity,
                       height: double.infinity,
-                      color: const Color(0xFF334155),
+                      color: const Color.fromARGB(255, 236, 236, 223),
                       child: imageUrl.isNotEmpty
                           ? Image.network(
                               imageUrl,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
                                 return Container(
-                                  color: Colors.grey[800],
+                                  color: const Color.fromARGB(255, 242, 182, 247),
                                   child: const Icon(Icons.book, size: 40, color: Colors.white54),
                                 );
                               },
@@ -213,7 +213,7 @@ class _BookCardState extends State<BookCard> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Color.fromARGB(255, 46, 3, 36),
                       fontWeight: FontWeight.bold,
                       fontSize: 13,
                     ),
@@ -241,7 +241,7 @@ print("Book Title: ${widget.book.bookName} | Authors: ${widget.book.authors} | A
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: TextStyle(
-        color: Colors.grey[400],
+        color: const Color.fromARGB(255, 88, 5, 101),
         fontSize: 11,
       ),
     );
@@ -265,7 +265,7 @@ print("Book Title: ${widget.book.bookName} | Authors: ${widget.book.authors} | A
                         Text(
                           "إيجار: ${widget.book.rentalPrice}\$",
                           style: TextStyle(
-                            color: Colors.lightBlueAccent[100],
+                            color: const Color.fromARGB(255, 204, 172, 212),
                             fontSize: 10,
                           ),
                         ),
