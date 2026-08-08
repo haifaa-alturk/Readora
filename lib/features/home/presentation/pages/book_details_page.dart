@@ -212,6 +212,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:library_app1/features/book_details/presentation/bloc/book_details_bloc.dart';
 import 'package:library_app1/features/book_details/presentation/bloc/book_details_event.dart';
 import 'package:library_app1/features/book_details/presentation/bloc/book_details_state.dart';
+import 'package:library_app1/features/individual_challenge/presentation/individual_challenge_entry.dart';
 
 class BookDetailsPage extends StatefulWidget {
   final int bookId;
@@ -474,7 +475,13 @@ SizedBox(
         borderRadius: BorderRadius.circular(12),
       ),
     ),
-    onPressed: () {},
+    onPressed: () {
+      openIndividualChallengeFlow(
+        context,
+        bookId: widget.bookId,
+        bookTitle: book.bookName,
+      );
+    },
     child: const Text(
       "Read Preview",
       style: TextStyle(
