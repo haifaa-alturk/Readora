@@ -10,7 +10,7 @@ class LibraryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffd2e9f3), // نفس الخلفية المريحة للتطبيق
+      backgroundColor: const Color(0xffd2e9f3), 
       appBar: AppBar(
         title: const Text('My Library', style: TextStyle(color: Color(0xff8b5cf6), fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
@@ -28,10 +28,10 @@ class LibraryPage extends StatelessWidget {
             return GridView.builder(
               padding: const EdgeInsets.all(16),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // عمودين
+                crossAxisCount: 2, 
                 crossAxisSpacing: 14,
                 mainAxisSpacing: 14,
-                childAspectRatio: 0.65, // متناسق مع أبعاد أغلفة الكتب
+                childAspectRatio: 0.65, 
               ),
               itemCount: state.books.length,
               itemBuilder: (context, index) {

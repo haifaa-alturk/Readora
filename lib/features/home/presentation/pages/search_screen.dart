@@ -216,13 +216,13 @@ class _SearchScreenState extends State<SearchScreen> {
   int? pagesFrom;
   int? pagesTo;
 
-  // 💰 المتغيرات الأربعة الجديدة المقسمة للبيع والإيجار لتطابق الباك إند
+  
   double? sellingPriceFrom;
   double? sellingPriceTo;
   double? rentalPriceFrom;
   double? rentalPriceTo;
 
-  // 🏷️ قائمة التصنيفات الأساسية
+  
   final List<Map<String, dynamic>> _staticCategories = [
     {'id': 1, 'name': 'literature'},
     {'id': 2, 'name': 'horror'},
@@ -254,7 +254,7 @@ class _SearchScreenState extends State<SearchScreen> {
     {'id': 28, 'name':'family_relationships'}
   ];
 
-  // 🔄 تعديل الدالة لترسل المتغيرات المنفصلة للـ Bloc ومنه للـ API
+  //  تعديل الدالة لترسل المتغيرات المنفصلة للـ Bloc ومنه للـ API
   void _dispatchSearch() {
     context.read<SearchBloc>().add(
       ExecuteBookSearch(
@@ -264,7 +264,7 @@ class _SearchScreenState extends State<SearchScreen> {
         language: selectedLanguage,
         numberOfPagesFrom: pagesFrom,
         numberOfPagesTo: pagesTo,
-        // ⬇️ قمنا بتغيير هذه السطور لترسل المتغيرات الأربعة المنفصلة
+       
         sellingPriceFrom: sellingPriceFrom,
         sellingPriceTo: sellingPriceTo,
         rentalPriceFrom: rentalPriceFrom,
@@ -302,7 +302,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 builder: (_) => const FilterBottomSheet(),
               );
 
-              // ⬇️ استقبال المتغيرات من الـ Bottom Sheet وربطها بالمتغيرات الصحيحة
+             
               if (result != null) {
                 setState(() {
                   authorName = result['author_name'];
@@ -324,7 +324,7 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
       body: Column(
         children: [
-          // 🏷️ شريط التصنيفات المستقر والسريع
+         
           Container(
             height: 60,
             padding: const EdgeInsets.symmetric(vertical: 10),
@@ -334,7 +334,7 @@ class _SearchScreenState extends State<SearchScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 12),
               itemBuilder: (context, index) {
                 
-                // 1. زر "الكل" لإلغاء فلاتر التصنيفات
+                
                 if (index == 0) {
                   final isSelected = selectedCategoryId == null;
                   return Padding(
@@ -401,7 +401,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         crossAxisCount: 2,
                         mainAxisSpacing: 12,
                         crossAxisSpacing: 12,
-                        childAspectRatio: 0.65,
+                        childAspectRatio: 0.58,
                       ),
                       itemBuilder: (context, index) => BookCard(book: books[index]),
                     ),

@@ -37,4 +37,8 @@ class Book {
     this.pdfFile,
     required this.authors,
   });
+
+  get rentalPrice => null;
+
+  get authorName => null;
 }

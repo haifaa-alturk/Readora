@@ -5,15 +5,107 @@ import '../pages/book_details_page.dart';
 
 //import 'package:library_app1/features/book_details/presentation/bloc/book_details_bloc.dart';
 //import 'package:library_app1/features/book_details/presentation/bloc/book_details_event.dart';
-class BookCard extends StatelessWidget {
+// class BookCard extends StatelessWidget {
+//   final Book book;
+
+//   const BookCard({required this.book, super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     // رابط صورة الكتاب
+//     String imageUrl = "http://127.0.0.1:8000/storage/${book.coverImage}";
+
+//     return GestureDetector(
+//       onTap: () {
+//         // الانتقال لصفحة التفاصيل عند الضغط على الكتاب
+//         Navigator.push(
+//           context,
+//           MaterialPageRoute(
+//             builder: (_) => BookDetailsPage(
+//               bookId: book.id,
+//               title: book.bookName,
+//               author: book.authors.join(", "),
+//               image: imageUrl,
+//               description: book.description ?? "لا يوجد وصف",
+//               pdfFile: book.pdfFile,
+//             ),
+//           ),
+//         );
+//       },
+
+//       child: Container(
+//         width: 140,
+//         margin: const EdgeInsets.symmetric(horizontal: 8),
+
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+
+//           children: [
+//             // صورة الكتاب
+//             Expanded(
+//               child: ClipRRect(
+//                 borderRadius: BorderRadius.circular(15),
+
+//                 child: Image.network(
+//                   imageUrl,
+//                   fit: BoxFit.cover,
+
+//                   errorBuilder: (context, error, stackTrace) {
+//                     return Container(
+//                       color: Colors.grey[300],
+//                       child: const Icon(Icons.book),
+//                     );
+//                   },
+//                 ),
+//               ),
+//             ),
+
+//             const SizedBox(height: 5),
+
+//             // اسم الكتاب
+//             Text(
+//               book.bookName,
+//               maxLines: 1,
+//               overflow: TextOverflow.ellipsis,
+
+//               style: const TextStyle(fontWeight: FontWeight.bold),
+//             ),
+
+//             // اسم المؤلف
+//             Text(
+//               book.authors.join(", "),
+//               maxLines: 1,
+
+//               style: const TextStyle(
+//                 color: Color.fromARGB(255, 21, 16, 16),
+//                 fontSize: 12,
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+class BookCard extends StatefulWidget {
   final Book book;
 
   const BookCard({required this.book, super.key});
 
   @override
+  State<BookCard> createState() => _BookCardState();
+}
+
+class _BookCardState extends State<BookCard> {
+  bool isFavorite = false; // حالة زر المفضلة (يمكنكِ ربطها مستقبلاً بالـ Bloc)
+
+  @override
   Widget build(BuildContext context) {
-    // رابط صورة الكتاب
-    String imageUrl = "http://127.0.0.1:8000/storage/${book.coverImage}";
+    // رابط صورة الكتاب مع الحماية من القيمة الفارغة (null/empty)
+    String imageUrl = (widget.book.coverImage != null && widget.book.coverImage!.isNotEmpty)
+        ? "http://127.0.0.1:8000/storage/${widget.book.coverImage}"
+        : "";
 
     return GestureDetector(
       onTap: () {
@@ -22,63 +114,164 @@ class BookCard extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (_) => BookDetailsPage(
-              bookId: book.id,
-              title: book.bookName,
-              author: book.authors.join(", "),
+              bookId: widget.book.id,
+              title: widget.book.bookName,
+              author: widget.book.authors.join(", "),
               image: imageUrl,
-              description: book.description ?? "لا يوجد وصف",
-              pdfFile: book.pdfFile,
+              description: widget.book.description ?? "لا يوجد وصف",
+              pdfFile: widget.book.pdfFile,
             ),
           ),
         );
       },
-
+  
       child: Container(
-        width: 140,
-        margin: const EdgeInsets.symmetric(horizontal: 8),
-
+        width: 150,
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E293B), // خلفية كرت كحلية فخمة ومناسبة للثيم الداكن
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-
+      
           children: [
-            // صورة الكتاب
+            // 1. صورة الكتاب مع زر المفضلة فوقها
             Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(15),
+              child: Stack(
+                children: [
+                  // صورة غلاف الكتاب
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                    child: Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      color: const Color(0xFF334155),
+                      child: imageUrl.isNotEmpty
+                          ? Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: Colors.grey[800],
+                                  child: const Icon(Icons.book, size: 40, color: Colors.white54),
+                                );
+                              },
+                            )
+                          : Container(
+                              color: Colors.grey[800],
+                              child: const Icon(Icons.book, size: 40, color: Colors.white54),
+                            ),
+                    ),
+                  ),
 
-                child: Image.network(
-                  imageUrl,
-                  fit: BoxFit.cover,
-
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.book),
-                    );
-                  },
-                ),
+                  // 🔴 أيقونة المفضلة (القلب) فوق غلاف الكتاب
+                  Positioned(
+                    top: 8,
+                    right: 8, // وضعناه على اليمين ليتناسب مع الواجهة
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isFavorite = !isFavorite;
+                        });
+                        // هنا سنضع كود حفظ المفضلة في السيرفر/الـ Bloc لاحقاً
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.4),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: isFavorite ? Colors.redAccent : Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
 
-            const SizedBox(height: 5),
+            // 2. تفاصيل الكتاب تحت الغلاف
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // اسم الكتاب (لون أبيض ناصع وواضح)
+                  Text(
+                    widget.book.bookName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
 
-            // اسم الكتاب
-            Text(
-              book.bookName,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+                  // اسم المؤلف (لون رمادي فاتح مريح للعين)
+                 // استبدلي سطر اسم المؤلف بهذا السطر الذكي:
+// اسم المؤلف - يفحص جميع الأشكال المحتملة للبيانات القادمة من الـ API
+Builder(
+  builder: (context) {
+    String authorText = "مؤلف غير معروف";
 
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
+    // 1. فحص حقل authorName إن وجد وكان غير فارغ
+    if (widget.book.authorName != null && widget.book.authorName!.toString().trim().isNotEmpty) {
+      authorText = widget.book.authorName!;
+    } 
+    // 2. فحص مصفوفة authors إن كانت تحتوي عناصر
+    else if (widget.book.authors.isNotEmpty) {
+      authorText = widget.book.authors.join(", ");
+    }
+print("Book Title: ${widget.book.bookName} | Authors: ${widget.book.authors} | AuthorName: ${widget.book.authorName}");
+    return Text(
+      authorText,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        color: Colors.grey[400],
+        fontSize: 11,
+      ),
+    );
+  },
+),
+                  const SizedBox(height: 6),
 
-            // اسم المؤلف
-            Text(
-              book.authors.join(", "),
-              maxLines: 1,
-
-              style: const TextStyle(
-                color: Color.fromARGB(255, 21, 16, 16),
-                fontSize: 12,
+                  // السعر والإيجار (إذا كانا معرّفين في الموديل)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "${widget.book.sellingPrice ?? 0} \$",
+                        style: const TextStyle(
+                          color: Color(0xFFA78BFA), // لون بنفسجي أنيق ومريح
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                      if (widget.book.rentalPrice != null)
+                        Text(
+                          "إيجار: ${widget.book.rentalPrice}\$",
+                          style: TextStyle(
+                            color: Colors.lightBlueAccent[100],
+                            fontSize: 10,
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],

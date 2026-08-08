@@ -128,8 +128,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 🛡️ نقوم بحقن الـ SearchBloc هنا فوق الـ Scaffold مباشرة 
-    // ليكون متاحاً بشكل أمن ومستقر في الهوم والمكتبة بدون أي تعارض أو أخطاء جانبية
+    
     return BlocProvider(
       create: (context) => SearchBloc(),
       child: Scaffold(

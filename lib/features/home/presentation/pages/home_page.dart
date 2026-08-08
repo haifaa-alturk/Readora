@@ -25,14 +25,14 @@ Widget build(BuildContext context) {
         if (state is HomeLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is HomeLoaded) {
-          // 💡 الهيكل الصحيح لمنع التعليق
+         
           return SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
 
-                // 1. إعادة الهيدر (شريط البحث والترحيب) 👈
+
       const HomeHeader(points: 250,),
                 const Padding(
                   padding: EdgeInsets.all(16.0),
@@ -50,7 +50,7 @@ Widget build(BuildContext context) {
                   padding: EdgeInsets.all(16.0),
                   child: Text("All Books ", style: TextStyle(color: Color.fromARGB(255, 143, 76, 225), fontSize: 20,fontWeight: FontWeight.bold)),
                 ),
-                AllBooksGrid(books: state.newBooks), // الـ Grid المعدل لح يشتغل بسلاسة هنا
+                AllBooksGrid(books: state.newBooks), 
               ],
             ),
           );
