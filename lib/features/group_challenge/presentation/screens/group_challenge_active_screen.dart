@@ -18,12 +18,7 @@ class GroupChallengeActiveScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        width: 420,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Scaffold(
+    return Scaffold(
             backgroundColor: const Color(0xfffcfbfa),
             appBar: AppBar(
               backgroundColor: const Color(0xfffcfbfa),
@@ -96,9 +91,6 @@ class GroupChallengeActiveScreen extends StatelessWidget {
                 ],
               ],
             ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -229,21 +221,6 @@ class GroupChallengeActiveScreen extends StatelessWidget {
               textStyle: const TextStyle(fontWeight: FontWeight.w600),
             ),
             child: const Text('Convince Me! I Want To Join'),
-          ),
-        ),
-        const SizedBox(height: 12),
-        TextButton(
-          onPressed: () {
-            context.read<GroupChallengeBloc>().add(
-                  const DismissChallengeEvent(),
-                );
-            Navigator.of(context).pop();
-          },
-          child: Text(
-            'Not Interested',
-            style: TextStyle(
-              color: const Color(0xff2d2d2d).withValues(alpha: 0.6),
-            ),
           ),
         ),
       ],

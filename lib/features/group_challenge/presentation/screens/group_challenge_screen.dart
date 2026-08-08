@@ -133,12 +133,7 @@ class _GroupChallengeScreenState extends State<GroupChallengeScreen> {
   }
 
   Widget _buildShell({required Widget child}) {
-    return Center(
-      child: SizedBox(
-        width: 420,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Scaffold(
+    return Scaffold(
             backgroundColor: const Color(0xfffcfbfa),
             appBar: AppBar(
               backgroundColor: const Color(0xfffcfbfa),
@@ -152,9 +147,6 @@ class _GroupChallengeScreenState extends State<GroupChallengeScreen> {
               ),
             ),
             body: child,
-          ),
-        ),
-      ),
     );
   }
 }

@@ -4,8 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/wallet_bloc.dart';
 import '../bloc/wallet_event.dart';
 import '../bloc/wallet_state.dart';
-import '../../domain/entities/wallet_entity.dart';
 import '../../domain/entities/wallet_transaction_entity.dart';
+import 'package:library_app1/core/widgets/gradient_summary_banner.dart';
 import 'recharge_wallet_screen.dart';
 
 class WalletScreen extends StatefulWidget {
@@ -42,107 +42,71 @@ class _WalletScreenState extends State<WalletScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        width: 420,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Scaffold(
-            backgroundColor: const Color(0xfffcfbfa),
-            appBar: AppBar(
-              backgroundColor: const Color(0xfffcfbfa),
-              elevation: 0,
-              title: const Text(
-                'My Wallet',
-                style: TextStyle(
-                  color: Color(0xff2d2d2d),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.add, color: Color(0xffe61b72)),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const RechargeWalletScreen(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            body: BlocConsumer<WalletBloc, WalletState>(
-              listener: (context, state) {
-                if (state is WalletError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.message)),
-                  );
-                }
-              },
-              builder: (context, state) {
-                if (state is WalletLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (state is WalletError) {
-                  return Center(
-                    child: Text(
-                      state.message,
-                      style: const TextStyle(color: Color(0xff2d2d2d)),
-                    ),
-                  );
-                }
-                if (state is WalletLoaded) {
-                  final wallet = state.wallet;
-                  final transactions = state.transactions;
-                  return SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _buildBalanceCard(wallet),
-                        const SizedBox(height: 24),
-                        _buildTransactionList(transactions),
-                      ],
-                    ),
-                  );
-                }
-                return const Center(child: CircularProgressIndicator());
-              },
-            ),
+    return Scaffold(
+      backgroundColor: const Color(0xfffcfbfa),
+      appBar: AppBar(
+        backgroundColor: const Color(0xfffcfbfa),
+        elevation: 0,
+        title: const Text(
+          'My Wallet',
+          style: TextStyle(
+            color: Color(0xff2d2d2d),
+            fontWeight: FontWeight.w600,
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildBalanceCard(WalletEntity wallet) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: const Color(0xffe61b72),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Available Balance',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '${_formatPrice(wallet.balance)} ${wallet.currency}',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 36,
-              fontWeight: FontWeight.w700,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add, color: Color(0xffe61b72)),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const RechargeWalletScreen(),
+              ),
             ),
           ),
         ],
+      ),
+      body: BlocConsumer<WalletBloc, WalletState>(
+        listener: (context, state) {
+          if (state is WalletError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state is WalletLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state is WalletError) {
+            return Center(
+              child: Text(
+                state.message,
+                style: const TextStyle(color: Color(0xff2d2d2d)),
+              ),
+            );
+          }
+          if (state is WalletLoaded) {
+            final wallet = state.wallet;
+            final transactions = state.transactions;
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  GradientSummaryBanner(
+                    label: 'Available Balance',
+                    value: '${_formatPrice(wallet.balance)} ${wallet.currency}',
+                    subtitle: 'Your current wallet balance',
+                  ),
+                  const SizedBox(height: 24),
+                  _buildTransactionList(transactions),
+                ],
+              ),
+            );
+          }
+          return const Center(child: CircularProgressIndicator());
+        },
       ),
     );
   }

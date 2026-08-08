@@ -22,7 +22,13 @@ class InterestsBloc extends Bloc<InterestsEvent, InterestsState> {
     final result = await repository.getAllInterests();
     result.fold(
       (error) => emit(InterestsError(message: error)),
-      (interests) => emit(InterestsLoaded(interests: interests)),
+      (interests) {
+        final selectedIds = <int>{...event.selectedInterestIds};
+        final marked = interests
+            .map((i) => i.copyWith(isSelected: selectedIds.contains(i.id)))
+            .toList();
+        emit(InterestsLoaded(interests: marked));
+      },
     );
   }
 

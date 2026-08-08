@@ -20,10 +20,6 @@ class JoinChallengeEvent extends GroupChallengeEvent {
   List<Object?> get props => [challengeId];
 }
 
-class DismissChallengeEvent extends GroupChallengeEvent {
-  const DismissChallengeEvent();
-}
-
 class RefreshGroupChallengeEvent extends GroupChallengeEvent {
   const RefreshGroupChallengeEvent();
 }

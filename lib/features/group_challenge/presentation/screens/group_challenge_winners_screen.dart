@@ -24,12 +24,7 @@ class GroupChallengeWinnersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        width: 420,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Scaffold(
+    return Scaffold(
             backgroundColor: const Color(0xfffcfbfa),
             appBar: AppBar(
               backgroundColor: const Color(0xfffcfbfa),
@@ -142,9 +137,6 @@ class GroupChallengeWinnersScreen extends StatelessWidget {
                 }),
               ],
             ),
-          ),
-        ),
-      ),
     );
   }
 }

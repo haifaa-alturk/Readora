@@ -14,7 +14,6 @@ class GroupChallengeBloc
     on<LoadGroupChallengeEvent>(_onLoadGroupChallenge);
     on<RefreshGroupChallengeEvent>(_onRefreshGroupChallenge);
     on<JoinChallengeEvent>(_onJoinChallenge);
-    on<DismissChallengeEvent>(_onDismissChallenge);
     on<RecordBookCompletionEvent>(_onRecordBookCompletion);
   }
 
@@ -90,12 +89,5 @@ class GroupChallengeBloc
       (error) => emit(GroupChallengeError(message: error)),
       (updatedChallenge) => emit(GroupChallengeActive(challenge: updatedChallenge)),
     );
-  }
-
-  void _onDismissChallenge(
-    DismissChallengeEvent event,
-    Emitter<GroupChallengeState> emit,
-  ) {
-    // No state change — event exists for future analytics/logging hooks.
   }
 }

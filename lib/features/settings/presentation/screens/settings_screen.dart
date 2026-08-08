@@ -21,12 +21,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        width: 420,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Scaffold(
+    return Scaffold(
             backgroundColor: const Color(0xfffcfbfa),
             appBar: AppBar(
               backgroundColor: const Color(0xfffcfbfa),
@@ -71,9 +66,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                   return Center(
                     child: SingleChildScrollView(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 450),
-                        child: Padding(
+                      child: Padding(
                           padding: const EdgeInsets.all(16),
                           child: Column(
                             children: [
@@ -92,15 +85,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                         ),
                       ),
-                    ),
                   );
                 }
                 return const Center(child: CircularProgressIndicator());
               },
             ),
-          ),
-        ),
-      ),
     );
   }
 

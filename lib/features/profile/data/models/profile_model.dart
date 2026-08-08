@@ -12,14 +12,20 @@ class ProfileModel extends ProfileEntity {
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
+    final source = json['user'] is Map<String, dynamic>
+        ? Map<String, dynamic>.from(json['user'] as Map)
+        : json;
+
     return ProfileModel(
-      userId: json['user_id'] as int? ?? 0,
-      name: json['name'] as String? ?? '',
-      email: json['email'] as String? ?? '',
-      points: json['points'] as int? ?? 0,
-      booksCount: json['books_count'] as int? ?? 0,
-      walletBalance: (json['wallet_balance'] as num?)?.toDouble() ?? 0.0,
-      imagePath: json['image_path'] as String?,
+      userId: source['id'] as int? ?? source['user_id'] as int? ?? 0,
+      name: source['name'] as String? ?? '',
+      email: source['email'] as String? ?? '',
+      points: int.tryParse(source['points']?.toString() ?? '') ?? 0,
+      booksCount: source['books_count'] as int? ?? source['booksCount'] as int? ?? 0,
+      walletBalance: (source['wallet_balance'] as num?)?.toDouble() ??
+          (source['walletBalance'] as num?)?.toDouble() ??
+          0.0,
+      imagePath: source['user_image'] as String? ?? source['image_path'] as String?,
     );
   }
 

@@ -26,31 +26,26 @@ class _RechargeWalletScreenState extends State<RechargeWalletScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        width: 420,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Scaffold(
-            backgroundColor: const Color(0xfffcfbfa),
-            appBar: AppBar(
-              backgroundColor: const Color(0xfffcfbfa),
-              elevation: 0,
-              title: const Text(
-                'Recharge Wallet',
-                style: TextStyle(
-                  color: Color(0xff2d2d2d),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            body: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
+    return Scaffold(
+      backgroundColor: const Color(0xfffcfbfa),
+      appBar: AppBar(
+        backgroundColor: const Color(0xfffcfbfa),
+        elevation: 0,
+        title: const Text(
+          'Recharge Wallet',
+          style: TextStyle(
+            color: Color(0xff2d2d2d),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
                     const Text(
                       'Enter amount to recharge',
                       style: TextStyle(
@@ -133,10 +128,7 @@ class _RechargeWalletScreenState extends State<RechargeWalletScreen> {
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
+            ],
           ),
         ),
       ),

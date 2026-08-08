@@ -9,6 +9,20 @@ import 'package:library_app1/features/profile/presentation/bloc/profile_event.da
 import 'package:library_app1/features/profile/presentation/bloc/profile_state.dart';
 import 'package:library_app1/features/profile/domain/entities/profile_entity.dart';
 
+const String _profileImageBaseUrl = 'http://127.0.0.1:8000/storage/';
+
+bool _isLocalImagePath(String path) {
+  return path.startsWith('/') ||
+      path.startsWith('file://') ||
+      RegExp(r'^[A-Za-z]:[\\/]').hasMatch(path);
+}
+
+String _resolveProfileImageUrl(String path) {
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  final normalized = path.startsWith('/') ? path.substring(1) : path;
+  return '$_profileImageBaseUrl$normalized';
+}
+
 class EditProfileScreen extends StatefulWidget {
   final ProfileEntity profile;
 
@@ -56,12 +70,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        width: 420,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Scaffold(
+    return Scaffold(
             backgroundColor: const Color(0xfffcfbfa),
             appBar: AppBar(
               backgroundColor: const Color(0xfffcfbfa),
@@ -93,9 +102,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               builder: (context, state) {
                 return Center(
                   child: SingleChildScrollView(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 450),
-                      child: Padding(
+                    child: Padding(
                         padding: const EdgeInsets.all(24),
                         child: Form(
                           key: _formKey,
@@ -108,22 +115,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     CircleAvatar(
                                       radius: 52,
                                       backgroundColor: const Color(0xfff9aabf),
-                                      backgroundImage: _pickedImage != null
-                                          ? FileImage(_pickedImage!)
-                                          : null,
-                                      child: _pickedImage == null
-                                          ? Text(
-                                              widget.profile.name.isNotEmpty
-                                                  ? widget.profile.name[0]
-                                                        .toUpperCase()
-                                                  : '?',
-                                              style: const TextStyle(
-                                                fontSize: 40,
-                                                fontWeight: FontWeight.bold,
-                                                color: Color(0xff2d2d2d),
-                                              ),
-                                            )
-                                          : null,
+                                      child: ClipOval(
+                                        child: _buildAvatarContent(),
+                                      ),
                                     ),
                                     Positioned(
                                       bottom: 0,
@@ -284,14 +278,73 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           ),
                         ),
                       ),
-                    ),
                   ),
                 );
               },
             ),
+    );
+  }
+
+  Widget _buildAvatarContent() {
+    const double diameter = 104;
+    final initial = widget.profile.name.isNotEmpty
+        ? widget.profile.name[0].toUpperCase()
+        : '?';
+
+    if (_pickedImage != null) {
+      return Image.file(
+        _pickedImage!,
+        width: diameter,
+        height: diameter,
+        fit: BoxFit.cover,
+      );
+    }
+
+    final profilePath = widget.profile.imagePath;
+    if (profilePath == null || profilePath.trim().isEmpty) {
+      return SizedBox(
+        width: diameter,
+        height: diameter,
+        child: Center(
+          child: Text(
+            initial,
+            style: const TextStyle(
+              fontSize: 40,
+              fontWeight: FontWeight.bold,
+              color: Color(0xff2d2d2d),
+            ),
           ),
         ),
-      ),
+      );
+    }
+
+    if (_isLocalImagePath(profilePath)) {
+      return Image.file(
+        File(profilePath),
+        width: diameter,
+        height: diameter,
+        fit: BoxFit.cover,
+      );
+    }
+
+    return Image.network(
+      _resolveProfileImageUrl(profilePath),
+      width: diameter,
+      height: diameter,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return SizedBox(
+          width: diameter,
+          height: diameter,
+          child: const Center(
+            child: Icon(
+              Icons.person,
+              size: 42,
+              color: Color(0xff2d2d2d),
+            ),
+          ),
+        );
+      },
     );
   }
 }

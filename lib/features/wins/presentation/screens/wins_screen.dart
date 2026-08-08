@@ -5,6 +5,7 @@ import '../bloc/wins_bloc.dart';
 import '../bloc/wins_event.dart';
 import '../bloc/wins_state.dart';
 import '../../domain/entities/win_entity.dart';
+import 'package:library_app1/core/widgets/gradient_summary_banner.dart';
 
 class WinsScreen extends StatefulWidget {
   const WinsScreen({super.key});
@@ -31,12 +32,7 @@ class _WinsScreenState extends State<WinsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        width: 420,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Scaffold(
+    return Scaffold(
             backgroundColor: const Color(0xfffcfbfa),
             appBar: AppBar(
               backgroundColor: const Color(0xfffcfbfa),
@@ -109,21 +105,23 @@ class _WinsScreenState extends State<WinsScreen> {
                     onRefresh: () async {
                       context.read<WinsBloc>().add(const RefreshWinsEvent());
                     },
-                    child: ListView.builder(
+                    child: ListView(
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                      itemCount: wins.length,
-                      itemBuilder: (context, index) {
-                        return _buildWinCard(wins[index]);
-                      },
+                      children: [
+                        GradientSummaryBanner(
+                          label: 'Total Wins',
+                          value: '${wins.length}',
+                          subtitle: 'Challenges completed & achievements earned',
+                        ),
+                        const SizedBox(height: 16),
+                        ...wins.map((win) => _buildWinCard(win)),
+                      ],
                     ),
                   );
                 }
                 return const Center(child: CircularProgressIndicator());
               },
             ),
-          ),
-        ),
-      ),
     );
   }
 

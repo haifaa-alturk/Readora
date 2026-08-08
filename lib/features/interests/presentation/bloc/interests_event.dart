@@ -8,7 +8,12 @@ abstract class InterestsEvent extends Equatable {
 }
 
 class LoadInterestsEvent extends InterestsEvent {
-  const LoadInterestsEvent();
+  final List<int> selectedInterestIds;
+
+  const LoadInterestsEvent({this.selectedInterestIds = const []});
+
+  @override
+  List<Object?> get props => [selectedInterestIds];
 }
 
 class ToggleInterestEvent extends InterestsEvent {

@@ -55,12 +55,7 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        width: 420,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Scaffold(
+    return Scaffold(
             backgroundColor: AppTheme.surfaceWhite,
             appBar: AppBar(
               backgroundColor: AppTheme.surfaceWhite,
@@ -98,9 +93,6 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
                 return const SizedBox();
               },
             ),
-          ),
-        ),
-      ),
     );
   }
 

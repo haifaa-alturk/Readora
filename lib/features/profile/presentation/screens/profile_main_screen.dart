@@ -15,14 +15,30 @@ import 'package:library_app1/features/library/presentation/bloc/library_bloc.dar
 import 'package:library_app1/features/library/presentation/screens/library_screen.dart';
 import 'package:library_app1/features/points/presentation/bloc/points_bloc.dart';
 import 'package:library_app1/features/points/presentation/bloc/points_state.dart';
-import 'package:library_app1/features/points/presentation/screens/points_screen.dart' as points_feature;
+import 'package:library_app1/features/points/presentation/screens/points_screen.dart'
+    as points_feature;
 import 'package:library_app1/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:library_app1/features/settings/presentation/screens/settings_screen.dart';
 import 'package:library_app1/features/wallet/presentation/bloc/wallet_bloc.dart';
-import 'package:library_app1/features/wallet/presentation/screens/wallet_screen.dart' as wallet_feature;
+import 'package:library_app1/features/wallet/presentation/screens/wallet_screen.dart'
+    as wallet_feature;
 import 'package:library_app1/features/wins/presentation/bloc/wins_bloc.dart';
 import 'package:library_app1/features/wins/presentation/screens/wins_screen.dart';
 import 'package:library_app1/features/quotes/presentation/screens/my_quotes_screen.dart';
+
+const String _profileImageBaseUrl = 'http://127.0.0.1:8000/storage/';
+
+bool _isLocalImagePath(String path) {
+  return path.startsWith('/') ||
+      path.startsWith('file://') ||
+      RegExp(r'^[A-Za-z]:[\\/]').hasMatch(path);
+}
+
+String _resolveProfileImageUrl(String path) {
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  final normalized = path.startsWith('/') ? path.substring(1) : path;
+  return '$_profileImageBaseUrl$normalized';
+}
 
 class ProfileMainScreen extends StatelessWidget {
   const ProfileMainScreen({super.key});
@@ -30,48 +46,37 @@ class ProfileMainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ProfileBloc, ProfileState>(
-        builder: (context, state) {
-          return Center(
-            child: SizedBox(
-              width: 420,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: Scaffold(
-                  backgroundColor: const Color(0xfffcfbfa),
-                  appBar: AppBar(
-                    backgroundColor: const Color(0xfffcfbfa),
-                    elevation: 0,
-                    title: const Text(
-                      'My Profile',
-                      style: TextStyle(
-                        color: Color(0xff2d2d2d),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    actions: [
-                      if (state is ProfileLoaded)
-                        IconButton(
-                          icon: const Icon(
-                            Icons.settings,
-                            color: Color(0xfffbc4db),
-                          ),
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => BlocProvider.value(
-                                value: context.read<SettingsBloc>(),
-                                child: const SettingsScreen(),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  body: _buildBody(state),
-                ),
+      builder: (context, state) {
+        return Scaffold(
+          backgroundColor: const Color(0xfffcfbfa),
+          appBar: AppBar(
+            backgroundColor: const Color(0xfffcfbfa),
+            elevation: 0,
+            title: const Text(
+              'My Profile',
+              style: TextStyle(
+                color: Color(0xff2d2d2d),
+                fontWeight: FontWeight.w600,
               ),
             ),
-          );
+            actions: [
+              if (state is ProfileLoaded)
+                IconButton(
+                  icon: const Icon(Icons.settings, color: Color(0xfffbc4db)),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BlocProvider.value(
+                        value: context.read<SettingsBloc>(),
+                        child: const SettingsScreen(),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          body: _buildBody(state),
+        );
       },
     );
   }
@@ -100,20 +105,17 @@ class ProfileMainScreen extends StatelessWidget {
   Widget _buildProfileContent(ProfileEntity profile) {
     return Center(
       child: SingleChildScrollView(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 450),
-          child: Column(
-            children: [
-              _buildProfileHeader(profile),
-              const SizedBox(height: 24),
-              _buildStatsCard(profile),
-              const SizedBox(height: 20),
-              _buildQuickLinksSection(),
-              const SizedBox(height: 24),
-              _buildProfileEditButton(profile),
-              const SizedBox(height: 24),
-            ],
-          ),
+        child: Column(
+          children: [
+            _buildProfileHeader(profile),
+            const SizedBox(height: 24),
+            _buildStatsCard(profile),
+            const SizedBox(height: 20),
+            _buildQuickLinksSection(),
+            const SizedBox(height: 24),
+            _buildProfileEditButton(profile),
+            const SizedBox(height: 24),
+          ],
         ),
       ),
     );
@@ -123,7 +125,9 @@ class ProfileMainScreen extends StatelessWidget {
     return Builder(
       builder: (context) {
         final pointsState = context.watch<PointsBloc>().state;
-        final livePoints = pointsState is PointsLoaded ? pointsState.totalPoints : profile.points;
+        final livePoints = pointsState is PointsLoaded
+            ? pointsState.totalPoints
+            : profile.points;
         return Column(
           children: [
             Hero(
@@ -138,14 +142,36 @@ class ProfileMainScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                child: CircleAvatar(
-                  radius: 48,
-                  backgroundColor: const Color(0xfffbc4db),
-                  backgroundImage: profile.imagePath != null
-                      ? FileImage(File(profile.imagePath!))
-                      : null,
-                  child: profile.imagePath == null
-                      ? Text(
+                child: Container(
+                  width: 132,
+                  height: 132,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        const Color(0xfffbc4db).withValues(alpha: 0.85),
+                        const Color(0xfffbc4db).withValues(alpha: 0.0),
+                      ],
+                      stops: const [0.35, 1.0],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xfffbc4db).withValues(alpha: 0.55),
+                        blurRadius: 30,
+                        spreadRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: CircleAvatar(
+                    radius: 48,
+                    backgroundColor: const Color(0xfffbc4db),
+                    child: ClipOval(
+                      child: _buildProfileAvatarContent(
+                        imagePath: profile.imagePath,
+                        diameter: 96,
+                        fallback: Text(
                           profile.name.isNotEmpty
                               ? profile.name[0].toUpperCase()
                               : '?',
@@ -154,8 +180,10 @@ class ProfileMainScreen extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                             color: Color(0xff2d2d2d),
                           ),
-                        )
-                      : null,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -171,10 +199,7 @@ class ProfileMainScreen extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               profile.email,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xff2d2d2d),
-              ),
+              style: const TextStyle(fontSize: 14, color: Color(0xff2d2d2d)),
             ),
             const SizedBox(height: 10),
             _buildLevelBadge(ProfileEntity.levelForPoints(livePoints)),
@@ -202,6 +227,45 @@ class ProfileMainScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildProfileAvatarContent({
+    required String? imagePath,
+    required double diameter,
+    required Widget fallback,
+  }) {
+    if (imagePath == null || imagePath.trim().isEmpty) {
+      return SizedBox(
+        width: diameter,
+        height: diameter,
+        child: Center(child: fallback),
+      );
+    }
+
+    if (_isLocalImagePath(imagePath)) {
+      return Image.file(
+        File(imagePath),
+        width: diameter,
+        height: diameter,
+        fit: BoxFit.cover,
+      );
+    }
+
+    return Image.network(
+      _resolveProfileImageUrl(imagePath),
+      width: diameter,
+      height: diameter,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return SizedBox(
+          width: diameter,
+          height: diameter,
+          child: const Center(
+            child: Icon(Icons.person, size: 42, color: Color(0xff2d2d2d)),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildProfileEditButton(ProfileEntity profile) {
     return Builder(
       builder: (context) => Padding(
@@ -219,8 +283,11 @@ class ProfileMainScreen extends StatelessWidget {
                 ),
               ),
             ),
-            icon: const Icon(Icons.edit_outlined,
-                color: Color(0xff2d2d2d), size: 20),
+            icon: const Icon(
+              Icons.edit_outlined,
+              color: Color(0xff2d2d2d),
+              size: 20,
+            ),
             label: const Text(
               'Edit Profile',
               style: TextStyle(
@@ -245,66 +312,75 @@ class ProfileMainScreen extends StatelessWidget {
     return Builder(
       builder: (context) {
         final pointsState = context.watch<PointsBloc>().state;
-        final livePoints = pointsState is PointsLoaded ? pointsState.totalPoints : profile.points;
+        final livePoints = pointsState is PointsLoaded
+            ? pointsState.totalPoints
+            : profile.points;
         return Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        elevation: 0,
-        color: const Color(0xffc2e7d9).withValues(alpha: 0.3),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _statItem(
-                Icons.stars,
-                '$livePoints',
-                'Points',
-                const Color.fromARGB(255, 182, 61, 93),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BlocProvider.value(
-                      value: context.read<PointsBloc>(),
-                      child: const points_feature.PointsScreen(),
-                    ),
-                  ),
-                ),
-              ),
-              _statItem(
-                Icons.menu_book,
-                '${profile.booksCount}',
-                'Books',
-                const Color.fromARGB(255, 16, 70, 128),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BlocProvider.value(
-                      value: context.read<LibraryBloc>(),
-                      child: const LibraryScreen(),
-                    ),
-                  ),
-                ),
-              ),
-              _statItem(
-                Icons.account_balance_wallet,
-                '${profile.walletBalance} SYP',
-                'Wallet',
-                const Color.fromARGB(255, 54, 159, 47),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BlocProvider.value(
-                      value: context.read<WalletBloc>(),
-                      child: const wallet_feature.WalletScreen(),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          elevation: 0,
+          color: const Color.fromARGB(
+            255,
+            236,
+            212,
+            186,
+          ).withValues(alpha: 0.3),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-        ),
-      );
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _statItem(
+                  Icons.stars,
+                  '$livePoints',
+                  'Points',
+                  const Color.fromARGB(255, 182, 61, 93),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BlocProvider.value(
+                        value: context.read<PointsBloc>(),
+                        child: const points_feature.PointsScreen(),
+                      ),
+                    ),
+                  ),
+                ),
+                _statItem(
+                  Icons.menu_book,
+                  '${profile.booksCount}',
+                  'Books',
+                  const Color.fromARGB(255, 87, 16, 128),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BlocProvider.value(
+                        value: context.read<LibraryBloc>(),
+                        child: const LibraryScreen(),
+                      ),
+                    ),
+                  ),
+                ),
+                _statItem(
+                  Icons.account_balance_wallet,
+                  '${profile.walletBalance} SYP',
+                  'Wallet',
+                  const Color.fromARGB(255, 54, 159, 47),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BlocProvider.value(
+                        value: context.read<WalletBloc>(),
+                        child: const wallet_feature.WalletScreen(),
+                      ),
+                    ),
+                  ),
+                ),
+                ],
+              ),
+            ),
+        );
       },
     );
   }
@@ -336,10 +412,7 @@ class ProfileMainScreen extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 13,
-                color: Color(0xff2d2d2d),
-              ),
+              style: const TextStyle(fontSize: 13, color: Color(0xff2d2d2d)),
             ),
           ],
         ),
@@ -359,21 +432,20 @@ class ProfileMainScreen extends StatelessWidget {
         'My Quotes',
         Icons.format_quote,
         const Color(0xff2d2d2d),
-        const Color(0xfffce38a),
+        const Color.fromARGB(255, 234, 156, 215),
       ),
       _QuickLink(
         'My Wins',
         Icons.emoji_events,
         const Color(0xff2d2d2d),
-        const Color(0xfffce38a),
+        const Color.fromARGB(255, 192, 238, 188),
       ),
       _QuickLink(
         'My Interests',
         Icons.local_activity,
         const Color(0xff2d2d2d),
-        const Color(0xff8cd7f7),
+        const Color.fromARGB(255, 118, 173, 227),
       ),
-
     ];
 
     return Padding(
@@ -408,6 +480,28 @@ class ProfileMainScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: link.backgroundColor,
                   borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color.fromARGB(
+                        255,
+                        80,
+                        79,
+                        79,
+                      ).withValues(alpha: 0.55),
+                      blurRadius: 6,
+                      offset: const Offset(0, 4),
+                    ),
+                    BoxShadow(
+                      color: const Color.fromARGB(
+                        255,
+                        92,
+                        92,
+                        92,
+                      ).withValues(alpha: 0.35),
+                      blurRadius: 1,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
                 ),
                 child: Material(
                   color: Colors.transparent,
@@ -500,10 +594,7 @@ class PointsScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xfffcfbfa),
         elevation: 0,
-        title: const Text(
-          'Points',
-          style: TextStyle(color: Color(0xff2d2d2d)),
-        ),
+        title: const Text('Points', style: TextStyle(color: Color(0xff2d2d2d))),
       ),
       body: Center(
         child: Text(
@@ -554,10 +645,7 @@ class WalletScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xfffcfbfa),
         elevation: 0,
-        title: const Text(
-          'Wallet',
-          style: TextStyle(color: Color(0xff2d2d2d)),
-        ),
+        title: const Text('Wallet', style: TextStyle(color: Color(0xff2d2d2d))),
       ),
       body: Center(
         child: Text(
@@ -586,18 +674,37 @@ class FullScreenImage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.black,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(
-          name,
-          style: const TextStyle(color: Colors.white),
-        ),
+        title: Text(name, style: const TextStyle(color: Colors.white)),
       ),
       body: Center(
-        child: imagePath != null
+        child: imagePath != null && imagePath!.trim().isNotEmpty
             ? InteractiveViewer(
-                child: Image.file(
-                  File(imagePath!),
-                  fit: BoxFit.contain,
-                ),
+                child: _isLocalImagePath(imagePath!)
+                    ? Image.file(File(imagePath!), fit: BoxFit.contain)
+                    : Image.network(
+                        _resolveProfileImageUrl(imagePath!),
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.broken_image_outlined,
+                                color: Colors.white70,
+                                size: 64,
+                              ),
+                              const SizedBox(height: 12),
+                              const Text(
+                                'Image unavailable',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
               )
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,

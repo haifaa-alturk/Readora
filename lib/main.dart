@@ -171,8 +171,8 @@ void main() {
   final quotesRemoteDataSource = QuotesRemoteDataSourceImpl(dev3ApiClient);
   final quotesRepository = QuotesRepositoryImpl(quotesRemoteDataSource);
 
-  // Interests (dev3) — uses same Dev3ApiClient & mock data
-  final interestsRemoteDataSource = InterestsRemoteDataSourceImpl(dev3ApiClient);
+  // Interests — uses real ApiClient (real categories from GET /categories)
+  final interestsRemoteDataSource = InterestsRemoteDataSourceImpl(apiClient);
   final interestsRepository = InterestsRepositoryImpl(interestsRemoteDataSource);
 
   // Wallet (dev3) — uses same Dev3ApiClient & mock data
@@ -195,9 +195,9 @@ void main() {
   final libraryRemoteDataSource = LibraryRemoteDataSourceImpl(dev3ApiClient);
   final libraryRepository = LibraryRepositoryImpl(libraryRemoteDataSource);
 
-  // Profile (dev3) — uses same Dev3ApiClient & mock data
+  // Profile — uses real ApiClient for user data, Dev3ApiClient remains for mock purchase history support
   // ProfileRepositoryImpl is shared between ProfileBloc and PurchaseHistoryBloc
-  final profileRemoteDataSource = ProfileRemoteDataSource(dev3ApiClient);
+  final profileRemoteDataSource = ProfileRemoteDataSource(dev3ApiClient, apiClient);
   final profileRepository = ProfileRepositoryImpl(profileRemoteDataSource);
 
   // Group Challenge (dev3) — uses same Dev3ApiClient & mock data

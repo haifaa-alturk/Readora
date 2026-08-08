@@ -1,13 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:library_app1/features/auth/data/models/Category_Model.dart';
+import 'package:library_app1/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:library_app1/features/auth/presentation/bloc/auth_state.dart';
 import 'package:library_app1/features/interests/presentation/bloc/interests_bloc.dart';
 import 'package:library_app1/features/interests/presentation/bloc/interests_event.dart';
 import 'package:library_app1/features/interests/presentation/bloc/interests_state.dart';
 import 'package:library_app1/features/interests/domain/entities/interest_entity.dart';
 
-class InterestsScreen extends StatelessWidget {
+class InterestsScreen extends StatefulWidget {
   const InterestsScreen({super.key});
+
+  @override
+  State<InterestsScreen> createState() => _InterestsScreenState();
+}
+
+class _InterestsScreenState extends State<InterestsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final authState = context.read<AuthBloc>().state;
+    final selectedIds = authState is AuthSuccess
+        ? (authState.user.interests ?? const <dynamic>[])
+            .whereType<CategoryModel>()
+            .map((c) => c.id)
+            .toList()
+        : <int>[];
+    context.read<InterestsBloc>().add(
+          LoadInterestsEvent(selectedInterestIds: selectedIds),
+        );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +51,7 @@ class InterestsScreen extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        return Center(
-          child: SizedBox(
-            width: 450,
-            child: Scaffold(
+        return Scaffold(
               backgroundColor: const Color(0xfffcfbfa),
               appBar: AppBar(
                 backgroundColor: const Color(0xfffcfbfa),
@@ -45,8 +65,6 @@ class InterestsScreen extends StatelessWidget {
                 ),
               ),
               body: _buildBody(context, state),
-            ),
-          ),
         );
       },
     );
@@ -64,17 +82,19 @@ class InterestsScreen extends StatelessWidget {
         ),
       );
     }
-    if (state is InterestsLoaded || state is InterestsSaving) {
+    if (state is InterestsLoaded ||
+        state is InterestsSaving ||
+        state is InterestsSaveSuccess) {
       final interests = state is InterestsLoaded
           ? state.interests
-          : (state as InterestsSaving).interests;
+          : state is InterestsSaving
+              ? state.interests
+              : (state as InterestsSaveSuccess).interests;
       final isSaving = state is InterestsSaving;
 
       return Center(
         child: SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 450),
-            child: Padding(
+          child: Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -134,7 +154,6 @@ class InterestsScreen extends StatelessWidget {
               ),
             ),
           ),
-        ),
       );
     }
     return const Center(child: CircularProgressIndicator());

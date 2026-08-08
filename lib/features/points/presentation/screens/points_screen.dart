@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:library_app1/core/widgets/gradient_summary_banner.dart';
 import 'package:library_app1/features/points/presentation/bloc/points_bloc.dart';
 import 'package:library_app1/features/points/presentation/bloc/points_event.dart';
 import 'package:library_app1/features/points/presentation/bloc/points_state.dart';
@@ -40,102 +41,58 @@ class _PointsScreenState extends State<PointsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        width: 420,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Scaffold(
-            backgroundColor: const Color(0xfffcfbfa),
-            appBar: AppBar(
-              backgroundColor: const Color(0xfffcfbfa),
-              elevation: 0,
-              title: const Text(
-                'Points',
-                style: TextStyle(
-                  color: Color(0xff2d2d2d),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            body: BlocConsumer<PointsBloc, PointsState>(
-              listener: (context, state) {
-                if (state is PointsError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.message)),
-                  );
-                }
-              },
-              builder: (context, state) {
-                if (state is PointsLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (state is PointsError) {
-                  return Center(
-                    child: Text(
-                      state.message,
-                      style: const TextStyle(color: Color(0xff2d2d2d)),
-                    ),
-                  );
-                }
-                if (state is PointsLoaded) {
-                  return SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _buildTotalCard(state.totalPoints),
-                        const SizedBox(height: 24),
-                        _buildHistoryList(state.history),
-                      ],
-                    ),
-                  );
-                }
-                return const Center(child: CircularProgressIndicator());
-              },
-            ),
+    return Scaffold(
+      backgroundColor: const Color(0xfffcfbfa),
+      appBar: AppBar(
+        backgroundColor: const Color(0xfffcfbfa),
+        elevation: 0,
+        title: const Text(
+          'Points',
+          style: TextStyle(
+            color: Color(0xff2d2d2d),
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTotalCard(int totalPoints) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: const Color(0xffe61b72),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Total Points',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _formatNumber(totalPoints),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 36,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'Earned from quizzes, rewards & challenges',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
-            ),
-          ),
-        ],
+      body: BlocConsumer<PointsBloc, PointsState>(
+        listener: (context, state) {
+          if (state is PointsError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state is PointsLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state is PointsError) {
+            return Center(
+              child: Text(
+                state.message,
+                style: const TextStyle(color: Color(0xff2d2d2d)),
+              ),
+            );
+          }
+          if (state is PointsLoaded) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  GradientSummaryBanner(
+                    label: 'Total Points',
+                    value: _formatNumber(state.totalPoints),
+                    subtitle: 'Your lifetime points earned',
+                  ),
+                  const SizedBox(height: 24),
+                  _buildHistoryList(state.history),
+                ],
+              ),
+            );
+          }
+          return const Center(child: CircularProgressIndicator());
+        },
       ),
     );
   }

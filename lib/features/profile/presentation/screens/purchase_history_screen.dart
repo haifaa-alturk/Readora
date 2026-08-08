@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:library_app1/core/widgets/gradient_summary_banner.dart';
 import 'package:library_app1/features/profile/presentation/bloc/purchase_history_bloc.dart';
 import 'package:library_app1/features/profile/presentation/bloc/purchase_history_event.dart';
 import 'package:library_app1/features/profile/presentation/bloc/purchase_history_state.dart';
@@ -13,28 +14,20 @@ class PurchaseHistoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<PurchaseHistoryBloc, PurchaseHistoryState>(
       builder: (context, state) {
-        return Center(
-          child: SizedBox(
-            width: 420,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: Scaffold(
-                backgroundColor: const Color(0xfffcfbfa),
-                appBar: AppBar(
-                  backgroundColor: const Color(0xfffcfbfa),
-                  elevation: 0,
-                  title: const Text(
-                    'My Purchases',
-                    style: TextStyle(
-                      color: Color(0xff2d2d2d),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                body: _buildBody(state),
+        return Scaffold(
+          backgroundColor: const Color(0xfffcfbfa),
+          appBar: AppBar(
+            backgroundColor: const Color(0xfffcfbfa),
+            elevation: 0,
+            title: const Text(
+              'My Purchases',
+              style: TextStyle(
+                color: Color(0xff2d2d2d),
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
+          body: _buildBody(state),
         );
       },
     );
@@ -54,6 +47,10 @@ class PurchaseHistoryScreen extends StatelessWidget {
     }
     if (state is PurchaseHistoryLoaded) {
       final transactions = state.transactions;
+      final totalSpent = transactions.fold<double>(
+        0,
+        (sum, tx) => sum + tx.price,
+      );
       final children = transactions.isEmpty
           ? <Widget>[
               const Center(
@@ -80,7 +77,15 @@ class PurchaseHistoryScreen extends StatelessWidget {
             : transactions.map((tx) => _buildTransactionTile(tx)).toList();
       return ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-        children: children,
+        children: [
+          GradientSummaryBanner(
+            label: 'Total Spent',
+            value: '${totalSpent.toStringAsFixed(0)} SYP',
+            subtitle: 'Across all your purchases & rentals',
+          ),
+          const SizedBox(height: 16),
+          ...children,
+        ],
       );
     }
     return const Center(child: CircularProgressIndicator());

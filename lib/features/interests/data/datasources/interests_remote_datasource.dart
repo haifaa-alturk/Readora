@@ -1,6 +1,7 @@
-import '../../../../core/mock_dev3/mock_config.dart';
-import '../../../../core/mock_dev3/mock_data_provider.dart';
-import '../../../../core/network_dev3/api_client.dart';
+import 'package:dio/dio.dart';
+import 'package:library_app1/core/api/api_client.dart';
+import 'package:library_app1/core/mock_dev3/mock_config.dart';
+
 import '../models/interest_model.dart';
 
 abstract class InterestsRemoteDataSource {
@@ -11,56 +12,56 @@ abstract class InterestsRemoteDataSource {
 class InterestsRemoteDataSourceImpl implements InterestsRemoteDataSource {
   InterestsRemoteDataSourceImpl(this._apiClient);
 
-  // ignore: unused_field — kept for when real API call is uncommented below
-  final Dev3ApiClient _apiClient;
+  final ApiClient _apiClient;
 
   @override
   Future<List<InterestModel>> getAllInterests() async {
-    if (useMockData) {
-      final data = MockDataProvider.interests();
-      return data.map((e) => InterestModel.fromJson(e)).toList();
+    print("Interests: useMockData=$useMockData");
+    print("Interests: calling GET categories...");
+    final response = await _apiClient.dio.get('categories');
+    print("Interests: GET response status=${response.statusCode}");
+
+    final dynamic rawData = response.data;
+    List rawList;
+
+    if (rawData is List && rawData.isNotEmpty && rawData.first is List) {
+      rawList = rawData.first;
+    } else if (rawData is List) {
+      rawList = rawData;
+    } else {
+      rawList = rawData['data'] ?? [];
     }
-    // TODO: confirm real interests endpoints with backend team
-    // final response = await _apiClient.get('/interests');
-    // final list = response.data as List<dynamic>;
-    // return list
-    //     .map((e) => InterestModel.fromJson(e as Map<String, dynamic>))
-    //     .toList();
-    final data = MockDataProvider.interests();
-    return data.map((e) => InterestModel.fromJson(e)).toList();
+
+    return rawList
+        .map((e) => InterestModel.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
   }
 
   @override
   Future<List<InterestModel>> updateUserInterests(
       List<int> selectedInterestIds) async {
-    if (useMockData) {
-      final all = MockDataProvider.interests();
-      final updated = all.map((e) {
-        final isSelected = selectedInterestIds.contains(e['id'] as int);
-        return <String, dynamic>{
-          ...e,
-          'is_selected': isSelected,
-        };
-      }).toList();
-      return updated.map((e) => InterestModel.fromJson(e)).toList();
-    }
-    // TODO: confirm real interests endpoints with backend team
-    // final response = await _apiClient.put(
-    //   '/profile/interests',
-    //   data: {'interest_ids': selectedInterestIds},
-    // );
-    // final list = response.data as List<dynamic>;
-    // return list
-    //     .map((e) => InterestModel.fromJson(e as Map<String, dynamic>))
-    //     .toList();
-    final all = MockDataProvider.interests();
-    final updated = all.map((e) {
-      final isSelected = selectedInterestIds.contains(e['id'] as int);
-      return <String, dynamic>{
-        ...e,
-        'is_selected': isSelected,
-      };
-    }).toList();
-    return updated.map((e) => InterestModel.fromJson(e)).toList();
+    print(
+        "Interests: calling POST profile_update with interests=$selectedInterestIds...");
+    final response = await _apiClient.dio.post(
+      'profile_update',
+      data: FormData.fromMap({
+        'interests[]': selectedInterestIds,
+      }),
+    );
+    print("Interests: POST response status=${response.statusCode}");
+
+    final json = (response.data as Map<String, dynamic>)['user']
+        as Map<String, dynamic>;
+
+    final dynamic rawData = json['interests'] ?? [];
+    final List rawList = rawData is List ? rawData : [];
+
+    return rawList
+        .map((e) => InterestModel(
+              id: e is int ? e : int.tryParse('$e') ?? 0,
+              name: '',
+              isSelected: true,
+            ))
+        .toList();
   }
 }
