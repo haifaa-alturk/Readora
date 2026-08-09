@@ -1,0 +1,181 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:library_app1/features/home/presentation/bloc/Favorite_Bloc/favorite_bloc.dart';
+import 'package:library_app1/features/home/presentation/bloc/Favorite_Bloc/favorite_event.dart';
+import 'package:library_app1/features/home/presentation/bloc/Favorite_Bloc/favorite_state.dart';
+import 'package:library_app1/features/home/domain/entities/book.dart';
+
+class FavoritesPage extends StatelessWidget {
+  const FavoritesPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // 🎨 خيارات ألوان الكروت المتبادلة (زهري وبنفسجي فاتح)
+    final List<Color> cardColors = [
+      const Color.fromARGB(255, 241, 203, 223), // زهري ناعم
+      const Color.fromARGB(255, 215, 195, 247), // بنفسجي فاتح
+    ];
+
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 241, 242, 245), // خلفية داكنة لإبراز ألوان الكروت
+      appBar: AppBar(
+        title: const Text(
+          'Favorites',
+          style: TextStyle(
+            color: Color(0xFFC9B6F5),
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+      ),
+      body: BlocBuilder<FavoriteBloc, FavoriteState>(
+        builder: (context, state) {
+          if (state is FavoriteLoading) {
+            return const Center(
+              child: CircularProgressIndicator(color: Color(0xFF8B5CF6)),
+            );
+          } else if (state is FavoriteLoaded) {
+            if (state.favoriteBooks.isEmpty) {
+              return const Center(
+                child: Text(
+                  'لم تقمي بإضافة أي كتب للمفضلة بعد',
+                  style: TextStyle(color: Colors.white70, fontSize: 16),
+                ),
+              );
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              itemCount: state.favoriteBooks.length,
+              itemBuilder: (context, index) {
+                final book = state.favoriteBooks[index];
+
+                // 🔄 التناوب بين اللونين بناءً على الـ index
+                final Color backgroundColor = cardColors[index % cardColors.length];
+
+                // تجهيز رابط الصورة
+                String imageUrl = (book.coverImage != null && book.coverImage!.isNotEmpty)
+                    ? (book.coverImage!.startsWith('http')
+                        ? book.coverImage!
+                        : "http://127.0.0.1:8000/storage/${book.coverImage}")
+                    : "";
+
+                // تجهيز اسم المؤلف
+                String authorText = "مؤلف غير معروف";
+                if (book.authorName != null && book.authorName!.trim().isNotEmpty) {
+                  authorText = book.authorName!;
+                } else if (book.authors.isNotEmpty) {
+                  authorText = book.authors.join(", ");
+                }
+
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 14),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      // 🖼️ صورة غلاف الكتاب مصغرة وبأطراف منحنية
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          width: 60,
+                          height: 75,
+                          color: Colors.white24,
+                          child: imageUrl.isNotEmpty
+                              ? Image.network(
+                                  imageUrl,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Icon(Icons.book, size: 30, color: Colors.grey),
+                                )
+                              : const Icon(Icons.book, size: 30, color: Colors.grey),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+
+                      // 📝 اسم الكتاب واسم المؤلف
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              book.bookName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Color(0xFF2D1B36), // لون داكن واضح للعنوان
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            // Text(
+                            //   authorText,
+                            //   maxLines: 1,
+                            //   overflow: TextOverflow.ellipsis,
+                            //   style: const TextStyle(
+                            //     color: Color(0xFF6B4E71), // لون فرعي مريح
+                            //     fontSize: 13,
+                            //     fontWeight: FontWeight.w500,
+                            //   ),
+                            // ),
+                          ],
+                        ),
+                      ),
+
+                      // 🔴 زر الحذف من المفضلة (القلب المضيء)
+                      GestureDetector(
+                        onTap: () {
+                          context.read<FavoriteBloc>().add(
+                                ToggleFavoriteEvent(
+                                  token: "",
+                                  bookId: book.id,
+                                  isCurrentlyFavorite: true, // عند الضغط سيقوم بالحذف فكلياً
+                                ),
+                              );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.favorite,
+                            color: Colors.redAccent,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          } else if (state is FavoriteError) {
+            return Center(
+              child: Text(
+                state.message,
+                style: const TextStyle(color: Colors.redAccent),
+              ),
+            );
+          }
+          return const SizedBox.shrink();
+        },
+      ),
+    );
+  }
+}

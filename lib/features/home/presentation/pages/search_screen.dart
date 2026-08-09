@@ -410,7 +410,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         crossAxisSpacing: 12,
                         childAspectRatio: 0.58,
                       ),
-                      itemBuilder: (context, index) => BookCard(book: books[index]),
+                      itemBuilder: (context, index) => BookCard(book: books[index],showFavorite: false,),
                     ),
                   );
                 } else if (state is SearchFailure) {

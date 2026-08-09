@@ -86,9 +86,11 @@ import 'package:library_app1/features/auth/domain/usecasees/get_categories_useca
 import 'package:library_app1/features/auth/domain/usecasees/login.dart';
 import 'package:library_app1/features/auth/domain/usecasees/signup.dart';
 import 'package:library_app1/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:library_app1/features/home/data/datasources/favorite_remote_data_source.dart';
 import 'package:library_app1/features/home/data/datasources/home_remote_datasource.dart';
 import 'package:library_app1/features/home/data/repositories/home_repository_impl.dart';
 import 'package:library_app1/features/home/domain/repositories/home_repository.dart';
+import 'package:library_app1/features/home/presentation/bloc/Favorite_Bloc/favorite_bloc.dart';
 import 'package:library_app1/features/home/presentation/bloc/Home_Bloc/home_bloc.dart';
 import 'package:library_app1/features/home/presentation/bloc/Home_Bloc/home_event.dart';
 import 'package:library_app1/features/quotes/data/datasources/quotes_remote_datasource.dart';
@@ -221,6 +223,9 @@ void main() {
       ],
       child: MultiBlocProvider(
         providers: [
+          BlocProvider<FavoriteBloc>(
+      create: (context) => FavoriteBloc(FavoriteRemoteDataSource()),
+    ),
         BlocProvider<AuthBloc>(
           create: (context) => AuthBloc(
             loginUseCase,
