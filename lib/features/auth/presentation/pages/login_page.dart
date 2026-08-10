@@ -224,16 +224,15 @@
 //     );
 //   }
 // }
-
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:library_app1/features/auth/presentation/pages/signup_page.dart';
 import 'package:library_app1/features/home/presentation/pages/home_page.dart';
 import 'package:library_app1/features/home/presentation/pages/main_screen.dart';
-import 'package:library_app1/login/forgot_password.dart';
+import 'package:library_app1/forget_screen/forgot_password.dart';
 
-// استيراد ملفات الـ Bloc الخاصة بك (تأكدي من صحة المسارات)
+// استيراد ملفات الـ Bloc الخاصة بك
 import 'package:library_app1/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:library_app1/features/auth/presentation/bloc/auth_event.dart';
 import 'package:library_app1/features/auth/presentation/bloc/auth_state.dart';
@@ -251,6 +250,8 @@ class _LoginScreenState extends State<LoginScreen> {
   // مفتاح للتحقق من الحقول (Validation)
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+  bool _isPasswordObscure = true;
+
   @override
   void dispose() {
     emailController.dispose();
@@ -264,36 +265,25 @@ class _LoginScreenState extends State<LoginScreen> {
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            // نجاح التسجيل: رسالة ترحيب ثم انتقال
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text("Welcome back, ${state.user.name}!"
-                ),
+                content: Text("Welcome back, ${state.user.name}!"),
                 backgroundColor: Colors.green,
               ),
             );
-          //    Navigator.pushReplacementNamed(context, '/home'); // فكي التعليق عند تجهيز الهوم
-          // } else if (state is AuthError) {
-          //   // فشل التسجيل: إظهار الخطأ القادم من الباك إيند
-          //   ScaffoldMessenger.of(context).showSnackBar(
-          //     SnackBar(
-          //       content: Text(state.message),
-          //       backgroundColor: Colors.red,
-          //     ),
-          //   );
-          // }
-          // 2. الانتقال لصفحة الهوم وحذف كل ما قبلها من الـ Stack
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => MainScreen()),
-      (route) => false,
-    );
-  } else if (state is AuthError) {
-    // عرض الخطأ
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(state.message)),
-    );
-  }
+
+            // الانتقال لصفحة الهوم وحذف كل ما قبلها من الـ Stack
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => MainScreen()),
+              (route) => false,
+            );
+          } else if (state is AuthError) {
+            // عرض الخطأ
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          }
         },
         builder: (context, state) {
           return Stack(
@@ -322,17 +312,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(20),
                     child: Form(
-                      key: _formKey, // ربط الـ Form للمصادقة
+                      key: _formKey,
                       child: Column(
                         children: [
                           const Text(
                             "Welcome To Readora",
                             style: TextStyle(
-                           fontSize: 24, // أكبر قليلاً
-    fontWeight: FontWeight.w900, // أثقل
-    letterSpacing: 1.5, // تباعد عصري,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.5,
                               color: Colors.white,
-                             
                             ),
                           ),
                           const SizedBox(height: 10),
@@ -371,12 +360,26 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 const SizedBox(height: 20),
 
-                                // 🔒 Password Field
+                                // 🔒 Password Field (تمت إضافة زر العين هنا)
                                 TextFormField(
                                   controller: passwordController,
-                                  obscureText: true,
+                                  obscureText: _isPasswordObscure, // 👈 متغيرة حالة الإخفاء
                                   style: const TextStyle(color: Colors.white),
-                                  decoration: _buildInputDecoration("Password", Icons.lock),
+                                  decoration: _buildInputDecoration(
+                                    "Password",
+                                    Icons.lock,
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _isPasswordObscure ? Icons.visibility_off : Icons.visibility,
+                                        color: Colors.white70,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          _isPasswordObscure = !_isPasswordObscure;
+                                        });
+                                      },
+                                    ),
+                                  ),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) return "Password is required";
                                     if (value.length < 8) return "Password must be at least 8 characters";
@@ -419,7 +422,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         style: TextStyle(color: Colors.white70)),
                                     TextButton(
                                       onPressed: () {
-                                        Navigator.push(context, MaterialPageRoute(builder: (_) =>RegisterScreen ()));
+                                        Navigator.push(context, MaterialPageRoute(builder: (_) => RegisterScreen()));
                                       },
                                       child: const Text(
                                         "Sign Up",
@@ -447,10 +450,11 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // ميثود لتنسيق المدخلات
-  InputDecoration _buildInputDecoration(String hint, IconData icon) {
+  // ميثود لتنسيق المدخلات (تم إضافة suffixIcon معامِل اختياري)
+  InputDecoration _buildInputDecoration(String hint, IconData icon, {Widget? suffixIcon}) {
     return InputDecoration(
       prefixIcon: Icon(icon, color: Colors.white),
+      suffixIcon: suffixIcon, // 👈 استلام زر العين
       hintText: hint,
       hintStyle: const TextStyle(color: Colors.white70),
       filled: true,

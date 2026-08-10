@@ -448,11 +448,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       body: Stack(
         children: [
+          
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(image: AssetImage('assets/images/signupp.jpg'), fit: BoxFit.cover),
             ),
           ),
+           Align(
+                      alignment: Alignment.topLeft,
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ),
           Center(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
@@ -464,6 +472,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: Colors.white.withOpacity(0.2)),
                 ),
+                
                 child: SingleChildScrollView(
                   child: Form(
                     key: _formKey,

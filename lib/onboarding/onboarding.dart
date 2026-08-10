@@ -2,8 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:library_app1/features/auth/presentation/pages/login_page.dart';
 // import 'package:library_app1/features/auth/views/login.dart';
-import 'package:library_app1/login/login.dart';
-import 'package:library_app1/onboarding/splash_screen.dart';
+
 // import 'home_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
