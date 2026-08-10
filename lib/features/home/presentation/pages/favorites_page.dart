@@ -1,9 +1,12 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:library_app1/features/home/presentation/bloc/Favorite_Bloc/favorite_bloc.dart';
 import 'package:library_app1/features/home/presentation/bloc/Favorite_Bloc/favorite_event.dart';
 import 'package:library_app1/features/home/presentation/bloc/Favorite_Bloc/favorite_state.dart';
-import 'package:library_app1/features/home/domain/entities/book.dart';
+
+// 🔴 استيراد صفحة تفاصيل الكتاب
+import 'package:library_app1/features/home/presentation/pages/book_details_page.dart';
 
 class FavoritesPage extends StatelessWidget {
   const FavoritesPage({super.key});
@@ -22,9 +25,9 @@ class FavoritesPage extends StatelessWidget {
         title: const Text(
           'Favorites',
           style: TextStyle(
-            color: Color(0xFFC9B6F5),
+            color: Color.fromARGB(255, 143, 76, 225),
             fontWeight: FontWeight.bold,
-            fontSize: 22,
+            fontSize: 18,
           ),
         ),
         backgroundColor: Colors.transparent,
@@ -41,8 +44,8 @@ class FavoritesPage extends StatelessWidget {
             if (state.favoriteBooks.isEmpty) {
               return const Center(
                 child: Text(
-                  'لم تقمي بإضافة أي كتب للمفضلة بعد',
-                  style: TextStyle(color: Colors.white70, fontSize: 16),
+                 "You haven't added any books to your favorites yet.",
+                  style: TextStyle(color: Color.fromARGB(179, 74, 1, 92), fontSize: 16),
                 ),
               );
             }
@@ -71,96 +74,117 @@ class FavoritesPage extends StatelessWidget {
                   authorText = book.authors.join(", ");
                 }
 
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 14),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: backgroundColor,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      // 🖼️ صورة غلاف الكتاب مصغرة وبأطراف منحنية
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          width: 60,
-                          height: 75,
-                          color: Colors.white24,
-                          child: imageUrl.isNotEmpty
-                              ? Image.network(
-                                  imageUrl,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      const Icon(Icons.book, size: 30, color: Colors.grey),
-                                )
-                              : const Icon(Icons.book, size: 30, color: Colors.grey),
+                // 🔴 تغليف الكارت بـ GestureDetector للانتقال للتفاصيل عند الضغط
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BlocProvider.value(
+                          value: context.read<FavoriteBloc>(),
+                          child: BookDetailsPage(
+                            bookId: book.id,
+                            title: book.bookName,
+                            author: authorText,
+                            image: book.coverImage ?? '',
+                            description: book.description ?? '',
+                            pdfFile: book.pdfFile,
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 14),
-
-                      // 📝 اسم الكتاب واسم المؤلف
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              book.bookName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Color(0xFF2D1B36), // لون داكن واضح للعنوان
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            // Text(
-                            //   authorText,
-                            //   maxLines: 1,
-                            //   overflow: TextOverflow.ellipsis,
-                            //   style: const TextStyle(
-                            //     color: Color(0xFF6B4E71), // لون فرعي مريح
-                            //     fontSize: 13,
-                            //     fontWeight: FontWeight.w500,
-                            //   ),
-                            // ),
-                          ],
+                    );
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 14),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: backgroundColor,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
-                      ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        // 🖼️ صورة غلاف الكتاب مصغرة وبأطراف منحنية
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            width: 60,
+                            height: 75,
+                            color: Colors.white24,
+                            child: imageUrl.isNotEmpty
+                                ? Image.network(
+                                    imageUrl,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) =>
+                                        const Icon(Icons.book, size: 30, color: Colors.grey),
+                                  )
+                                : const Icon(Icons.book, size: 30, color: Colors.grey),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
 
-                      // 🔴 زر الحذف من المفضلة (القلب المضيء)
-                      GestureDetector(
-                        onTap: () {
-                          context.read<FavoriteBloc>().add(
-                                ToggleFavoriteEvent(
-                                  token: "",
-                                  bookId: book.id,
-                                  isCurrentlyFavorite: true, // عند الضغط سيقوم بالحذف فكلياً
+                        // 📝 اسم الكتاب واسم المؤلف
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                book.bookName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Color(0xFF2D1B36), // لون داكن واضح للعنوان
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
                                 ),
-                              );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.favorite,
-                            color: Colors.redAccent,
-                            size: 20,
+                              ),
+                              const SizedBox(height: 6),
+                              // Text(
+                              //   authorText,
+                              //   maxLines: 1,
+                              //   overflow: TextOverflow.ellipsis,
+                              //   style: const TextStyle(
+                              //     color: Color(0xFF6B4E71), // لون فرعي مريح
+                              //     fontSize: 13,
+                              //     fontWeight: FontWeight.w500,
+                              //   ),
+                              // ),
+                            ],
                           ),
                         ),
-                      ),
-                    ],
+
+                        // 🔴 زر الحذف من المفضلة (القلب المضيء)
+                        GestureDetector(
+                          onTap: () {
+                            context.read<FavoriteBloc>().add(
+                                  ToggleFavoriteEvent(
+                                    token: "",
+                                    bookId: book.id,
+                                    isCurrentlyFavorite: true, // عند الضغط سيقوم بالحذف فكلياً
+                                  ),
+                                );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.favorite,
+                              color: Colors.redAccent,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },

@@ -56,6 +56,7 @@ class BookModel extends Book {
     super.sellingPrice,
     super.pdfFile,
     required super.authors,
+  
   });
 
   factory BookModel.fromJson(Map<String, dynamic> json) {
@@ -86,6 +87,7 @@ class BookModel extends Book {
       sellingPrice: json['selling_price']?.toString(),
 
       authors: authorNames,
+    
     );
   }
 }

@@ -73,4 +73,6 @@ class BookDetails {
     required this.authors,
     required this.categories,
   });
+
+  bool? get isFavorite => null;
 }

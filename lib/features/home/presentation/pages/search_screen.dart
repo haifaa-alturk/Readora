@@ -278,7 +278,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 237, 238, 240),
       appBar: AppBar(
-        backgroundColor:  const Color(0xffc9b6f5),
+        backgroundColor:  const Color.fromARGB(255, 184, 156, 250),
         elevation: 0,
         title: TextField(
           controller: _searchController,
@@ -356,7 +356,7 @@ class _SearchScreenState extends State<SearchScreen> {
             // اللون الأصفر الدائري للمحدد والبنفسجي للغير محدد
             color: isSelected 
                 ? const Color(0xFFFFE57F) // أصفر مائل الذهبي الفاتح
-                : const Color(0xFFC9B6F5), // البنفسجي
+                : const Color.fromARGB(255, 195, 172, 248), // البنفسجي
             borderRadius: BorderRadius.circular(25), // يجعل الشكل كبسولة/دائري
             
             // إضافة التوهج الأصفر (Glow Effect) عند التحديد

@@ -26,6 +26,7 @@ class Book {
   final String? sellingPrice;
   final String? pdfFile; // رابط ملف الكتاب
   final List<String> authors;
+  
 
   Book({
     required this.id,
@@ -36,6 +37,7 @@ class Book {
     this.sellingPrice,
     this.pdfFile,
     required this.authors,
+   
   });
 
   get rentalPrice => null;

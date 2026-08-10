@@ -227,23 +227,41 @@ class _BookCardState extends State<BookCard> {
     return GestureDetector(
       onTap: () {
         // الانتقال لصفحة التفاصيل عند الضغط على الكتاب
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => BookDetailsPage(
-              bookId: widget.book.id,
-              title: widget.book.bookName,
-              author: widget.book.authors.isNotEmpty ? widget.book.authors.join(", ") : "",
-              image: imageUrl,
-              description: widget.book.description ?? "لا يوجد وصف",
-              pdfFile: widget.book.pdfFile,
-            ),
-          ),
-        );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (_) => BookDetailsPage(
+        //       bookId: widget.book.id,
+        //       title: widget.book.bookName,
+        //       author: widget.book.authors.isNotEmpty ? widget.book.authors.join(", ") : "",
+        //       image: imageUrl,
+        //       description: widget.book.description ?? "لا يوجد وصف",
+        //       pdfFile: widget.book.pdfFile,
+        //     ),
+        //   ),
+        // );
+        // في كود التنقل (مثلاً داخل OnTap بالـ BookCard):
+Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (_) => BlocProvider.value(
+      value: context.read<FavoriteBloc>(), // 👈 إعطاء نفس الـ Bloc للصفحة الجديدة
+      child: BookDetailsPage(
+        bookId: widget.book.id,
+        title: widget.book.bookName,
+        author: widget.book.authors.isNotEmpty ? widget.book.authors.join(", ") : "",
+        image: imageUrl,
+        description: widget.book.description ?? "لا يوجد وصف",
+        pdfFile: widget.book.pdfFile,
+      ),
+    ),
+  ),
+);
       },
      
       child: Container(
         width: 100,
+        height: 100,
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
           color: const Color.fromARGB(255, 240, 204, 218),
@@ -348,7 +366,7 @@ if (widget.showFavorite)
                     style: const TextStyle(
                       color: Color.fromARGB(255, 46, 3, 36),
                       fontWeight: FontWeight.bold,
-                      fontSize: 13,
+                      fontSize: 11,
                     ),
                   ),
                   const SizedBox(height: 3),
@@ -356,7 +374,7 @@ if (widget.showFavorite)
                   // اسم المؤلف
                   Builder(
                     builder: (context) {
-                      String authorText = "مؤلف غير معروف";
+                      String authorText = "";
                       if (widget.book.authorName != null && widget.book.authorName!.toString().trim().isNotEmpty) {
                         authorText = widget.book.authorName!;
                       } else if (widget.book.authors.isNotEmpty) {
@@ -368,7 +386,7 @@ if (widget.showFavorite)
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: Color.fromARGB(255, 88, 5, 101),
-                          fontSize: 11,
+                          fontSize: 8,
                         ),
                       );
                     },

@@ -44,6 +44,7 @@ Widget build(BuildContext context) {
                   padding: EdgeInsets.all(16.0),
                   child: Text(" Top Reated Books", style: TextStyle(color: Color.fromARGB(255, 143, 76, 225), fontSize: 20,fontWeight: FontWeight.bold)),
                 ),
+                
                 TopRatedBooksList(books: state.topRatedBooks),
 
                 const Padding(
