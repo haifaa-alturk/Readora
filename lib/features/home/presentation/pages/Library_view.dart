@@ -109,8 +109,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:library_app1/core/language/app_localizations.dart';
 import 'package:library_app1/features/home/presentation/bloc/Library_Bloc/library_bloc.dart';
 import 'package:library_app1/features/home/presentation/bloc/Library_Bloc/library_state.dart';
+import 'package:library_app1/features/settings/presentation/bloc/settings_bloc.dart';
+import 'package:library_app1/features/settings/presentation/bloc/settings_state.dart';
 import '../widgets/book_card.dart'; // 💡 استيراد ويدجت BookCard الموحدة
 
 class LibraryPage extends StatelessWidget {
@@ -118,13 +121,15 @@ class LibraryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settingsState = context.watch<SettingsBloc>().state;
+  final lang = settingsState is SettingsLoaded ? settingsState.language : 'en';
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 250, 251, 254), // خلفية داكنة فخمة متناسقة مع الكروت
+backgroundColor: Theme.of(context).scaffoldBackgroundColor, // خلفية داكنة فخمة متناسقة مع الكروت
       appBar: AppBar(
-        title: const Text(
-          'My Library',
+        title:
+        Text(context.tr('all_books', lang),
           style: TextStyle(
-            color: Color(0xFFC9B6F5),
+            color: Color.fromARGB(255, 187, 161, 250),
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -144,7 +149,7 @@ class LibraryPage extends StatelessWidget {
               return const Center(
                 child: Text(
                   'لا توجد كتب في المكتبة حالياً',
-                  style: TextStyle(color: Colors.white70, fontSize: 16),
+                  style: TextStyle(color: Color.fromARGB(179, 243, 121, 252), fontSize: 16),
                 ),
               );
             }
@@ -174,7 +179,7 @@ class LibraryPage extends StatelessWidget {
           return const Center(
             child: Text(
               'اضغط لتحديث المكتبة',
-              style: TextStyle(color: Colors.white60),
+              style: TextStyle(color: Color.fromARGB(153, 241, 102, 248)),
             ),
           );
         },

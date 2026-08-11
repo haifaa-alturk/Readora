@@ -79,7 +79,7 @@ class _GroupChallengeScreenState extends State<GroupChallengeScreen> {
             child: Center(
               child: Text(
                 state.message,
-                style: const TextStyle(color: Color(0xff2d2d2d)),
+
               ),
             ),
           );
@@ -93,14 +93,14 @@ class _GroupChallengeScreenState extends State<GroupChallengeScreen> {
                   Icon(
                     Icons.emoji_events_outlined,
                     size: 64,
-                    color: const Color(0xff2d2d2d).withValues(alpha: 0.2),
+                  
                   ),
                   const SizedBox(height: 16),
                   const Text(
                     'No active challenge right now',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Color(0xff2d2d2d),
+                 
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -108,7 +108,7 @@ class _GroupChallengeScreenState extends State<GroupChallengeScreen> {
                     'Check back soon for a new challenge!',
                     style: TextStyle(
                       fontSize: 13,
-                      color: const Color(0xff2d2d2d).withValues(alpha: 0.6),
+                      
                     ),
                   ),
                 ],
@@ -141,7 +141,7 @@ class _GroupChallengeScreenState extends State<GroupChallengeScreen> {
               title: const Text(
                 'Challenge',
                 style: TextStyle(
-                  color: Color(0xff2d2d2d),
+                
                   fontWeight: FontWeight.w600,
                 ),
               ),

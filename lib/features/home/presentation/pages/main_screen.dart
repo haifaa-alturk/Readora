@@ -235,7 +235,7 @@ class _MainScreenState extends State<MainScreen> {
         ),
       ],
       child: Scaffold(
-        backgroundColor: const Color(0xfffcfbfa),
+       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: _pages[_selectedIndex],
         bottomNavigationBar: _buildFloatingNavBar(),
       ),

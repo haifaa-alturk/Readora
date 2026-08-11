@@ -59,8 +59,11 @@
 // }
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:library_app1/core/language/app_localizations.dart';
 import 'package:library_app1/features/home/presentation/bloc/Search_Bloc/search_bloc.dart';
 import 'package:library_app1/features/home/presentation/pages/search_screen.dart';
+import 'package:library_app1/features/settings/presentation/bloc/settings_bloc.dart';
+import 'package:library_app1/features/settings/presentation/bloc/settings_state.dart';
 
 class HomeHeader extends StatelessWidget {
   final int points;
@@ -68,6 +71,8 @@ class HomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settingsState = context.watch<SettingsBloc>().state;
+  final lang = settingsState is SettingsLoaded ? settingsState.language : 'en';
     return Container(
       padding: const EdgeInsets.only(top: 50, left: 20, right: 20, bottom: 20),
       decoration: const BoxDecoration(
@@ -125,15 +130,14 @@ GestureDetector(
         ),
       ],
     ),
-    child: const Row(
+    child: Row(
       mainAxisAlignment: MainAxisAlignment.center, // لجعل النص والأيقونة في المنتصف كزر
       children: [
        
 
         Center(
-          child: Text(
-            "  Search",
-            style: TextStyle(
+          child: Text(context.tr('search', lang),
+            style: const TextStyle(
               color: Colors.white, 
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -141,7 +145,7 @@ GestureDetector(
           ),
           
         ),
-         Icon(Icons.search, color: Colors.white, size: 22), // أيقونة الفلترة والبحث
+         const Icon(Icons.search, color: Colors.white, size: 22), // أيقونة الفلترة والبحث
       ],
     ),
   ),

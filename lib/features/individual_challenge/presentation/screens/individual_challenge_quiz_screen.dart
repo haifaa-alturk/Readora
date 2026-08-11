@@ -48,14 +48,14 @@ class _IndividualChallengeQuizScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            backgroundColor: const Color(0xfffcfbfa),
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor, 
             appBar: AppBar(
-              backgroundColor: const Color(0xfffcfbfa),
+           backgroundColor: Theme.of(context).scaffoldBackgroundColor, 
               elevation: 0,
               title: const Text(
                 'Quiz',
                 style: TextStyle(
-                  color: Color(0xff2d2d2d),
+                 
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -80,7 +80,7 @@ class _IndividualChallengeQuizScreenState
                   return Center(
                     child: Text(
                       state.message,
-                      style: const TextStyle(color: Color(0xff2d2d2d)),
+                      
                     ),
                   );
                 }
@@ -98,8 +98,8 @@ class _IndividualChallengeQuizScreenState
                           'Question ${_visibleQuestionIndex + 1} of ${questions.length}',
                           style: TextStyle(
                             fontSize: 13,
-                            color: const Color(0xff2d2d2d)
-                                .withValues(alpha: 0.6),
+                            
+                              
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -166,7 +166,7 @@ class _IndividualChallengeQuizScreenState
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Color(0xff2d2d2d),
+                
               ),
             ),
             const SizedBox(height: 20),
@@ -263,7 +263,7 @@ class _IndividualChallengeQuizScreenState
                           question.options[index],
                           style: TextStyle(
                             fontSize: 15,
-                            color: const Color(0xff2d2d2d),
+                            
                           ),
                         ),
                       ),

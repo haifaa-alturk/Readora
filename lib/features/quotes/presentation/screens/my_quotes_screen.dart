@@ -56,9 +56,9 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            backgroundColor: AppTheme.surfaceWhite,
+           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             appBar: AppBar(
-              backgroundColor: AppTheme.surfaceWhite,
+              backgroundColor: const Color.fromARGB(185, 203, 157, 255),
               elevation: 0,
               title: const Text(
                 'My quotes',
@@ -84,7 +84,7 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
                     child: Text(
                       state.message,
                       style: TextStyle(
-                        color: AppTheme.textSecondary,
+                       
                         fontSize: 14,
                       ),
                     ),
@@ -102,7 +102,7 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
         child: Text(
           "No quotes have been saved yet.",
           style: TextStyle(
-            color: AppTheme.textSecondary,
+            color: const Color.fromARGB(255, 151, 57, 144),
             fontSize: 14,
           ),
         ),
@@ -122,7 +122,10 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 0,
-      color: AppTheme.surfaceWhite,
+      // color: AppTheme.surfaceWhite,
+      color: Theme.of(context).brightness == Brightness.dark
+      ? const Color.fromARGB(88, 170, 21, 183)?.withOpacity(0.5) // 🌙 لون رمادي داكن وأنيق للوضع الليلي
+      : const Color.fromARGB(255, 248, 245, 243).withOpacity(0.3), // ☀️ اللون البيج الأصلي للوضع العادي
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: const BorderSide(color: AppTheme.borderLight),
@@ -172,7 +175,7 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
                 fontSize: 14,
                 height: 1.5,
                 fontWeight: FontWeight.w500,
-                color: AppTheme.textPrimary,
+                // color: AppTheme.textPrimary,
               ),
             ),
             const SizedBox(height: 12),
@@ -185,7 +188,7 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
                   "${quote.createdAt.day}/${quote.createdAt.month}/${quote.createdAt.year}",
                   style: const TextStyle(
                     fontSize: 11,
-                    color: AppTheme.textSecondary,
+                
                   ),
                 ),
                 Row(

@@ -1,18 +1,24 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:library_app1/core/language/app_localizations.dart';
 import 'package:library_app1/features/home/presentation/bloc/Favorite_Bloc/favorite_bloc.dart';
 import 'package:library_app1/features/home/presentation/bloc/Favorite_Bloc/favorite_event.dart';
 import 'package:library_app1/features/home/presentation/bloc/Favorite_Bloc/favorite_state.dart';
 
 // 🔴 استيراد صفحة تفاصيل الكتاب
 import 'package:library_app1/features/home/presentation/pages/book_details_page.dart';
+import 'package:library_app1/features/settings/presentation/bloc/settings_bloc.dart';
+import 'package:library_app1/features/settings/presentation/bloc/settings_state.dart';
 
 class FavoritesPage extends StatelessWidget {
   const FavoritesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final settingsState = context.watch<SettingsBloc>().state;
+  // ignore: dead_code
+  final lang = settingsState is SettingsLoaded ? settingsState.language : 'en';
     // 🎨 خيارات ألوان الكروت المتبادلة (زهري وبنفسجي فاتح)
     final List<Color> cardColors = [
       const Color.fromARGB(255, 241, 203, 223), // زهري ناعم
@@ -20,10 +26,10 @@ class FavoritesPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 241, 242, 245), // خلفية داكنة لإبراز ألوان الكروت
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor, // ✅ متكيف تلقائياً
       appBar: AppBar(
-        title: const Text(
-          'Favorites',
+        title: 
+        Text(context.tr('favorites', lang),
           style: TextStyle(
             color: Color.fromARGB(255, 143, 76, 225),
             fontWeight: FontWeight.bold,
@@ -42,10 +48,14 @@ class FavoritesPage extends StatelessWidget {
             );
           } else if (state is FavoriteLoaded) {
             if (state.favoriteBooks.isEmpty) {
-              return const Center(
+              return Center(
                 child: Text(
                  "You haven't added any books to your favorites yet.",
-                  style: TextStyle(color: Color.fromARGB(179, 74, 1, 92), fontSize: 16),
+                  style: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.dark
+      ? const Color.fromARGB(255, 255, 70, 255)?.withOpacity(0.5) // 🌙 لون رمادي داكن وأنيق للوضع الليلي
+      : const Color.fromARGB(255, 58, 1, 51).withOpacity(0.3), // ☀️ اللون البيج الأصلي للوضع العادي
+                    fontSize: 16),
                 ),
               );
             }

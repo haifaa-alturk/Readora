@@ -38,14 +38,14 @@ class _LibraryScreenState extends State<LibraryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            backgroundColor: const Color(0xfffcfbfa),
+           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             appBar: AppBar(
-              backgroundColor: const Color(0xfffcfbfa),
+             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               elevation: 0,
               title: const Text(
                 'My Books',
                 style: TextStyle(
-                  color: Color(0xff2d2d2d),
+                 
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -59,7 +59,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   return Center(
                     child: Text(
                       state.message,
-                      style: const TextStyle(color: Color(0xff2d2d2d)),
+                   
                     ),
                   );
                 }
@@ -71,14 +71,14 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         Icon(
                           Icons.menu_book,
                           size: 64,
-                          color: const Color(0xff2d2d2d).withValues(alpha: 0.2),
+                         
                         ),
                         const SizedBox(height: 16),
                         const Text(
                           'No books yet',
                           style: TextStyle(
                             fontSize: 16,
-                            color: Color(0xff2d2d2d),
+                           
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -86,7 +86,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                           'Start reading to build your library!',
                           style: TextStyle(
                             fontSize: 13,
-                            color: const Color(0xff2d2d2d).withValues(alpha: 0.6),
+                           
                           ),
                         ),
                       ],
@@ -104,7 +104,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                   'No ${state.activeFilter ?? ''} books',
                                   style: const TextStyle(
                                     fontSize: 15,
-                                    color: Color(0xff2d2d2d),
+                                 
                                   ),
                                 ),
                               )
@@ -145,12 +145,12 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 decoration: BoxDecoration(
                   color: isActive
                       ? const Color(0xffd4c5f9).withValues(alpha: 0.25)
-                      : const Color(0xff2d2d2d).withValues(alpha: 0.04),
+                      : const Color.fromARGB(255, 85, 84, 84).withValues(alpha: 0.04),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: isActive
                         ? const Color(0xff7c5cbf).withValues(alpha: 0.5)
-                        : const Color(0xff2d2d2d).withValues(alpha: 0.1),
+                        : const Color.fromARGB(255, 97, 95, 95).withValues(alpha: 0.1),
                     width: 1.5,
                   ),
                 ),
@@ -200,11 +200,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).brightness == Brightness.dark
+      ? const Color.fromARGB(115, 130, 128, 128)?.withOpacity(0.5) // 🌙 لون رمادي داكن وأنيق للوضع الليلي
+      : const Color.fromARGB(255, 244, 241, 237).withOpacity(0.3),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xff2d2d2d).withValues(alpha: 0.04),
+            color: const Color.fromARGB(255, 181, 173, 173).withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -231,7 +233,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xff2d2d2d),
+                    
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -244,7 +246,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         book.author,
                         style: TextStyle(
                           fontSize: 13,
-                          color: const Color(0xff2d2d2d).withValues(alpha: 0.6),
+                          
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -287,7 +289,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   _formatDate(book.startDate!),
                   style: const TextStyle(
                     fontSize: 12,
-                    color: Color(0xff757575),
+                   
                   ),
                 ),
               if (book.completionDate != null) ...[
@@ -296,7 +298,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   'Done ${_formatDate(book.completionDate!)}',
                   style: const TextStyle(
                     fontSize: 11,
-                    color: Color(0xff757575),
+                    
                   ),
                 ),
               ],
@@ -315,7 +317,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     style: TextStyle(fontSize: 12),
                   ),
                   style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xff7c5cbf),
+                    foregroundColor: const Color.fromARGB(255, 143, 108, 220),
                     padding: EdgeInsets.zero,
                     visualDensity: VisualDensity.compact,
                   ),

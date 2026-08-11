@@ -33,14 +33,14 @@ class _WinsScreenState extends State<WinsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            backgroundColor: const Color(0xfffcfbfa),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             appBar: AppBar(
-              backgroundColor: const Color(0xfffcfbfa),
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               elevation: 0,
               title: const Text(
                 'My Wins',
                 style: TextStyle(
-                  color: Color(0xff2d2d2d),
+                  
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -61,7 +61,7 @@ class _WinsScreenState extends State<WinsScreen> {
                   return Center(
                     child: Text(
                       state.message,
-                      style: const TextStyle(color: Color(0xff2d2d2d)),
+                  
                     ),
                   );
                 }
@@ -73,14 +73,14 @@ class _WinsScreenState extends State<WinsScreen> {
                         Icon(
                           Icons.emoji_events_outlined,
                           size: 64,
-                          color: const Color(0xff2d2d2d).withValues(alpha: 0.2),
+                         
                         ),
                         const SizedBox(height: 16),
                         const Text(
                           'No wins yet',
                           style: TextStyle(
                             fontSize: 16,
-                            color: Color(0xff2d2d2d),
+                           
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -88,7 +88,7 @@ class _WinsScreenState extends State<WinsScreen> {
                           'Complete challenges to earn wins!',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Color(0xff2d2d2d),
+                            
                           ),
                         ),
                       ],
@@ -138,7 +138,9 @@ class _WinsScreenState extends State<WinsScreen> {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+       color: Theme.of(context).brightness == Brightness.dark
+      ? const Color.fromARGB(172, 152, 40, 169)?.withOpacity(0.5) // 🌙 لون رمادي داكن وأنيق للوضع الليلي
+      : const Color.fromARGB(255, 254, 251, 248).withOpacity(0.3), // ☀️ اللون البيج الأصلي للوضع العادي
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -194,7 +196,7 @@ class _WinsScreenState extends State<WinsScreen> {
             style: const TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w700,
-              color: Color(0xff2d2d2d),
+              
             ),
           ),
           const SizedBox(height: 10),
@@ -211,14 +213,14 @@ class _WinsScreenState extends State<WinsScreen> {
                   Icon(
                     Icons.calendar_today,
                     size: 14,
-                    color: const Color(0xff2d2d2d).withValues(alpha: 0.5),
+                    
                   ),
                   const SizedBox(width: 6),
                   Text(
                     formattedDate,
                     style: TextStyle(
                       fontSize: 12,
-                      color: const Color(0xff2d2d2d).withValues(alpha: 0.5),
+                    
                     ),
                   ),
                 ],

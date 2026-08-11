@@ -25,14 +25,14 @@ class GroupChallengeWinnersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            backgroundColor: const Color(0xfffcfbfa),
+         backgroundColor: Theme.of(context).scaffoldBackgroundColor, 
             appBar: AppBar(
-              backgroundColor: const Color(0xfffcfbfa),
+             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               elevation: 0,
               title: const Text(
                 'Challenge Winners',
                 style: TextStyle(
-                  color: Color(0xff2d2d2d),
+                  
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -46,7 +46,7 @@ class GroupChallengeWinnersScreen extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xff2d2d2d),
+                   
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -55,7 +55,7 @@ class GroupChallengeWinnersScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 15,
-                    color: const Color(0xff2d2d2d).withValues(alpha: 0.8),
+                   
                     height: 1.5,
                   ),
                 ),
@@ -65,7 +65,7 @@ class GroupChallengeWinnersScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xff2d2d2d),
+                   
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -111,7 +111,7 @@ class GroupChallengeWinnersScreen extends StatelessWidget {
                                   style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
-                                    color: Color(0xff2d2d2d),
+                                   
                                   ),
                                 ),
                         ),
@@ -122,7 +122,7 @@ class GroupChallengeWinnersScreen extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w500,
-                              color: Color(0xff2d2d2d),
+                             
                             ),
                           ),
                         ),

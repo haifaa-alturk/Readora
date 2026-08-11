@@ -1,5 +1,44 @@
-import 'package:equatable/equatable.dart';
+// import 'package:equatable/equatable.dart';
 
+// import '../../domain/entities/settings_entity.dart';
+
+// abstract class SettingsState extends Equatable {
+//   const SettingsState();
+
+//   @override
+//   List<Object?> get props => [];
+// }
+
+// class SettingsInitial extends SettingsState {
+//   const SettingsInitial();
+// }
+
+// class SettingsLoading extends SettingsState {
+//   const SettingsLoading();
+// }
+
+// class SettingsLoaded extends SettingsState {
+//   final SettingsEntity settings;
+
+//   const SettingsLoaded({required this.settings});
+
+//   @override
+//   List<Object?> get props => [settings];
+// }
+
+// class SettingsError extends SettingsState {
+//   final String message;
+
+//   const SettingsError({required this.message});
+
+//   @override
+//   List<Object?> get props => [message];
+// }
+
+// class LoggedOut extends SettingsState {
+//   const LoggedOut();
+// }
+import 'package:equatable/equatable.dart';
 import '../../domain/entities/settings_entity.dart';
 
 abstract class SettingsState extends Equatable {
@@ -19,11 +58,29 @@ class SettingsLoading extends SettingsState {
 
 class SettingsLoaded extends SettingsState {
   final SettingsEntity settings;
+  final String language; // 🔴 'en' or 'ar'
+  final bool isDarkMode; // 🔴 true for dark, false for light
 
-  const SettingsLoaded({required this.settings});
+  const SettingsLoaded({
+    required this.settings,
+    this.language = 'en',
+    this.isDarkMode = false,
+  });
+
+  SettingsLoaded copyWith({
+    SettingsEntity? settings,
+    String? language,
+    bool? isDarkMode,
+  }) {
+    return SettingsLoaded(
+      settings: settings ?? this.settings,
+      language: language ?? this.language,
+      isDarkMode: isDarkMode ?? this.isDarkMode,
+    );
+  }
 
   @override
-  List<Object?> get props => [settings];
+  List<Object?> get props => [settings, language, isDarkMode];
 }
 
 class SettingsError extends SettingsState {

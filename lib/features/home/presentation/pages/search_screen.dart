@@ -276,7 +276,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 237, 238, 240),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // ✅ متكيف تلقائياً
       appBar: AppBar(
         backgroundColor:  const Color.fromARGB(255, 184, 156, 250),
         elevation: 0,

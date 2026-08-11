@@ -52,14 +52,14 @@ class _InterestsScreenState extends State<InterestsScreen> {
       },
       builder: (context, state) {
         return Scaffold(
-              backgroundColor: const Color(0xfffcfbfa),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               appBar: AppBar(
-                backgroundColor: const Color(0xfffcfbfa),
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 elevation: 0,
                 title: const Text(
                   'My Interests',
                   style: TextStyle(
-                    color: Color(0xff2d2d2d),
+                  
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -78,7 +78,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
       return Center(
         child: Text(
           state.message,
-          style: const TextStyle(color: Color(0xff2d2d2d)),
+        
         ),
       );
     }
@@ -104,7 +104,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xff2d2d2d),
+                     
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -175,13 +175,13 @@ class _InterestsScreenState extends State<InterestsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
               color: isSelected
-                  ? const Color(0xffd4c5f9).withValues(alpha: 0.25)
-                  : const Color(0xff2d2d2d).withValues(alpha: 0.04),
+                  ? const Color.fromARGB(255, 230, 75, 227).withValues(alpha: 0.25)
+                  : const Color.fromARGB(255, 245, 245, 217).withValues(alpha: 0.04),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: isSelected
                     ? const Color(0xff7c5cbf).withValues(alpha: 0.5)
-                    : const Color(0xff2d2d2d).withValues(alpha: 0.1),
+                    : const Color.fromARGB(255, 220, 101, 212).withValues(alpha: 0.1),
                 width: 1.5,
               ),
             ),
@@ -204,8 +204,8 @@ class _InterestsScreenState extends State<InterestsScreen> {
                     fontWeight:
                         isSelected ? FontWeight.w600 : FontWeight.w500,
                     color: isSelected
-                        ? const Color(0xff7c5cbf)
-                        : const Color(0xff2d2d2d).withValues(alpha: 0.7),
+                        ? const Color.fromARGB(255, 119, 10, 192)
+                        : const Color.fromARGB(255, 215, 40, 191).withValues(alpha: 0.7),
                   ),
                 ),
               ],

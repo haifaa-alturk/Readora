@@ -13,9 +13,9 @@ class IndividualChallengeCompletionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            backgroundColor: const Color(0xfffcfbfa),
+         backgroundColor: Theme.of(context).scaffoldBackgroundColor, 
             appBar: AppBar(
-              backgroundColor: const Color(0xfffcfbfa),
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor, 
               elevation: 0,
             ),
             body: Center(
@@ -30,7 +30,7 @@ class IndividualChallengeCompletionScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xff2d2d2d),
+                      
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -39,7 +39,7 @@ class IndividualChallengeCompletionScreen extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 15,
-                        color: const Color(0xff2d2d2d).withValues(alpha: 0.7),
+                      
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -48,7 +48,7 @@ class IndividualChallengeCompletionScreen extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 13,
-                        color: const Color(0xff2d2d2d).withValues(alpha: 0.6),
+                      
                       ),
                     ),
                     const SizedBox(height: 32),
@@ -76,7 +76,7 @@ class IndividualChallengeCompletionScreen extends StatelessWidget {
                       child: Text(
                         'Skip',
                         style: TextStyle(
-                          color: const Color(0xff2d2d2d).withValues(alpha: 0.6),
+                        
                         ),
                       ),
                     ),

@@ -2,6 +2,7 @@ import 'dart:io' show File;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:library_app1/core/language/app_localizations.dart';
 
 import 'package:library_app1/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:library_app1/features/profile/presentation/bloc/profile_state.dart';
@@ -18,6 +19,7 @@ import 'package:library_app1/features/points/presentation/bloc/points_state.dart
 import 'package:library_app1/features/points/presentation/screens/points_screen.dart'
     as points_feature;
 import 'package:library_app1/features/settings/presentation/bloc/settings_bloc.dart';
+import 'package:library_app1/features/settings/presentation/bloc/settings_state.dart';
 import 'package:library_app1/features/settings/presentation/screens/settings_screen.dart';
 import 'package:library_app1/features/wallet/presentation/bloc/wallet_bloc.dart';
 import 'package:library_app1/features/wallet/presentation/screens/wallet_screen.dart'
@@ -43,21 +45,23 @@ String _resolveProfileImageUrl(String path) {
 class ProfileMainScreen extends StatelessWidget {
   const ProfileMainScreen({super.key});
 
+  
+
   @override
   Widget build(BuildContext context) {
+    final settingsState = context.watch<SettingsBloc>().state;
+    final lang = settingsState is SettingsLoaded ? settingsState.language : 'en';
+
     return BlocBuilder<ProfileBloc, ProfileState>(
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: const Color(0xfffcfbfa),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
-            backgroundColor: const Color(0xfffcfbfa),
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             elevation: 0,
-            title: const Text(
-              'My Profile',
-              style: TextStyle(
-                color: Color(0xff2d2d2d),
-                fontWeight: FontWeight.w600,
-              ),
+            title: Text(
+              context.tr('my_profile', lang),
+              style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             actions: [
               if (state is ProfileLoaded)
@@ -75,13 +79,13 @@ class ProfileMainScreen extends StatelessWidget {
                 ),
             ],
           ),
-          body: _buildBody(state),
+          body: _buildBody(context, state, lang),
         );
       },
     );
   }
 
-  Widget _buildBody(ProfileState state) {
+  Widget _buildBody(BuildContext context, ProfileState state, String lang) {
     if (state is ProfileLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -89,31 +93,31 @@ class ProfileMainScreen extends StatelessWidget {
       return Center(
         child: Text(
           state.message,
-          style: const TextStyle(color: Color(0xff2d2d2d)),
+          style: const TextStyle(),
         ),
       );
     }
     if (state is ProfileLoaded) {
-      return _buildProfileContent(state.profile);
+      return _buildProfileContent(context, state.profile, lang);
     }
     if (state is ProfileUpdateSuccess) {
-      return _buildProfileContent(state.profile);
+      return _buildProfileContent(context, state.profile, lang);
     }
     return const Center(child: CircularProgressIndicator());
   }
 
-  Widget _buildProfileContent(ProfileEntity profile) {
+  Widget _buildProfileContent(BuildContext context, ProfileEntity profile, String lang) {
     return Center(
       child: SingleChildScrollView(
         child: Column(
           children: [
             _buildProfileHeader(profile),
             const SizedBox(height: 24),
-            _buildStatsCard(profile),
+            _buildStatsCard(profile, lang),
             const SizedBox(height: 20),
-            _buildQuickLinksSection(),
+          _buildQuickLinksSection(context, lang), // 👈 مرري context ه
             const SizedBox(height: 24),
-            _buildProfileEditButton(profile),
+            _buildProfileEditButton(profile, lang),
             const SizedBox(height: 24),
           ],
         ),
@@ -178,7 +182,7 @@ class ProfileMainScreen extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 36,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xff2d2d2d),
+    
                           ),
                         ),
                       ),
@@ -193,13 +197,13 @@ class ProfileMainScreen extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
-                color: Color(0xff2d2d2d),
+    
               ),
             ),
             const SizedBox(height: 4),
             Text(
               profile.email,
-              style: const TextStyle(fontSize: 14, color: Color(0xff2d2d2d)),
+              style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 10),
             _buildLevelBadge(ProfileEntity.levelForPoints(livePoints)),
@@ -259,14 +263,14 @@ class ProfileMainScreen extends StatelessWidget {
           width: diameter,
           height: diameter,
           child: const Center(
-            child: Icon(Icons.person, size: 42, color: Color(0xff2d2d2d)),
+            child: Icon(Icons.person, size: 42),
           ),
         );
       },
     );
   }
 
-  Widget _buildProfileEditButton(ProfileEntity profile) {
+  Widget _buildProfileEditButton(ProfileEntity profile, String lang) {
     return Builder(
       builder: (context) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -285,15 +289,15 @@ class ProfileMainScreen extends StatelessWidget {
             ),
             icon: const Icon(
               Icons.edit_outlined,
-              color: Color(0xff2d2d2d),
+    
               size: 20,
             ),
-            label: const Text(
-              'Edit Profile',
-              style: TextStyle(
+            label: Text(
+              context.tr('edit_profile', lang),
+              style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: Color(0xff2d2d2d),
+    
               ),
             ),
             style: OutlinedButton.styleFrom(
@@ -308,7 +312,7 @@ class ProfileMainScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsCard(ProfileEntity profile) {
+  Widget _buildStatsCard(ProfileEntity profile, String lang) {
     return Builder(
       builder: (context) {
         final pointsState = context.watch<PointsBloc>().state;
@@ -318,24 +322,21 @@ class ProfileMainScreen extends StatelessWidget {
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 16),
           elevation: 0,
-          color: const Color.fromARGB(
-            255,
-            236,
-            212,
-            186,
-          ).withValues(alpha: 0.3),
+          color: Theme.of(context).brightness == Brightness.dark
+              ? const Color.fromARGB(255, 82, 2, 89).withOpacity(0.5)
+              : const Color.fromARGB(255, 236, 212, 186).withOpacity(0.3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 👈 تم التصحيح هنا
               children: [
                 _statItem(
                   Icons.stars,
                   '$livePoints',
-                  'Points',
+                  context.tr('points', lang),
                   const Color.fromARGB(255, 182, 61, 93),
                   onTap: () => Navigator.push(
                     context,
@@ -350,7 +351,7 @@ class ProfileMainScreen extends StatelessWidget {
                 _statItem(
                   Icons.menu_book,
                   '${profile.booksCount}',
-                  'Books',
+                  context.tr('books', lang),
                   const Color.fromARGB(255, 87, 16, 128),
                   onTap: () => Navigator.push(
                     context,
@@ -364,8 +365,8 @@ class ProfileMainScreen extends StatelessWidget {
                 ),
                 _statItem(
                   Icons.account_balance_wallet,
-                  '${profile.walletBalance} SYP',
-                  'Wallet',
+                  '${profile.walletBalance} ${context.tr('syp', lang)}',
+                  context.tr('wallet', lang),
                   const Color.fromARGB(255, 54, 159, 47),
                   onTap: () => Navigator.push(
                     context,
@@ -377,9 +378,9 @@ class ProfileMainScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                ],
-              ),
+              ],
             ),
+          ),
         );
       },
     );
@@ -412,7 +413,7 @@ class ProfileMainScreen extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               label,
-              style: const TextStyle(fontSize: 13, color: Color(0xff2d2d2d)),
+              style: const TextStyle(fontSize: 13),
             ),
           ],
         ),
@@ -420,28 +421,28 @@ class ProfileMainScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickLinksSection() {
+ Widget _buildQuickLinksSection(BuildContext context, String lang) {
     final links = [
       _QuickLink(
-        'My Purchases',
+        context.tr('my_purchases', lang),
         Icons.receipt_long,
         const Color(0xff2d2d2d),
         const Color(0xffd4c5f9),
       ),
       _QuickLink(
-        'My Quotes',
+        context.tr('my_quotes', lang),
         Icons.format_quote,
         const Color(0xff2d2d2d),
         const Color.fromARGB(255, 234, 156, 215),
       ),
       _QuickLink(
-        'My Wins',
+        context.tr('my_wins', lang),
         Icons.emoji_events,
         const Color(0xff2d2d2d),
         const Color.fromARGB(255, 192, 238, 188),
       ),
       _QuickLink(
-        'My Interests',
+        context.tr('my_interests', lang),
         Icons.local_activity,
         const Color(0xff2d2d2d),
         const Color.fromARGB(255, 118, 173, 227),
@@ -456,11 +457,11 @@ class ProfileMainScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: 12),
             child: Text(
-              'Quick Links',
+              context.tr('quick_links', lang),
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
-                color: Color(0xff2d2d2d),
+    
               ),
             ),
           ),
@@ -482,22 +483,12 @@ class ProfileMainScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color.fromARGB(
-                        255,
-                        80,
-                        79,
-                        79,
-                      ).withValues(alpha: 0.55),
+                      color: const Color.fromARGB(255, 80, 79, 79).withValues(alpha: 0.55),
                       blurRadius: 6,
                       offset: const Offset(0, 4),
                     ),
                     BoxShadow(
-                      color: const Color.fromARGB(
-                        255,
-                        92,
-                        92,
-                        92,
-                      ).withValues(alpha: 0.35),
+                      color: const Color.fromARGB(255, 92, 92, 92).withValues(alpha: 0.35),
                       blurRadius: 1,
                       offset: const Offset(0, 1),
                     ),
@@ -685,16 +676,16 @@ class FullScreenImage extends StatelessWidget {
                         _resolveProfileImageUrl(imagePath!),
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) {
-                          return Column(
+                          return const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.broken_image_outlined,
                                 color: Colors.white70,
                                 size: 64,
                               ),
-                              const SizedBox(height: 12),
-                              const Text(
+                              SizedBox(height: 12),
+                              Text(
                                 'Image unavailable',
                                 style: TextStyle(
                                   color: Colors.white70,

@@ -42,14 +42,14 @@ class _PointsScreenState extends State<PointsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfffcfbfa),
+     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xfffcfbfa),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         title: const Text(
           'Points',
           style: TextStyle(
-            color: Color(0xff2d2d2d),
+           
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -70,7 +70,7 @@ class _PointsScreenState extends State<PointsScreen> {
             return Center(
               child: Text(
                 state.message,
-                style: const TextStyle(color: Color(0xff2d2d2d)),
+              
               ),
             );
           }
@@ -109,7 +109,7 @@ class _PointsScreenState extends State<PointsScreen> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Color(0xff2d2d2d),
+                
               ),
             ),
             TextButton(
@@ -128,7 +128,7 @@ class _PointsScreenState extends State<PointsScreen> {
                   padding: EdgeInsets.all(32),
                   child: Text(
                     'No points history yet',
-                    style: TextStyle(color: Color(0xff2d2d2d)),
+                   
                   ),
                 ),
               )
@@ -151,10 +151,10 @@ class _PointsScreenState extends State<PointsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xff2d2d2d).withValues(alpha: 0.04),
+        color: const Color.fromARGB(255, 92, 91, 91).withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xff2d2d2d).withValues(alpha: 0.1),
+          color: const Color.fromARGB(255, 103, 103, 103).withValues(alpha: 0.1),
         ),
       ),
       child: Row(
@@ -184,7 +184,7 @@ class _PointsScreenState extends State<PointsScreen> {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xff2d2d2d),
+                 
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -192,7 +192,7 @@ class _PointsScreenState extends State<PointsScreen> {
                   _formatDate(entry.date),
                   style: const TextStyle(
                     fontSize: 12,
-                    color: Color(0xff2d2d2d),
+                   
                   ),
                 ),
               ],

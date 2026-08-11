@@ -15,9 +15,9 @@ class IndividualChallengeResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            backgroundColor: const Color(0xfffcfbfa),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             appBar: AppBar(
-              backgroundColor: const Color(0xfffcfbfa),
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor, 
               elevation: 0,
               leading: IconButton(
                 icon: const Icon(Icons.close),
@@ -51,7 +51,7 @@ class IndividualChallengeResultScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xff2d2d2d),
+                         
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -60,7 +60,7 @@ class IndividualChallengeResultScreen extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 15,
-                          color: const Color(0xff2d2d2d).withValues(alpha: 0.7),
+                          
                         ),
                       ),
                     ] else ...[
@@ -70,7 +70,7 @@ class IndividualChallengeResultScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xff2d2d2d),
+                         
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -79,7 +79,7 @@ class IndividualChallengeResultScreen extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 15,
-                          color: Color(0xff2d2d2d),
+                          
                         ),
                       ),
                     ],

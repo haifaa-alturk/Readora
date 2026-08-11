@@ -64,14 +64,14 @@ class _GroupChallengeCountdownState extends State<GroupChallengeCountdown> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.timer, size: 16, color: Color(0xff2d2d2d)),
+          const Icon(Icons.timer, size: 16, ),
           const SizedBox(width: 6),
           Text(
             '${days}d ${hours}h ${minutes}m',
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: Color(0xff2d2d2d),
+              
             ),
           ),
         ],

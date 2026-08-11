@@ -27,14 +27,14 @@ class _RechargeWalletScreenState extends State<RechargeWalletScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfffcfbfa),
+     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xfffcfbfa),
+       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         title: const Text(
           'Recharge Wallet',
           style: TextStyle(
-            color: Color(0xff2d2d2d),
+           
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -51,7 +51,7 @@ class _RechargeWalletScreenState extends State<RechargeWalletScreen> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xff2d2d2d),
+                        
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -82,7 +82,7 @@ class _RechargeWalletScreenState extends State<RechargeWalletScreen> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xff2d2d2d),
+                       
                       ),
                     ),
                     const SizedBox(height: 12),

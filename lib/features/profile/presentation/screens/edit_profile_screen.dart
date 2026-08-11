@@ -70,14 +70,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
-            backgroundColor: const Color(0xfffcfbfa),
+         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             appBar: AppBar(
-              backgroundColor: const Color(0xfffcfbfa),
+           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               elevation: 0,
               title: const Text(
                 'Edit Profile',
-                style: TextStyle(color: Color(0xff2d2d2d)),
+              
               ),
             ),
             body: BlocConsumer<ProfileBloc, ProfileState>(
@@ -143,7 +144,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                           ),
                                           child: const Icon(
                                             Icons.camera_alt,
-                                            color: Color(0xff2d2d2d),
+                                          
                                             size: 20,
                                           ),
                                         ),
@@ -155,16 +156,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               const SizedBox(height: 24),
                               TextFormField(
                                 controller: _nameController,
-                                style: const TextStyle(
-                                  color: Color(0xff2d2d2d),
-                                ),
+                               
                                 decoration: InputDecoration(
                                   labelText: 'Name',
                                   labelStyle: const TextStyle(
-                                    color: Color(0xff2d2d2d),
+                                 
                                   ),
                                   filled: true,
-                                  fillColor: Colors.white,
+                                  fillColor:
+                                   const Color.fromARGB(120, 250, 219, 251),
+                              
+          
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
                                     borderSide: BorderSide(
@@ -200,16 +202,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               TextFormField(
                                 controller: _emailController,
                                 style: const TextStyle(
-                                  color: Color(0xff2d2d2d),
+                                 
                                 ),
                                 keyboardType: TextInputType.emailAddress,
                                 decoration: InputDecoration(
                                   labelText: 'Email',
                                   labelStyle: const TextStyle(
-                                    color: Color(0xff2d2d2d),
+                                  
                                   ),
                                   filled: true,
-                                  fillColor: Colors.white,
+                                  fillColor:    const Color.fromARGB(120, 250, 219, 251),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
                                     borderSide: BorderSide(
@@ -221,9 +223,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
                                     borderSide: BorderSide(
-                                      color: const Color(
-                                        0xff2d2d2d,
-                                      ).withValues(alpha: 0.12),
+                                      color: const Color.fromARGB(255, 45, 45, 45).withValues(alpha: 0.12),
                                     ),
                                   ),
                                   focusedBorder: OutlineInputBorder(
@@ -311,7 +311,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             style: const TextStyle(
               fontSize: 40,
               fontWeight: FontWeight.bold,
-              color: Color(0xff2d2d2d),
+             
             ),
           ),
         ),
@@ -340,7 +340,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             child: Icon(
               Icons.person,
               size: 42,
-              color: Color(0xff2d2d2d),
+             
             ),
           ),
         );

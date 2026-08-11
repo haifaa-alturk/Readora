@@ -43,14 +43,14 @@ class _WalletScreenState extends State<WalletScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfffcfbfa),
+     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xfffcfbfa),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         title: const Text(
           'My Wallet',
           style: TextStyle(
-            color: Color(0xff2d2d2d),
+          
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -82,7 +82,7 @@ class _WalletScreenState extends State<WalletScreen> {
             return Center(
               child: Text(
                 state.message,
-                style: const TextStyle(color: Color(0xff2d2d2d)),
+           
               ),
             );
           }
@@ -123,7 +123,7 @@ class _WalletScreenState extends State<WalletScreen> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Color(0xff2d2d2d),
+               
               ),
             ),
             TextButton(
@@ -142,7 +142,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   padding: EdgeInsets.all(32),
                   child: Text(
                     'No transactions yet',
-                    style: TextStyle(color: Color(0xff2d2d2d)),
+                   
                   ),
                 ),
               )
@@ -164,10 +164,10 @@ class _WalletScreenState extends State<WalletScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xff2d2d2d).withValues(alpha: 0.04),
+        color: const Color.fromARGB(127, 148, 144, 144).withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xff2d2d2d).withValues(alpha: 0.1),
+          color: const Color.fromARGB(87, 179, 174, 174).withValues(alpha: 0.1),
         ),
       ),
       child: Row(
@@ -197,7 +197,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xff2d2d2d),
+                    
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -205,8 +205,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   _formatDate(tx.date),
                   style: const TextStyle(
                     fontSize: 12,
-                    color: Color(0xff2d2d2d),
-                  ),
+                                     ),
                 ),
               ],
             ),

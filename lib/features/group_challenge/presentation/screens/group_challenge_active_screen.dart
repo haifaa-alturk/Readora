@@ -19,14 +19,14 @@ class GroupChallengeActiveScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            backgroundColor: const Color(0xfffcfbfa),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor, 
             appBar: AppBar(
-              backgroundColor: const Color(0xfffcfbfa),
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor, 
               elevation: 0,
               title: const Text(
                 'The Challenge Has Started!',
                 style: TextStyle(
-                  color: Color(0xff2d2d2d),
+                 
                   fontWeight: FontWeight.w600,
                   fontSize: 16,
                 ),
@@ -47,7 +47,7 @@ class GroupChallengeActiveScreen extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xff2d2d2d),
+                          
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -55,7 +55,7 @@ class GroupChallengeActiveScreen extends StatelessWidget {
                         challenge.description,
                         style: TextStyle(
                           fontSize: 14,
-                          color: const Color(0xff2d2d2d).withValues(alpha: 0.7),
+                          
                         ),
                       ),
                     ],
@@ -80,7 +80,7 @@ class GroupChallengeActiveScreen extends StatelessWidget {
                     'Everyone who successfully completes this challenge will receive ${challenge.bonusPoints} bonus points and a commemorative achievement.\nWhy not become one of the winners?',
                     style: TextStyle(
                       fontSize: 14,
-                      color: const Color(0xff2d2d2d).withValues(alpha: 0.7),
+                    
                     ),
                   ),
                 ),
@@ -113,14 +113,14 @@ class GroupChallengeActiveScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 18, color: const Color(0xff2d2d2d).withValues(alpha: 0.6)),
+              Icon(icon, size: 18,),
               const SizedBox(width: 8),
               Text(
                 heading,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xff2d2d2d).withValues(alpha: 0.6),
+                 
                 ),
               ),
             ],
@@ -153,7 +153,7 @@ class GroupChallengeActiveScreen extends StatelessWidget {
             'A book only counts once you pass its Individual Challenge quiz.',
             style: TextStyle(
               fontSize: 12,
-              color: const Color(0xff2d2d2d).withValues(alpha: 0.6),
+             
             ),
           ),
         ],
@@ -173,7 +173,7 @@ class GroupChallengeActiveScreen extends StatelessWidget {
               label,
               style: const TextStyle(
                 fontSize: 14,
-                color: Color(0xff2d2d2d),
+               
               ),
             ),
             Text(
@@ -181,7 +181,7 @@ class GroupChallengeActiveScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xff2d2d2d).withValues(alpha: 0.7),
+               
               ),
             ),
           ],

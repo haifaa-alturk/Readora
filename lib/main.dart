@@ -100,6 +100,7 @@ import 'package:library_app1/features/interests/data/datasources/interests_remot
 import 'package:library_app1/features/interests/data/repositories/interests_repository_impl.dart';
 import 'package:library_app1/features/interests/domain/repositories/interests_repository_interface.dart';
 import 'package:library_app1/features/interests/presentation/bloc/interests_bloc.dart';
+import 'package:library_app1/features/settings/presentation/bloc/settings_state.dart';
 import 'package:library_app1/features/wallet/data/datasources/wallet_remote_datasource.dart';
 import 'package:library_app1/features/wallet/data/repositories/wallet_repository_impl.dart';
 import 'package:library_app1/features/wallet/domain/repositories/wallet_repository_interface.dart';
@@ -134,6 +135,9 @@ import 'package:library_app1/features/individual_challenge/data/datasources/indi
 import 'package:library_app1/features/individual_challenge/data/repositories/individual_challenge_repository_impl.dart';
 import 'package:library_app1/features/individual_challenge/domain/repositories/individual_challenge_repository_interface.dart';
 import 'package:library_app1/onboarding/splash_screen.dart';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
   final apiClient = ApiClient();
@@ -287,14 +291,50 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Library App',
-      theme: ThemeData(
-        primarySwatch: Colors.amber,
-        brightness: Brightness.dark, // لأن تصميمك Glassmorphism غامق
-      ),
+    // return MaterialApp(
+    //   debugShowCheckedModeBanner: false,
+    //   title: 'Library App',
+    //   theme: ThemeData(
+    //     primarySwatch: Colors.amber,
+    //     brightness: Brightness.dark, // لأن تصميمك Glassmorphism غامق
+    //   ),
+    return BlocBuilder<SettingsBloc, SettingsState>(
+      builder: (context, state) {
+        bool isDarkMode = false;
+        String language = 'en';
+
+        // الاستماع لحالة الإعدادات
+        if (state is SettingsLoaded) {
+          isDarkMode = state.isDarkMode;
+          language = state.language;
+        }
+
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Readora App',
+
+          // 1. التحكم بالوضع الداكن والفاتح
+          themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+          theme: ThemeData(
+            brightness: Brightness.light,
+            primaryColor: const Color(0xffe61b72),
+            scaffoldBackgroundColor: const Color(0xfffcfbfa),
+          ),
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            scaffoldBackgroundColor: const Color(0xFF121212),
+          ),
+
+          // 2. التحكم باتجاه الواجهة (RTL للعربية و LTR للإنجليزية)
+          builder: (context, child) {
+            return Directionality(
+              textDirection: language == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+              child: child!,
+            );
+          },
       home: SplashScreen(),
+    );
+      },
     );
   }
 }
