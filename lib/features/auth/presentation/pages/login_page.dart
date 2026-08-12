@@ -292,7 +292,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Container(
                 decoration: const BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage("assets/images/MrDuck.jpg"),
+                    image: AssetImage("assets/images/MrDuck2.jpg"),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -427,7 +427,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       child: const Text(
                                         "Sign Up",
                                         style: TextStyle(
-                                          color: Colors.amber,
+                                          color: Color.fromARGB(255, 106, 12, 108),
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -474,8 +474,8 @@ class _LoginScreenState extends State<LoginScreen> {
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
-            Color.fromARGB(255, 222, 173, 12),
-            Color.fromARGB(255, 212, 196, 124),
+            Color.fromARGB(255, 244, 243, 241),
+            Color.fromARGB(255, 230, 156, 236),
           ],
         ),
         borderRadius: BorderRadius.circular(15),

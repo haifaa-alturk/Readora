@@ -298,7 +298,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             width: double.infinity,
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [Color(0xFFf7971e), Color(0xFFffd200)],
+                                colors: [Color.fromARGB(255, 128, 37, 158), Color.fromARGB(255, 232, 162, 225)],
                               ),
                               borderRadius: BorderRadius.circular(15),
                             ),

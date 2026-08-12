@@ -20,21 +20,24 @@ final List<Map<String, dynamic>> data = [
     "title": "YOUR DIGITAL LIBRARY",
     "desc":"Access your reading list on any device.",
    // "color": Color.fromARGB(255, 239, 247, 208),
-   "color": Color(0xFFC8E6C9)
+  //  "color": Color(0xFFC8E6C9)
+  "color": Color.fromARGB(255, 230, 200, 219)
   },
   {
   "image": "assets/images/on2.jpg",
     "title": "COMPETATION SYSTEM",
     "desc": "More excitement and reading to win competitions",
     // "color": Color(0xFFD6EAF8),
-     "color": Color(0xFFFFF9C4)
+    //  "color": Color(0xFFFFF9C4)
+   "color": Color.fromARGB(255, 230, 200, 219)
   },
   {
       "image": "assets/images/on3.jpg",
     "title": "CHOOSE A BOOK",
     "desc": "Select and Borrow your book",
     // "color": Color.fromARGB(255, 208, 231, 198),
-     "color": Color(0xFFE1F5FE)
+    //  "color": Color(0xFFE1F5FE)
+    "color": Color.fromARGB(255, 230, 200, 219)
   }
 ];
 
@@ -75,7 +78,7 @@ Align(
     child: Text(
       "Skip",
       style: TextStyle(
-        color: Color(0xFF463716), // متناسق مع لون الوصف
+        color: Color.fromARGB(255, 140, 0, 168), // متناسق مع لون الوصف
         fontWeight: FontWeight.bold,
       ),
     ),
@@ -110,7 +113,7 @@ Container(
     // إضافة ظل خفيف لإبراز الصورة
     boxShadow: [
       BoxShadow(
-        color: Colors.black.withOpacity(0.5),
+        color: const Color.fromARGB(255, 79, 22, 78).withOpacity(0.5),
         blurRadius: 20,
         spreadRadius: 6,
       ),
@@ -126,7 +129,7 @@ Text(
   data[i]['title']!,
   style: TextStyle(
     fontSize: 24, // أكبر قليلاً
-    color: const Color(0xFF2F3C43),
+    color: const Color.fromARGB(255, 57, 1, 61),
     fontWeight: FontWeight.w900, // أثقل
     letterSpacing: 1.5, // تباعد عصري
   ),
@@ -139,7 +142,7 @@ Text(
                           data[i]['desc']!,
                           style: TextStyle(
                             fontSize: 16,
-                            color: const Color.fromARGB(255, 70, 55, 22),
+                            color: const Color.fromARGB(255, 86, 25, 99),
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -179,8 +182,8 @@ Text(
                     
                     onPressed: nextPage,
                    style: ElevatedButton.styleFrom(
-  backgroundColor: const Color(0xFF7CB9B9), // لون ثيم Readora
-  foregroundColor: Colors.white, // نص أبيض
+  backgroundColor: const Color.fromARGB(169, 254, 253, 254), // لون ثيم Readora
+  foregroundColor: const Color.fromARGB(255, 216, 5, 199), // نص أبيض
   padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
   elevation: 5, // ظل خفيف للزر
   shape: RoundedRectangleBorder(
