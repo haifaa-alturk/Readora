@@ -28,7 +28,8 @@ import 'package:library_app1/features/wins/presentation/bloc/wins_bloc.dart';
 import 'package:library_app1/features/wins/presentation/screens/wins_screen.dart';
 import 'package:library_app1/features/quotes/presentation/screens/my_quotes_screen.dart';
 
-const String _profileImageBaseUrl = 'http://127.0.0.1:8000/storage/';
+// const String _profileImageBaseUrl = 'http://127.0.0.1:8000/storage/';
+const String _profileImageBaseUrl = 'http://192.168.90.2:8000/storage/';
 
 bool _isLocalImagePath(String path) {
   return path.startsWith('/') ||

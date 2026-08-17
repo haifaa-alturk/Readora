@@ -221,7 +221,8 @@ class _BookCardState extends State<BookCard> {
     String imageUrl = (widget.book.coverImage != null && widget.book.coverImage!.isNotEmpty)
         ? (widget.book.coverImage!.startsWith('http')
             ? widget.book.coverImage!
-            : "http://127.0.0.1:8000/storage/${widget.book.coverImage}")
+            // : "http://127.0.0.1:8000/storage/${widget.book.coverImage}")
+              : "http://192.168.90.2:8000/storage/${widget.book.coverImage}")
         : "";
 
     return GestureDetector(

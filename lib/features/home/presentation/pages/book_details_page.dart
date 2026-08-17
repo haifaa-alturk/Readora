@@ -509,7 +509,8 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
                       child: Image.network(
-                        "http://127.0.0.1:8000/storage/${book.coverImage}",
+                        // "http://127.0.0.1:8000/storage/${book.coverImage}",
+                          "http://192.168.90.2:8000/storage/${book.coverImage}",
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) {
                           return const Center(

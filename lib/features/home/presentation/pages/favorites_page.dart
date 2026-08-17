@@ -73,7 +73,8 @@ class FavoritesPage extends StatelessWidget {
                 String imageUrl = (book.coverImage != null && book.coverImage!.isNotEmpty)
                     ? (book.coverImage!.startsWith('http')
                         ? book.coverImage!
-                        : "http://127.0.0.1:8000/storage/${book.coverImage}")
+                        // : "http://127.0.0.1:8000/storage/${book.coverImage}")
+                        : "http://192.168.90.2:8000/storage/${book.coverImage}")
                     : "";
 
                 // تجهيز اسم المؤلف

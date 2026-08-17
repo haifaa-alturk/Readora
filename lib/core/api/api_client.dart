@@ -10,7 +10,8 @@ class ApiClient {
       : dio = Dio(
           BaseOptions(
            
-            baseUrl: "http://127.0.0.1:8000/api/",
+            // baseUrl: "http://127.0.0.1:8000/api/",
+baseUrl: "http://192.168.90.2:8000/api/",
             headers: {
               "Accept": "application/json",
               "Content-Type": "application/json",

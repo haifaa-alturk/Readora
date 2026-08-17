@@ -5,16 +5,16 @@ import 'package:library_app1/features/home/domain/entities/book.dart';
 import '../../data/models/book_model.dart';
 
 class FavoriteRemoteDataSource {
-  final String baseUrl = "http://127.0.0.1:8000/api";
-
-  // 🔑 دالة جلب التوكين المحفوظ تلقائياً
+  // final String baseUrl = "http://127.0.0.1:8000/api";
+ final String baseUrl = "http://192.168.90.2:8000/api";
+  //  دالة جلب التوكين المحفوظ تلقائياً
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
     // تأكدي من الاسم الذي حفظتي به التوكين عند تسجيل الدخول (مثلاً: 'token' أو 'auth_token' أو 'ACCESS_TOKEN')
     return prefs.getString('token') ?? prefs.getString('auth_token');
   }
 
-  // 📋 تجهيز الـ Headers مع التوكين
+  //  تجهيز الـ Headers مع التوكين
   Future<Map<String, String>> _getHeaders() async {
     final token = await _getToken();
     return {
@@ -24,7 +24,7 @@ class FavoriteRemoteDataSource {
     };
   }
 
-  // 1️⃣ جلب قائمة المفضلة
+  // جلب قائمة المفضلة
   Future<List<Book>> getFavorites([String? unusedToken]) async {
     final headers = await _getHeaders();
     final response = await http.get(
@@ -43,7 +43,7 @@ print("Response Body: ${response.body}");
     }
   }
 
-  // 2️⃣ إضافة كتاب للمفضلة
+  //  إضافة كتاب للمفضلة
   Future<void> addToFavorite(int bookId, [String? unusedToken]) async {
     final headers = await _getHeaders();
     final response = await http.post(
@@ -56,7 +56,7 @@ print("Response Body: ${response.body}");
     }
   }
 
-  // 3️⃣ حذف كتاب من المفضلة
+  //  حذف كتاب من المفضلة
   Future<void> removeFromFavorite(int bookId, [String? unusedToken]) async {
     final headers = await _getHeaders();
     final response = await http.delete(

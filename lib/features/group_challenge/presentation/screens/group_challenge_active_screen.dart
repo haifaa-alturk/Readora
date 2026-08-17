@@ -94,7 +94,7 @@ class GroupChallengeActiveScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCard({
+ Widget _buildInfoCard({
     required Color color,
     required IconData icon,
     required String heading,
@@ -113,14 +113,16 @@ class GroupChallengeActiveScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 18,),
+              Icon(icon, size: 18),
               const SizedBox(width: 8),
-              Text(
-                heading,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                 
+              // 👈 تغليف النص بـ Expanded لمنع الـ Overflow
+              Expanded(
+                child: Text(
+                  heading,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -169,19 +171,21 @@ class GroupChallengeActiveScreen extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 14,
-               
+            // 👈 تغليف النص بـ Expanded
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 14,
+                ),
               ),
             ),
+            const SizedBox(width: 8),
             Text(
               '$current/$total',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-               
               ),
             ),
           ],

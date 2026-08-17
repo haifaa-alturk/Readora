@@ -291,19 +291,52 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // return MaterialApp(
-    //   debugShowCheckedModeBanner: false,
-    //   title: 'Library App',
-    //   theme: ThemeData(
-    //     primarySwatch: Colors.amber,
-    //     brightness: Brightness.dark, // لأن تصميمك Glassmorphism غامق
-    //   ),
+  
+    // return BlocBuilder<SettingsBloc, SettingsState>(
+    //   builder: (context, state) {
+    //     bool isDarkMode = false;
+    //     String language = 'en';
+
+    //     // الاستماع لحالة الإعدادات
+    //     if (state is SettingsLoaded) {
+    //       isDarkMode = state.isDarkMode;
+    //       language = state.language;
+    //     }
+
+    //     return MaterialApp(
+    //       debugShowCheckedModeBanner: false,
+    //       title: 'Readora App',
+
+    //       // 1. التحكم بالوضع الداكن والفاتح
+    //       themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+    //       theme: ThemeData(
+    //         brightness: Brightness.light,
+    //         primaryColor: const Color(0xffe61b72),
+    //         scaffoldBackgroundColor: const Color(0xfffcfbfa),
+    //       ),
+    //       darkTheme: ThemeData(
+    //         brightness: Brightness.dark,
+    //         scaffoldBackgroundColor: const Color(0xFF121212),
+    //       ),
+
+    //       // 2. التحكم باتجاه الواجهة (RTL للعربية و LTR للإنجليزية)
+    //       builder: (context, child) {
+    //         return Directionality(
+    //           textDirection: language == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+    //           child: child!,
+    //         );
+    //       },
+    //   home: SplashScreen(),
+    // );
+    //   },
+    // );
     return BlocBuilder<SettingsBloc, SettingsState>(
       builder: (context, state) {
+        // 💡 5. القيم الافتراضية في حال لم يتم التحميل بعد
         bool isDarkMode = false;
         String language = 'en';
 
-        // الاستماع لحالة الإعدادات
+        // 💡 6. الاستماع لحالة الإعدادات المحملة (التي أصبحت تقرأ من prefs في الـ Bloc)
         if (state is SettingsLoaded) {
           isDarkMode = state.isDarkMode;
           language = state.language;
@@ -332,8 +365,8 @@ class MyApp extends StatelessWidget {
               child: child!,
             );
           },
-      home: SplashScreen(),
-    );
+          home: SplashScreen(),
+        );
       },
     );
   }

@@ -10,7 +10,7 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
 
   FavoriteBloc(this.dataSource) : super(FavoriteInitial()) {
     
-    // 1️⃣ جلب قائمة المفضلة
+    // جلب قائمة المفضلة
     on<FetchFavoritesEvent>((event, emit) async {
       emit(FavoriteLoading());
       try {
@@ -22,7 +22,7 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
       }
     });
 
-    // 2️⃣ إضافة أو حذف كتاب (Toggle)
+    //  إضافة أو حذف كتاب (Toggle)
     on<ToggleFavoriteEvent>((event, emit) async {
       try {
         if (event.isCurrentlyFavorite) {
