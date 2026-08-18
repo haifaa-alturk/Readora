@@ -1,197 +1,5 @@
 
-// import 'package:flutter/material.dart';
-// import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:library_app1/features/home/presentation/bloc/Search_Bloc/search_bloc.dart';
-// import 'package:library_app1/features/home/presentation/bloc/Search_Bloc/search_event.dart';
 
-// import 'package:library_app1/features/home/presentation/bloc/Search_Bloc/search_statet.dart';
-// import '../widgets/book_card.dart';
-// import 'filter_bottom_sheet.dart';
-
-// class SearchScreen extends StatefulWidget {
-//   const SearchScreen({super.key});
-
-//   @override
-//   State<SearchScreen> createState() => _SearchScreenState();
-// }
-
-// class _SearchScreenState extends State<SearchScreen> {
-//   final TextEditingController _searchController = TextEditingController();
-
-//   // متغيرات الفلترة
-//   int? selectedCategoryId;
-//   String? authorName;
-//   String? selectedLanguage;
-//   int? pagesFrom;
-//   int? pagesTo;
-//   double? priceFrom;
-//   double? priceTo;
-
-//   // قائمة تصنيفات تجريبية (يمكنكِ تعبئتها ديناميكياً من الـ Category Bloc لاحقاً)
-//   final List<Map<String, dynamic>> _categories = [
-  //   {'id': null, 'name': 'الكل'},
-  //   {'id': 1, 'name': 'literature'},
-  //   {'id': 2, 'name': 'horror'},
-  //   {'id': 3, 'name': 'history'},
-  //   {'id': 4, 'name': 'poetry '},
-  //  {'id': 4, 'name': 'science'},
-  //   {'id': 4, 'name':'fantasy'},
-  //   {'id': 4, 'name':'adventure'},
-  //       //    {'id': 4, 'name': 'self_development'},
-  //       //    {'id': 4, 'name':'business'},
-  //       //    {'id': 4, 'name':'marketing'},
-  //       //    {'id': 4, 'name':'finance'},
-  //       //    {'id': 4, 'name':'programming'},
-  //       //    {'id': 4, 'name':'data_science'},
-  //       //    {'id': 4, 'name':'physics'},
-  //       //    {'id': 4, 'name':'chemistry'},
-  //       //    {'id': 4, 'name':'biology'},
-  //       //    {'id': 4, 'name':'astronomy'},
-  //       //    {'id': 4, 'name':'education'},
-  //       //    {'id': 4, 'name':'art'},
-  //       //    {'id': 4, 'name':'cooking'},
-  //       //    {'id': 4, 'name':'health'},
-  //       //    {'id': 4, 'name':'children'},
-  //       // //  'statistics','academic_books','comics','sports','parenting','family_relationships'
-  // ];
-
-//   void _dispatchSearch() {
-//     context.read<SearchBloc>().add(
-//       ExecuteBookSearch(
-//         bookName: _searchController.text,
-//         authorName: authorName, // تفعيل إرسال اسم المؤلف
-//         categoryId: selectedCategoryId, // تفعيل إرسال التصنيف المطلوب
-//         language: selectedLanguage,
-//         numberOfPagesFrom: pagesFrom,
-//         numberOfPagesTo: pagesTo,
-//         sellingPriceFrom: priceFrom,
-//         sellingPriceTo: priceTo,
-//       ),
-//     );
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: const Color.fromARGB(172, 181, 225, 239),
-//       appBar: AppBar(
-//         backgroundColor: const Color.fromARGB(112, 29, 105, 133),
-//         elevation: 0,
-//         title: TextField(
-//           controller: _searchController,
-//           autofocus: true,
-//           style: const TextStyle(color: Color.fromARGB(255, 240, 230, 230)),
-//           decoration: const InputDecoration(
-//             hintText: "ابحث باسم الكتاب...",
-//             hintStyle: TextStyle(color: Color.fromARGB(153, 16, 14, 14)),
-//             border: InputBorder.none,
-//           ),
-//           onChanged: (value) => _dispatchSearch(),
-//         ),
-//         actions: [
-//           IconButton(
-//             icon: const Icon(Icons.tune, color: Colors.white),
-//             onPressed: () async {
-//               final result = await showModalBottomSheet<Map<String, dynamic>>(
-//                 context: context,
-//                 isScrollControlled: true,
-//                 backgroundColor: Colors.transparent,
-//                 builder: (_) => const FilterBottomSheet(),
-//               );
-
-//               if (result != null) {
-//                 setState(() {
-//                   authorName = result['author_name'];
-//                   selectedLanguage = result['language'];
-//                   pagesFrom = result['pages_from'];
-//                   pagesTo = result['pages_to'];
-//                   priceFrom = result['price_from'];
-//                   priceTo = result['price_to'];
-//                 });
-//                 _dispatchSearch();
-//               }
-//             },
-//           ),
-//         ],
-//       ),
-//       body: Column(
-//         children: [
-//           // 🏷️ تحسين التصميم: قائمة التصنيفات الأفقية الذكية
-//           Container(
-//             height: 60,
-//             padding: const EdgeInsets.symmetric(vertical: 10),
-//             child: ListView.builder(
-//               scrollDirection: Axis.horizontal,
-//               itemCount: _categories.length,
-//               padding: const EdgeInsets.symmetric(horizontal: 12),
-//               itemBuilder: (context, index) {
-//                 final cat = _categories[index];
-//                 final isSelected = selectedCategoryId == cat['id'];
-//                 return Padding(
-//                   padding: const EdgeInsets.only(left: 8.0),
-//                   child: ChoiceChip(
-//                     label: Text(cat['name']),
-//                     selected: isSelected,
-//                     selectedColor: const Color.fromARGB(255, 31, 69, 91),
-//                     backgroundColor: const Color.fromARGB(255, 173, 199, 255),
-//                     labelStyle: TextStyle(
-//                       color: isSelected ? const Color.fromARGB(255, 27, 23, 23) : Colors.white70,
-//                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-//                     ),
-//                     onSelected: (bool selected) {
-//                       setState(() {
-//                         selectedCategoryId = selected ? cat['id'] : null;
-//                       });
-//                       _dispatchSearch(); // تحديث البحث فوراً عند تغيير التصنيف
-//                     },
-//                   ),
-//                 );
-//               },
-//             ),
-//           ),
-          
-//           // نتائج البحث
-//           Expanded(
-//             child: BlocBuilder<SearchBloc, SearchState>(
-//               builder: (context, state) {
-//                 if (state is SearchLoading) {
-//                   return const Center(child: CircularProgressIndicator(color: Colors.white));
-//                 } else if (state is SearchSuccess) {
-//                   final books = state.books;
-//                   if (books.isEmpty) {
-//                     return const Center(
-//                       child: Text("لم نجد أي كتب تطابق بحثكِ", style: TextStyle(color: Colors.white70)),
-//                     );
-//                   }
-//                   return Padding(
-//                     padding: const EdgeInsets.all(12.0),
-//                     child: GridView.builder(
-//                       itemCount: books.length,
-//                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-//                         crossAxisCount: 2,
-//                         mainAxisSpacing: 12,
-//                         crossAxisSpacing: 12,
-//                         childAspectRatio: 0.65,
-//                       ),
-//                       itemBuilder: (context, index) => BookCard(book: books[index]),
-//                     ),
-//                   );
-//                 } else if (state is SearchFailure) {
-//                   return Center(
-//                     child: Text(state.errorMessage, style: const TextStyle(color: Colors.redAccent)),
-//                   );
-//                 }
-//                 return const Center(
-//                   child: Text("اكتب اسم الكتاب أو استخدم الفلاتر لبدء البحث", style: TextStyle(color: Colors.white60)),
-//                 );
-//               },
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:library_app1/features/home/presentation/bloc/Search_Bloc/search_bloc.dart';
@@ -211,6 +19,7 @@ class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   int? selectedCategoryId;
+  int? selectedAuthorId;
   String? authorName;
   String? selectedLanguage;
   int? pagesFrom;
@@ -291,36 +100,45 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           onChanged: (value) => _dispatchSearch(),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.tune, color: Colors.white),
-            onPressed: () async {
-              final result = await showModalBottomSheet<Map<String, dynamic>>(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (_) => const FilterBottomSheet(),
-              );
+     actions: [
+  IconButton(
+    icon: const Icon(Icons.tune, color: Colors.white),
+    onPressed: () async {
+      final result = await showModalBottomSheet<Map<String, dynamic>>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => FilterBottomSheet(
+          initialAuthorName: authorName,
+          initialLanguage: selectedLanguage,
+          initialPagesFrom: pagesFrom,
+          initialPagesTo: pagesTo,
+        ),
+      );
 
-             
-              if (result != null) {
-                setState(() {
-                  authorName = result['author_name'];
-                  selectedLanguage = result['language'];
-                  pagesFrom = result['pages_from'];
-                  pagesTo = result['pages_to'];
-                  
-                  // ربط حقول أسعار البيع والإيجار بشكل منفصل تماماً
-                  sellingPriceFrom = result['selling_price_from'];
-                  sellingPriceTo = result['selling_price_to'];
-                  rentalPriceFrom = result['rental_price_from'];
-                  rentalPriceTo = result['rental_price_to'];
-                });
-                _dispatchSearch();
-              }
-            },
-          ),
-        ],
+      if (result != null) {
+        // 1. في حال الضغط على زر البحث داخل الـ BottomSheet
+        setState(() {
+          selectedAuthorId = result['author_id'];
+          authorName = result['author_name'];
+          selectedLanguage = result['language'];
+          pagesFrom = result['pages_from'];
+          pagesTo = result['pages_to'];
+          sellingPriceFrom = result['selling_price_from'];
+          sellingPriceTo = result['selling_price_to'];
+          rentalPriceFrom = result['rental_price_from'];
+          rentalPriceTo = result['rental_price_to'];
+        });
+
+        // إرسال حدث البحث بالبيانات المحددة الجديدة
+        _dispatchSearch();
+      } else {
+        // 2. في حال إغلاق الـ Sheet دون التعديل (لتحديث الـ Bloc وإلغاء حالة اقتراحات المؤلفين)
+        _dispatchSearch();
+      }
+    },
+  ),
+],
       ),
       body: Column(
         children: [

@@ -93,6 +93,7 @@ import 'package:library_app1/features/home/domain/repositories/home_repository.d
 import 'package:library_app1/features/home/presentation/bloc/Favorite_Bloc/favorite_bloc.dart';
 import 'package:library_app1/features/home/presentation/bloc/Home_Bloc/home_bloc.dart';
 import 'package:library_app1/features/home/presentation/bloc/Home_Bloc/home_event.dart';
+import 'package:library_app1/features/home/presentation/bloc/Search_Bloc/search_bloc.dart';
 import 'package:library_app1/features/quotes/data/datasources/quotes_remote_datasource.dart';
 import 'package:library_app1/features/quotes/data/repositories/quotes_repository_impl.dart';
 import 'package:library_app1/features/quotes/presentation/bloc/quotes_bloc.dart';
@@ -281,6 +282,10 @@ void main() {
               repository: groupChallengeRepository,
             ),
           ),
+       
+    BlocProvider<SearchBloc>(
+      create: (context) => SearchBloc(),
+    ),
         ],
         child: MyApp(),
       ),

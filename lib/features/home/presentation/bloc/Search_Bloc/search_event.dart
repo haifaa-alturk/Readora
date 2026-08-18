@@ -49,3 +49,13 @@ class ExecuteBookSearch extends SearchEvent {
         rentalPriceTo,
       ];
 }
+
+// أضيفي هذا الحدث في نهاية ملف search_event.dart
+class FetchAuthorSuggestions extends SearchEvent {
+  final String query;
+
+  const FetchAuthorSuggestions(this.query);
+
+  @override
+  List<Object?> get props => [query];
+}

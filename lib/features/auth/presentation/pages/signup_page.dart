@@ -587,12 +587,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               if (state is AuthLoading) return const CircularProgressIndicator(color: Color.fromARGB(255, 206, 125, 239));
                               return ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color.fromARGB(246, 241, 241, 239), 
+                                  backgroundColor: const Color.fromARGB(246, 244, 216, 240), 
                                   minimumSize: const Size(double.infinity, 48),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 ),
                                 onPressed: _onRegisterPressed,
-                                child: const Text("Register", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16)),
+                                child: const Text("Sign up", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16)),
                               );
                             },
                           ),
