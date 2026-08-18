@@ -47,7 +47,9 @@ class TopRatedCard extends StatelessWidget {
     // 🛡️ معالجة ذكية للرابط لمنع التعليق
     String imageUrl = book.coverImage != null && book.coverImage!.startsWith('http')
         ? book.coverImage!
-        : "http://127.0.0.1:8000/storage/${book.coverImage}";
+        // : "http://127.0.0.1:8000/storage/${book.coverImage}";
+         : "http://192.168.90.2:8000/storage/${book.coverImage}";
+ 
 
     return Card(
       color: const Color.fromARGB(255, 240, 204, 218),

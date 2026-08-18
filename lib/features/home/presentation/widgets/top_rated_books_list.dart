@@ -4,7 +4,7 @@ import 'package:library_app1/features/home/domain/entities/book.dart';
 import 'package:library_app1/features/home/presentation/pages/book_details_page.dart';
 import 'package:library_app1/features/home/presentation/widgets/top_rated_card.dart';
 
-// 🔴 استيراد الـ Bloc وصفحة التفاصيل
+//  استيراد الـ Bloc وصفحة التفاصيل
 import 'package:library_app1/features/home/presentation/bloc/Favorite_Bloc/favorite_bloc.dart';
 
 class TopRatedBooksList extends StatelessWidget {
@@ -35,7 +35,7 @@ class TopRatedBooksList extends StatelessWidget {
           authorText = book.authors.join(", ");
         }
 
-        // 🔴 تغليف الكارت بـ GestureDetector للانتقال للتفاصيل
+        // تغليف الكارت بـ GestureDetector للانتقال للتفاصيل
         return GestureDetector(
           onTap: () {
             Navigator.push(
