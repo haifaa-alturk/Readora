@@ -2,7 +2,6 @@
 // import 'package:library_app1/features/home/domain/entities/book.dart';
 // import '../pages/book_details_page.dart';
 
-
 // class BookCard extends StatefulWidget {
 //   final Book book;
 
@@ -39,7 +38,7 @@
 //           ),
 //         );
 //       },
-  
+
 //       child: Container(
 //         width: 100,
 //         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -56,7 +55,7 @@
 //         ),
 //         child: Column(
 //           crossAxisAlignment: CrossAxisAlignment.start,
-      
+
 //           children: [
 //             // 1. صورة الكتاب مع زر المفضلة فوقها
 //             Expanded(
@@ -145,7 +144,7 @@
 //     // 1. فحص حقل authorName إن وجد وكان غير فارغ
 //     if (widget.book.authorName != null && widget.book.authorName!.toString().trim().isNotEmpty) {
 //       authorText = widget.book.authorName!;
-//     } 
+//     }
 //     // 2. فحص مصفوفة authors إن كانت تحتوي عناصر
 //     else if (widget.book.authors.isNotEmpty) {
 //       authorText = widget.book.authors.join(", ");
@@ -205,24 +204,24 @@ import '../pages/book_details_page.dart';
 
 class BookCard extends StatefulWidget {
   final Book book;
-final bool showFavorite; // 👈 1. إضافة هذه المتغيرة
+  final bool showFavorite; // 👈 1. إضافة هذه المتغيرة
 
-  const BookCard({required this.book, super.key, this.showFavorite = true });
+  const BookCard({required this.book, super.key, this.showFavorite = true});
 
   @override
   State<BookCard> createState() => _BookCardState();
 }
 
 class _BookCardState extends State<BookCard> {
-  
   @override
   Widget build(BuildContext context) {
     // رابط صورة الكتاب مع الحماية من القيمة الفارغة (null/empty)
-    String imageUrl = (widget.book.coverImage != null && widget.book.coverImage!.isNotEmpty)
+    String imageUrl =
+        (widget.book.coverImage != null && widget.book.coverImage!.isNotEmpty)
         ? (widget.book.coverImage!.startsWith('http')
-            ? widget.book.coverImage!
-            // : "http://127.0.0.1:8000/storage/${widget.book.coverImage}")
-              : "http://192.168.90.2:8000/storage/${widget.book.coverImage}")
+              ? widget.book.coverImage!
+              : "http://127.0.0.1:8000/storage/${widget.book.coverImage}")
+        // : "http://192.168.90.2:8000/storage/${widget.book.coverImage}")
         : "";
 
     return GestureDetector(
@@ -242,24 +241,27 @@ class _BookCardState extends State<BookCard> {
         //   ),
         // );
         // في كود التنقل (مثلاً داخل OnTap بالـ BookCard):
-Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (_) => BlocProvider.value(
-      value: context.read<FavoriteBloc>(), // 👈 إعطاء نفس الـ Bloc للصفحة الجديدة
-      child: BookDetailsPage(
-        bookId: widget.book.id,
-        title: widget.book.bookName,
-        author: widget.book.authors.isNotEmpty ? widget.book.authors.join(", ") : "",
-        image: imageUrl,
-        description: widget.book.description ?? "لا يوجد وصف",
-        pdfFile: widget.book.pdfFile,
-      ),
-    ),
-  ),
-);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BlocProvider.value(
+              value: context
+                  .read<FavoriteBloc>(), // 👈 إعطاء نفس الـ Bloc للصفحة الجديدة
+              child: BookDetailsPage(
+                bookId: widget.book.id,
+                title: widget.book.bookName,
+                author: widget.book.authors.isNotEmpty
+                    ? widget.book.authors.join(", ")
+                    : "",
+                image: imageUrl,
+                description: widget.book.description ?? "لا يوجد وصف",
+                pdfFile: widget.book.pdfFile,
+              ),
+            ),
+          ),
+        );
       },
-     
+
       child: Container(
         width: 100,
         height: 100,
@@ -277,16 +279,17 @@ Navigator.push(
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-       
+
           children: [
-       
             // 1. صورة الكتاب مع زر المفضلة فوقها
             Expanded(
               child: Stack(
                 children: [
                   // صورة غلاف الكتاب
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(16),
+                    ),
                     child: Container(
                       width: double.infinity,
                       height: double.infinity,
@@ -297,58 +300,73 @@ Navigator.push(
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
                                 return Container(
-                                  color: const Color.fromARGB(255, 242, 182, 247),
-                                  child: const Icon(Icons.book, size: 40, color: Colors.white54),
+                                  color: const Color.fromARGB(
+                                    255,
+                                    242,
+                                    182,
+                                    247,
+                                  ),
+                                  child: const Icon(
+                                    Icons.book,
+                                    size: 40,
+                                    color: Colors.white54,
+                                  ),
                                 );
                               },
                             )
                           : Container(
                               color: Colors.grey[800],
-                              child: const Icon(Icons.book, size: 40, color: Colors.white54),
+                              child: const Icon(
+                                Icons.book,
+                                size: 40,
+                                color: Colors.white54,
+                              ),
                             ),
                     ),
                   ),
-if (widget.showFavorite)
-                  // 🔴 أيقونة المفضلة المربوطة بالـ Bloc الموحد
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: BlocBuilder<FavoriteBloc, FavoriteState>(
-                      builder: (context, state) {
-                        bool isFav = false;
+                  if (widget.showFavorite)
+                    // 🔴 أيقونة المفضلة المربوطة بالـ Bloc الموحد
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: BlocBuilder<FavoriteBloc, FavoriteState>(
+                        builder: (context, state) {
+                          bool isFav = false;
 
-                        // فحص ما إذا كان الكتاب موجوداً ضمن قائمة المفضلة المحدثة فورياً من السيرفر
-                        if (state is FavoriteLoaded) {
-                          isFav = state.favoriteBooks.any((b) => b.id == widget.book.id);
-                        }
+                          // فحص ما إذا كان الكتاب موجوداً ضمن قائمة المفضلة المحدثة فورياً من السيرفر
+                          if (state is FavoriteLoaded) {
+                            isFav = state.favoriteBooks.any(
+                              (b) => b.id == widget.book.id,
+                            );
+                          }
 
-                        return GestureDetector(
-                          onTap: () {
-                            // إرسال حدث التبديل للـ Bloc الموحد
-                            context.read<FavoriteBloc>().add(
-                                  ToggleFavoriteEvent(
-                                    token: "",
-                                    bookId: widget.book.id,
-                                    isCurrentlyFavorite: isFav,
-                                  ),
-                                );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.4),
-                              shape: BoxShape.circle,
+                          return GestureDetector(
+                            onTap: () {
+                              // إرسال حدث التبديل للـ Bloc الموحد
+                              context.read<FavoriteBloc>().add(
+                                ToggleFavoriteEvent(
+                                  token: "",
+                                  bookId: widget.book.id,
+                                  isCurrentlyFavorite: isFav,
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.4),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                isFav ? Icons.favorite : Icons.favorite_border,
+                                color: isFav ? Colors.redAccent : Colors.white,
+                                size: 18,
+                              ),
                             ),
-                            child: Icon(
-                              isFav ? Icons.favorite : Icons.favorite_border,
-                              color: isFav ? Colors.redAccent : Colors.white,
-                              size: 18,
-                            ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -376,7 +394,11 @@ if (widget.showFavorite)
                   Builder(
                     builder: (context) {
                       String authorText = "";
-                      if (widget.book.authorName != null && widget.book.authorName!.toString().trim().isNotEmpty) {
+                      if (widget.book.authorName != null &&
+                          widget.book.authorName!
+                              .toString()
+                              .trim()
+                              .isNotEmpty) {
                         authorText = widget.book.authorName!;
                       } else if (widget.book.authors.isNotEmpty) {
                         authorText = widget.book.authors.join(", ");

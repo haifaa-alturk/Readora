@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:library_app1/core/language/app_localizations.dart';
 
+import 'package:library_app1/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:library_app1/features/auth/presentation/bloc/auth_state.dart';
 import 'package:library_app1/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:library_app1/features/profile/presentation/bloc/profile_event.dart';
 import 'package:library_app1/features/profile/presentation/bloc/profile_state.dart';
 import 'package:library_app1/features/profile/presentation/bloc/purchase_history_bloc.dart';
 import 'package:library_app1/features/profile/domain/entities/profile_entity.dart';
@@ -28,8 +31,7 @@ import 'package:library_app1/features/wins/presentation/bloc/wins_bloc.dart';
 import 'package:library_app1/features/wins/presentation/screens/wins_screen.dart';
 import 'package:library_app1/features/quotes/presentation/screens/my_quotes_screen.dart';
 
-// const String _profileImageBaseUrl = 'http://127.0.0.1:8000/storage/';
-const String _profileImageBaseUrl = 'http://192.168.90.2:8000/storage/';
+const String _profileImageBaseUrl = 'http://127.0.0.1:8000/storage/';
 
 bool _isLocalImagePath(String path) {
   return path.startsWith('/') ||
@@ -53,36 +55,53 @@ class ProfileMainScreen extends StatelessWidget {
     final settingsState = context.watch<SettingsBloc>().state;
     final lang = settingsState is SettingsLoaded ? settingsState.language : 'en';
 
-    return BlocBuilder<ProfileBloc, ProfileState>(
-      builder: (context, state) {
-        return Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          appBar: AppBar(
+    return BlocListener<AuthBloc, AuthState>(
+      listenWhen: (previous, current) =>
+          current is AuthSuccess &&
+          (previous is! AuthSuccess || previous.user.id != current.user.id),
+      listener: (context, state) {
+        final userId = (state as AuthSuccess).user.id;
+        final profileState = context.read<ProfileBloc>().state;
+        final loadedUserId = profileState is ProfileLoaded
+            ? profileState.profile.userId
+            : profileState is ProfileUpdateSuccess
+                ? profileState.profile.userId
+                : null;
+        if (loadedUserId != userId) {
+          context.read<ProfileBloc>().add(const LoadProfileEvent());
+        }
+      },
+      child: BlocBuilder<ProfileBloc, ProfileState>(
+        builder: (context, state) {
+          return Scaffold(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            elevation: 0,
-            title: Text(
-              context.tr('my_profile', lang),
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-            actions: [
-              if (state is ProfileLoaded)
-                IconButton(
-                  icon: const Icon(Icons.settings, color: Color(0xfffbc4db)),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => BlocProvider.value(
-                        value: context.read<SettingsBloc>(),
-                        child: const SettingsScreen(),
+            appBar: AppBar(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              elevation: 0,
+              title: Text(
+                context.tr('my_profile', lang),
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              actions: [
+                if (state is ProfileLoaded)
+                  IconButton(
+                    icon: const Icon(Icons.settings, color: Color(0xfffbc4db)),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BlocProvider.value(
+                          value: context.read<SettingsBloc>(),
+                          child: const SettingsScreen(),
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
-          ),
-          body: _buildBody(context, state, lang),
-        );
-      },
+              ],
+            ),
+            body: _buildBody(context, state, lang),
+          );
+        },
+      ),
     );
   }
 

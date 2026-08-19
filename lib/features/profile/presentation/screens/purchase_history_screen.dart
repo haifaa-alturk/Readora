@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:library_app1/core/widgets/gradient_summary_banner.dart';
 import 'package:library_app1/features/profile/presentation/bloc/purchase_history_bloc.dart';
-import 'package:library_app1/features/profile/presentation/bloc/purchase_history_event.dart';
 import 'package:library_app1/features/profile/presentation/bloc/purchase_history_state.dart';
 import 'package:library_app1/features/profile/domain/entities/purchase_history_entity.dart';
 
@@ -99,7 +98,7 @@ class PurchaseHistoryScreen extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isDark
-            ? const Color.fromARGB(100, 123, 7, 141)?.withOpacity(0.5) // 🌙 للوضع الليلي
+            ? const Color.fromARGB(100, 123, 7, 141).withOpacity(0.5) // 🌙 للوضع الليلي
             : const Color.fromARGB(255, 251, 248, 244).withOpacity(0.3), // ☀️ للوضع العادي
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
@@ -140,7 +139,7 @@ class PurchaseHistoryScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _formatDate(tx.purchaseDate),
+                  tx.purchaseDate,
                   style: TextStyle(
                     fontSize: 12,
                     color: isDark ? Colors.white60 : Colors.black54,
@@ -161,12 +160,4 @@ class PurchaseHistoryScreen extends StatelessWidget {
       ),
     );
   }
-}
-
-String _formatDate(DateTime date) {
-  const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ];
-  return '${date.day} ${months[date.month - 1]} ${date.year}';
 }

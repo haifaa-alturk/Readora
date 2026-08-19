@@ -22,4 +22,12 @@ class InterestModel extends InterestEntity {
       'is_selected': isSelected,
     };
   }
+
+  InterestModel copyWithSelected({required bool isSelected}) {
+    return InterestModel(
+      id: id,
+      name: name,
+      isSelected: isSelected,
+    );
+  }
 }

@@ -5,34 +5,30 @@ class LibraryBookModel extends LibraryBookEntity {
     required super.id,
     required super.title,
     required super.author,
-    super.startDate,
-    super.completionDate,
     required super.status,
+    super.displayDate,
   });
 
   factory LibraryBookModel.fromJson(Map<String, dynamic> json) {
+    final type = json['type'] as String? ?? '';
+    final status = type.toLowerCase() == 'rent' ? 'borrowed' : 'purchased';
+
     return LibraryBookModel(
-      id: json['id'] as int? ?? 0,
-      title: json['title'] as String? ?? '',
-      author: json['author'] as String? ?? '',
-      startDate: json['start_date'] != null
-          ? DateTime.parse(json['start_date'] as String)
-          : null,
-      completionDate: json['completion_date'] != null
-          ? DateTime.parse(json['completion_date'] as String)
-          : null,
-      status: json['status'] as String? ?? 'in_progress',
+      id: json['book_id'] as int? ?? 0,
+      title: json['book_name'] as String? ?? '',
+      author: json['authors'] as String? ?? '',
+      status: status,
+      displayDate: json['date'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'title': title,
-      'author': author,
-      'start_date': startDate?.toIso8601String(),
-      'completion_date': completionDate?.toIso8601String(),
+      'book_id': id,
+      'book_name': title,
+      'authors': author,
       'status': status,
+      'date': displayDate,
     };
   }
 }

@@ -32,9 +32,38 @@ class InterestsRemoteDataSourceImpl implements InterestsRemoteDataSource {
       rawList = rawData['data'] ?? [];
     }
 
-    return rawList
+    final interests = rawList
         .map((e) => InterestModel.fromJson(Map<String, dynamic>.from(e)))
         .toList();
+
+    final selectedIds = await _fetchUserCategoryIds();
+
+    return interests
+        .map((i) => i.copyWithSelected(isSelected: selectedIds.contains(i.id)))
+        .toList();
+  }
+
+  Future<Set<int>> _fetchUserCategoryIds() async {
+    try {
+      print("Interests: calling GET user to load saved categories...");
+      final userResponse = await _apiClient.dio.get('user');
+      final dynamic userData = userResponse.data;
+      final dynamic categories = userData is Map<String, dynamic>
+          ? userData['categories']
+          : null;
+
+      if (categories is List) {
+        return categories
+            .map((e) => e is Map<String, dynamic>
+                ? int.tryParse('${e['id']}')
+                : int.tryParse('$e'))
+            .whereType<int>()
+            .toSet();
+      }
+    } catch (e) {
+      print("Interests: could not load saved categories: $e");
+    }
+    return <int>{};
   }
 
   @override
@@ -53,15 +82,20 @@ class InterestsRemoteDataSourceImpl implements InterestsRemoteDataSource {
     final json = (response.data as Map<String, dynamic>)['user']
         as Map<String, dynamic>;
 
-    final dynamic rawData = json['interests'] ?? [];
+    final dynamic rawData = json['categories'] ?? [];
     final List rawList = rawData is List ? rawData : [];
 
     return rawList
-        .map((e) => InterestModel(
-              id: e is int ? e : int.tryParse('$e') ?? 0,
-              name: '',
-              isSelected: true,
-            ))
+        .map((e) => e is Map<String, dynamic>
+            ? InterestModel.fromJson({
+                ...e,
+                'is_selected': true,
+              })
+            : InterestModel(
+                id: e is int ? e : int.tryParse('$e') ?? 0,
+                name: '',
+                isSelected: true,
+              ))
         .toList();
   }
 }

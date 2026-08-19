@@ -54,17 +54,6 @@ class _WalletScreenState extends State<WalletScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add, color: Color(0xffe61b72)),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const RechargeWalletScreen(),
-              ),
-            ),
-          ),
-        ],
       ),
       body: BlocConsumer<WalletBloc, WalletState>(
         listener: (context, state) {
@@ -99,6 +88,8 @@ class _WalletScreenState extends State<WalletScreen> {
                     value: '${_formatPrice(wallet.balance)} ${wallet.currency}',
                     subtitle: 'Your current wallet balance',
                   ),
+                  const SizedBox(height: 20),
+                  _buildRechargeButton(),
                   const SizedBox(height: 24),
                   _buildTransactionList(transactions),
                 ],
@@ -107,6 +98,33 @@ class _WalletScreenState extends State<WalletScreen> {
           }
           return const Center(child: CircularProgressIndicator());
         },
+      ),
+    );
+  }
+
+  Widget _buildRechargeButton() {
+    return SizedBox(
+      height: 52,
+      child: ElevatedButton.icon(
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const RechargeWalletScreen(),
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xffe61b72),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+        icon: const Icon(Icons.account_balance_wallet_outlined),
+        label: const Text(
+          'Recharge Wallet',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
       ),
     );
   }

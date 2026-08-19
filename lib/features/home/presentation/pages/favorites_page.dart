@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:library_app1/core/language/app_localizations.dart';
@@ -17,8 +16,10 @@ class FavoritesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settingsState = context.watch<SettingsBloc>().state;
-  // ignore: dead_code
-  final lang = settingsState is SettingsLoaded ? settingsState.language : 'en';
+    // ignore: dead_code
+    final lang = settingsState is SettingsLoaded
+        ? settingsState.language
+        : 'en';
     // 🎨 خيارات ألوان الكروت المتبادلة (زهري وبنفسجي فاتح)
     final List<Color> cardColors = [
       const Color.fromARGB(255, 241, 203, 223), // زهري ناعم
@@ -26,10 +27,12 @@ class FavoritesPage extends StatelessWidget {
     ];
 
     return Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor, // ✅ متكيف تلقائياً
+      backgroundColor: Theme.of(
+        context,
+      ).scaffoldBackgroundColor, // ✅ متكيف تلقائياً
       appBar: AppBar(
-        title: 
-        Text(context.tr('favorites', lang),
+        title: Text(
+          context.tr('favorites', lang),
           style: TextStyle(
             color: Color.fromARGB(255, 143, 76, 225),
             fontWeight: FontWeight.bold,
@@ -50,12 +53,17 @@ class FavoritesPage extends StatelessWidget {
             if (state.favoriteBooks.isEmpty) {
               return Center(
                 child: Text(
-                 "You haven't added any books to your favorites yet.",
+                  "You haven't added any books to your favorites yet.",
                   style: TextStyle(
                     color: Theme.of(context).brightness == Brightness.dark
-      ? const Color.fromARGB(255, 255, 70, 255)?.withOpacity(0.5) // 🌙 لون رمادي داكن وأنيق للوضع الليلي
-      : const Color.fromARGB(255, 58, 1, 51).withOpacity(0.3), // ☀️ اللون البيج الأصلي للوضع العادي
-                    fontSize: 16),
+                        ? const Color.fromARGB(255, 255, 70, 255)?.withOpacity(
+                            0.5,
+                          ) // 🌙 لون رمادي داكن وأنيق للوضع الليلي
+                        : const Color.fromARGB(255, 58, 1, 51).withOpacity(
+                            0.3,
+                          ), // ☀️ اللون البيج الأصلي للوضع العادي
+                    fontSize: 16,
+                  ),
                 ),
               );
             }
@@ -67,19 +75,22 @@ class FavoritesPage extends StatelessWidget {
                 final book = state.favoriteBooks[index];
 
                 // 🔄 التناوب بين اللونين بناءً على الـ index
-                final Color backgroundColor = cardColors[index % cardColors.length];
+                final Color backgroundColor =
+                    cardColors[index % cardColors.length];
 
                 // تجهيز رابط الصورة
-                String imageUrl = (book.coverImage != null && book.coverImage!.isNotEmpty)
+                String imageUrl =
+                    (book.coverImage != null && book.coverImage!.isNotEmpty)
                     ? (book.coverImage!.startsWith('http')
-                        ? book.coverImage!
-                        // : "http://127.0.0.1:8000/storage/${book.coverImage}")
-                        : "http://192.168.90.2:8000/storage/${book.coverImage}")
+                          ? book.coverImage!
+                          : "http://127.0.0.1:8000/storage/${book.coverImage}")
+                    // : "http://192.168.90.2:8000/storage/${book.coverImage}")
                     : "";
 
                 // تجهيز اسم المؤلف
                 String authorText = "مؤلف غير معروف";
-                if (book.authorName != null && book.authorName!.trim().isNotEmpty) {
+                if (book.authorName != null &&
+                    book.authorName!.trim().isNotEmpty) {
                   authorText = book.authorName!;
                 } else if (book.authors.isNotEmpty) {
                   authorText = book.authors.join(", ");
@@ -132,10 +143,19 @@ class FavoritesPage extends StatelessWidget {
                                 ? Image.network(
                                     imageUrl,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) =>
-                                        const Icon(Icons.book, size: 30, color: Colors.grey),
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Icon(
+                                              Icons.book,
+                                              size: 30,
+                                              color: Colors.grey,
+                                            ),
                                   )
-                                : const Icon(Icons.book, size: 30, color: Colors.grey),
+                                : const Icon(
+                                    Icons.book,
+                                    size: 30,
+                                    color: Colors.grey,
+                                  ),
                           ),
                         ),
                         const SizedBox(width: 14),
@@ -150,7 +170,9 @@ class FavoritesPage extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
-                                  color: Color(0xFF2D1B36), // لون داكن واضح للعنوان
+                                  color: Color(
+                                    0xFF2D1B36,
+                                  ), // لون داكن واضح للعنوان
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
                                 ),
@@ -174,12 +196,13 @@ class FavoritesPage extends StatelessWidget {
                         GestureDetector(
                           onTap: () {
                             context.read<FavoriteBloc>().add(
-                                  ToggleFavoriteEvent(
-                                    token: "",
-                                    bookId: book.id,
-                                    isCurrentlyFavorite: true, // عند الضغط سيقوم بالحذف فكلياً
-                                  ),
-                                );
+                              ToggleFavoriteEvent(
+                                token: "",
+                                bookId: book.id,
+                                isCurrentlyFavorite:
+                                    true, // عند الضغط سيقوم بالحذف فكلياً
+                              ),
+                            );
                           },
                           child: Container(
                             padding: const EdgeInsets.all(8),

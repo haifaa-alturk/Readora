@@ -266,6 +266,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:library_app1/core/language/app_localizations.dart';
+import 'package:library_app1/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:library_app1/features/auth/presentation/bloc/auth_event.dart';
 import 'package:library_app1/features/auth/presentation/pages/login_page.dart';
 
 // 🔴 استيراد ملف الترجمة
@@ -318,6 +320,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SnackBar(content: Text(state.message)),
             );
           } else if (state is LoggedOut) {
+            context.read<AuthBloc>().add(LogoutEvent());
             Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
               MaterialPageRoute(builder: (_) => LoginScreen()),
               (route) => false,

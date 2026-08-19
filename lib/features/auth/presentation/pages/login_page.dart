@@ -236,6 +236,8 @@ import 'package:library_app1/forget_screen/forgot_password.dart';
 import 'package:library_app1/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:library_app1/features/auth/presentation/bloc/auth_event.dart';
 import 'package:library_app1/features/auth/presentation/bloc/auth_state.dart';
+import 'package:library_app1/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:library_app1/features/profile/presentation/bloc/profile_event.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -271,6 +273,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 backgroundColor: Colors.green,
               ),
             );
+
+            // 🔄 إعادة تحميل الملف الشخصي ليعكس الحساب الجديد
+            context.read<ProfileBloc>().add(const LoadProfileEvent());
 
             // الانتقال لصفحة الهوم وحذف كل ما قبلها من الـ Stack
             Navigator.pushAndRemoveUntil(

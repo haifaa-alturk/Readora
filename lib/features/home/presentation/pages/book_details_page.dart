@@ -1,4 +1,3 @@
-
 // import 'package:flutter/material.dart';
 // import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -162,7 +161,7 @@
 //                           style: TextStyle(
 //                             fontSize: 20,
 //                             fontWeight: FontWeight.bold, color: Color.fromARGB(234, 129, 76, 7),
-                         
+
 //                           ),
 //                         ),
 
@@ -232,7 +231,7 @@
 //                           style: TextStyle(
 //                             fontSize: 20,
 //                             fontWeight: FontWeight.bold, color: Color.fromARGB(234, 129, 76, 7),
-                          
+
 //                           ),
 //                         ),
 
@@ -249,7 +248,7 @@
 //                               book.rating.toString(),
 //                               style: const TextStyle(
 //                                 fontSize: 22,
-   
+
 //                             fontWeight: FontWeight.bold,
 //                               ),
 //                             ),
@@ -421,9 +420,7 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
   void initState() {
     super.initState();
 
-    context.read<BookDetailsBloc>().add(
-          LoadBookDetailsEvent(widget.bookId),
-        );
+    context.read<BookDetailsBloc>().add(LoadBookDetailsEvent(widget.bookId));
   }
 
   @override
@@ -459,12 +456,12 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                 ),
                 onPressed: () {
                   context.read<FavoriteBloc>().add(
-                        ToggleFavoriteEvent(
-                          token: "",
-                          bookId: widget.bookId,
-                          isCurrentlyFavorite: isFav,
-                        ),
-                      );
+                    ToggleFavoriteEvent(
+                      token: "",
+                      bookId: widget.bookId,
+                      isCurrentlyFavorite: isFav,
+                    ),
+                  );
                 },
               );
             },
@@ -476,15 +473,11 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
       body: BlocBuilder<BookDetailsBloc, BookDetailsState>(
         builder: (context, state) {
           if (state is BookDetailsLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (state is BookDetailsError) {
-            return Center(
-              child: Text(state.message),
-            );
+            return Center(child: Text(state.message));
           }
 
           if (state is BookDetailsLoaded) {
@@ -500,17 +493,14 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: const [
-                        BoxShadow(
-                          blurRadius: 10,
-                          color: Colors.black12,
-                        ),
+                        BoxShadow(blurRadius: 10, color: Colors.black12),
                       ],
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
                       child: Image.network(
-                        // "http://127.0.0.1:8000/storage/${book.coverImage}",
-                          "http://192.168.90.2:8000/storage/${book.coverImage}",
+                        "http://127.0.0.1:8000/storage/${book.coverImage}",
+                        //"http://192.168.90.2:8000/storage/${book.coverImage}",
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) {
                           return const Center(
@@ -611,11 +601,7 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                           spacing: 8,
                           runSpacing: 8,
                           children: book.authors
-                              .map(
-                                (author) => Chip(
-                                  label: Text(author),
-                                ),
-                              )
+                              .map((author) => Chip(label: Text(author)))
                               .toList(),
                         ),
 
@@ -636,11 +622,7 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                           spacing: 8,
                           runSpacing: 8,
                           children: book.categories
-                              .map(
-                                (category) => Chip(
-                                  label: Text(category),
-                                ),
-                              )
+                              .map((category) => Chip(label: Text(category)))
                               .toList(),
                         ),
 
@@ -714,8 +696,9 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.green,
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
@@ -739,8 +722,9 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.blue,
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
@@ -767,8 +751,12 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                           width: double.infinity,
                           child: OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
-                              backgroundColor:
-                                  const Color.fromARGB(249, 227, 228, 206),
+                              backgroundColor: const Color.fromARGB(
+                                249,
+                                227,
+                                228,
+                                206,
+                              ),
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -781,8 +769,9 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                             label: const Text(
                               "Comments",
                               style: TextStyle(
-                                  fontSize: 18,
-                                  color: Color.fromARGB(253, 0, 0, 4)),
+                                fontSize: 18,
+                                color: Color.fromARGB(253, 0, 0, 4),
+                              ),
                             ),
                           ),
                         ),
@@ -796,9 +785,7 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
             );
           }
 
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );

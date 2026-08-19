@@ -404,6 +404,8 @@ import 'package:library_app1/features/auth/data/models/Category_Model.dart';
 import 'package:library_app1/features/auth/presentation/bloc/auth_state.dart';
 
 import 'package:library_app1/features/home/presentation/pages/main_screen.dart';
+import 'package:library_app1/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:library_app1/features/profile/presentation/bloc/profile_event.dart';
 import 'dart:ui';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -572,6 +574,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   isLoadingCategories = false;
                                 });
                               } else if (state is AuthSuccess) {
+                                context
+                                    .read<ProfileBloc>()
+                                    .add(const LoadProfileEvent());
                                 Navigator.pushAndRemoveUntil(
                                   context, 
                                   MaterialPageRoute(builder: (context) => const MainScreen()),

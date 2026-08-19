@@ -4,8 +4,6 @@ import '../../domain/entities/profile_entity.dart';
 import '../../domain/entities/purchase_history_entity.dart';
 import '../../domain/repositories/profile_repository_interface.dart';
 import '../datasources/profile_remote_datasource.dart';
-import '../models/profile_model.dart';
-import '../models/purchase_history_model.dart';
 
 class ProfileRepositoryImpl implements ProfileRepositoryInterface {
   final ProfileRemoteDataSource _remoteDataSource;

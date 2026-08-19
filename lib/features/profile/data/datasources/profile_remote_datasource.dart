@@ -1,19 +1,14 @@
 import 'package:dio/dio.dart';
 
-import '../../../../core/mock_dev3/mock_config.dart';
-import '../../../../core/mock_dev3/mock_data_provider.dart';
-import '../../../../core/network_dev3/api_client.dart';
-import '../../../../core/network_dev3/endpoints.dart';
 import '../../../../core/api/api_client.dart';
 import '../models/profile_model.dart';
 import '../models/purchase_history_model.dart';
 
 class ProfileRemoteDataSource {
-  final Dev3ApiClient _apiClient;
   final ApiClient _realApiClient;
   ProfileModel? _cachedProfile;
 
-  ProfileRemoteDataSource(this._apiClient, this._realApiClient);
+  ProfileRemoteDataSource(this._realApiClient);
 
   Future<ProfileModel> getProfile() async {
     final userFuture = _realApiClient.dio.get('user');
@@ -23,7 +18,13 @@ class ProfileRemoteDataSource {
     final booksCount = await booksCountFuture;
 
     final json = Map<String, dynamic>.from(response.data as Map);
-    final previous = _cachedProfile;
+    final freshUserId = json['id'] as int? ?? json['user_id'] as int?;
+    // لا نعيد استخدام الكاش القديم إذا تغيّر الحساب (مختلف الـ id)
+    final previous = (_cachedProfile != null &&
+            freshUserId != null &&
+            _cachedProfile!.userId == freshUserId)
+        ? _cachedProfile
+        : null;
 
     _cachedProfile = _profileFromUserJson(
       json,
@@ -88,14 +89,11 @@ class ProfileRemoteDataSource {
   }
 
   Future<List<PurchaseHistoryModel>> getPurchaseHistory() async {
-    if (useMockData) {
-      final data = MockDataProvider.purchaseHistoryList();
-      return data.map((e) => PurchaseHistoryModel.fromJson(e)).toList();
-    }
-    final response = await _apiClient.get(Endpoints.purchaseHistory);
-    final list = response.data as List<dynamic>;
-    return list
-        .map((e) => PurchaseHistoryModel.fromJson(e as Map<String, dynamic>))
+    final response = await _realApiClient.dio.get('user/purchases-history');
+    final json = Map<String, dynamic>.from(response.data as Map);
+    final history = json['history'] as List<dynamic>? ?? [];
+    return history
+        .map((e) => PurchaseHistoryModel.fromJson(Map<String, dynamic>.from(e)))
         .toList();
   }
 

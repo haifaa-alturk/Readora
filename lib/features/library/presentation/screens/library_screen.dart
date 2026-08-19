@@ -5,7 +5,6 @@ import '../bloc/library_bloc.dart';
 import '../bloc/library_event.dart';
 import '../bloc/library_state.dart';
 import '../../domain/entities/library_book_entity.dart';
-import 'package:library_app1/features/individual_challenge/presentation/individual_challenge_entry.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -17,22 +16,12 @@ class LibraryScreen extends StatefulWidget {
 class _LibraryScreenState extends State<LibraryScreen> {
   static const List<_FilterOption> _filters = [
     _FilterOption('All', null),
-    _FilterOption('In Progress', 'in_progress'),
-    _FilterOption('Completed', 'completed'),
   ];
 
   @override
   void initState() {
     super.initState();
     context.read<LibraryBloc>().add(const LoadLibraryBooksEvent());
-  }
-
-  String _formatDate(DateTime date) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 
   @override
@@ -98,22 +87,25 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     children: [
                       _buildFilterRow(state.activeFilter),
                       Expanded(
-                        child: state.filteredBooks.isEmpty
+child: state.filteredBooks.isEmpty
                             ? Center(
                                 child: Text(
-                                  'No ${state.activeFilter ?? ''} books',
+                                  'No books',
                                   style: const TextStyle(
                                     fontSize: 15,
-                                 
+                                  
                                   ),
                                 ),
                               )
                             : ListView(
                                 padding:
                                     const EdgeInsets.fromLTRB(16, 4, 16, 24),
-                                children: state.filteredBooks
-                                    .map((b) => _buildBookCard(b))
-                                    .toList(),
+                                children: [
+                                    ...state.filteredBooks.indexed.map(
+                                      (entry) =>
+                                          _buildBookCard(entry.$2, entry.$1),
+                                    ),
+                                  ],
                               ),
                       ),
                     ],
@@ -173,55 +165,51 @@ class _LibraryScreenState extends State<LibraryScreen> {
     );
   }
 
-  Widget _buildBookCard(LibraryBookEntity book) {
-    final icon = book.status == 'completed'
-        ? Icons.check_circle
-        : book.status == 'in_progress'
-            ? Icons.autorenew
-            : book.status == 'borrowed'
-                ? Icons.unfold_more
-                : Icons.shopping_cart;
-    final iconBgColor = book.status == 'completed'
-        ? const Color(0xffd4c5f9)
-        : book.status == 'in_progress'
-            ? const Color(0xfffce38a)
-            : book.status == 'borrowed'
-                ? const Color(0xff8cd7f7)
-                : const Color(0xffc2e7d9);
-    final typeColor = book.status == 'completed'
-        ? const Color(0xff7c5cbf)
-        : book.status == 'in_progress'
-            ? const Color(0xffb8860b)
-            : book.status == 'borrowed'
-                ? const Color(0xff2d7d2d)
-                : const Color(0xffc62828);
+  static const List<_PastelColor> _pastelColors = [
+    _PastelColor(Color(0xFFFFF3CD), Color(0xFFE6C87B)), // light yellow
+    _PastelColor(Color(0xFFFBD9E2), Color(0xFFE89BB0)), // light pink
+    _PastelColor(Color(0xFFD7F0D6), Color(0xFF9CCB9C)), // light green
+    _PastelColor(Color(0xFFF0E0D6), Color(0xFFD4B39E)), // light nude
+    _PastelColor(Color(0xFFD6E6F5), Color(0xFF9DBEDD)), // light blue
+    _PastelColor(Color(0xFFE8E6EC), Color(0xFFB9B5C4)), // light gray
+  ];
+
+  Widget _buildBookCard(LibraryBookEntity book, int index) {
+    final isRented = book.status == 'borrowed';
+    final pastel = _pastelColors[index % _pastelColors.length];
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).brightness == Brightness.dark
-      ? const Color.fromARGB(115, 130, 128, 128)?.withOpacity(0.5) // 🌙 لون رمادي داكن وأنيق للوضع الليلي
-      : const Color.fromARGB(255, 244, 241, 237).withOpacity(0.3),
+        color: pastel.background,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: pastel.border,
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: const Color.fromARGB(255, 181, 173, 173).withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: pastel.border.withValues(alpha: 0.35),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Row(
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-              color: iconBgColor,
-              borderRadius: BorderRadius.circular(14),
+              color: pastel.border.withValues(alpha: 0.25),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: typeColor, size: 24),
+            child: Icon(
+              Icons.menu_book,
+              color: pastel.border,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -239,95 +227,39 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        book.author,
-                        style: TextStyle(
-                          fontSize: 13,
-                          
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: typeColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        book.status == 'in_progress'
-                            ? 'In Progress'
-                            : book.status == 'completed'
-                                ? 'Completed'
-                                : book.status == 'borrowed'
-                                    ? 'Borrowed'
-                                    : 'Purchased',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: typeColor,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              if (book.startDate != null)
                 Text(
-                  _formatDate(book.startDate!),
-                  style: const TextStyle(
-                    fontSize: 12,
-                   
-                  ),
-                ),
-              if (book.completionDate != null) ...[
-                const SizedBox(height: 2),
-                Text(
-                  'Done ${_formatDate(book.completionDate!)}',
-                  style: const TextStyle(
-                    fontSize: 11,
+                  book.author,
+                  style: TextStyle(
+                    fontSize: 13,
                     
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
+                if (book.displayDate != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    '${isRented ? 'Rented' : 'Purchased'} ${book.displayDate}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      
+                    ),
+                  ),
+                ],
               ],
-              // TEMPORARY entry point for dev/testing — replace with the real
-              // reader's 'reached final page' event once that screen is integrated.
-              if (book.status == 'completed')
-                TextButton.icon(
-                  onPressed: () => openIndividualChallengeFlow(
-                    context,
-                    bookId: book.id,
-                    bookTitle: book.title,
-                  ),
-                  icon: const Icon(Icons.emoji_events, size: 16),
-                  label: const Text(
-                    'Take the Challenge',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                  style: TextButton.styleFrom(
-                    foregroundColor: const Color.fromARGB(255, 143, 108, 220),
-                    padding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ),
-            ],
+            ),
           ),
         ],
       ),
     );
   }
+}
+
+class _PastelColor {
+  final Color background;
+  final Color border;
+
+  const _PastelColor(this.background, this.border);
 }
 
 class _FilterOption {

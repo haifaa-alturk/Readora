@@ -10,15 +10,30 @@ class PurchaseHistoryModel extends PurchaseHistoryEntity {
   });
 
   factory PurchaseHistoryModel.fromJson(Map<String, dynamic> json) {
+    final rawType = (json['type'] as String? ?? '').toLowerCase();
+
     return PurchaseHistoryModel(
       id: json['id'] as int? ?? 0,
-      bookTitle: json['book_title'] as String? ?? '',
-      type: json['type'] as String? ?? 'purchase',
-      price: (json['price'] as num?)?.toDouble() ?? 0.0,
-      purchaseDate: json['purchase_date'] != null
-          ? DateTime.parse(json['purchase_date'] as String)
-          : DateTime.now(),
+      bookTitle: (json['title'] as String? ?? json['book_title'] as String? ?? ''),
+      type: rawType.isEmpty ? 'purchase' : rawType,
+      price: _parsePrice(json['price']),
+      purchaseDate: (json['date'] as String? ??
+          json['purchase_date'] as String? ??
+          ''),
     );
+  }
+
+  // يقبل القيمة الرقمية مباشرة أو النص المنسّق مثل "Purchase 125000 SYP"
+  static double _parsePrice(dynamic raw) {
+    if (raw is num) return raw.toDouble();
+    if (raw is String) {
+      final cleaned = raw.replaceAll(',', '');
+      final match = RegExp(r'\d+(\.\d+)?').firstMatch(cleaned);
+      if (match != null) {
+        return double.tryParse(match.group(0)!) ?? 0.0;
+      }
+    }
+    return 0.0;
   }
 
   Map<String, dynamic> toJson() {
@@ -27,7 +42,7 @@ class PurchaseHistoryModel extends PurchaseHistoryEntity {
       'book_title': bookTitle,
       'type': type,
       'price': price,
-      'purchase_date': purchaseDate.toIso8601String(),
+      'purchase_date': purchaseDate,
     };
   }
 }

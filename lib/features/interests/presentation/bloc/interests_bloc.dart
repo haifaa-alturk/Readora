@@ -25,7 +25,8 @@ class InterestsBloc extends Bloc<InterestsEvent, InterestsState> {
       (interests) {
         final selectedIds = <int>{...event.selectedInterestIds};
         final marked = interests
-            .map((i) => i.copyWith(isSelected: selectedIds.contains(i.id)))
+            .map((i) => i.copyWith(
+                isSelected: i.isSelected || selectedIds.contains(i.id)))
             .toList();
         emit(InterestsLoaded(interests: marked));
       },

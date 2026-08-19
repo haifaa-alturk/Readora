@@ -9,8 +9,7 @@ import 'package:library_app1/features/profile/presentation/bloc/profile_event.da
 import 'package:library_app1/features/profile/presentation/bloc/profile_state.dart';
 import 'package:library_app1/features/profile/domain/entities/profile_entity.dart';
 
-// const String _profileImageBaseUrl = 'http://127.0.0.1:8000/storage/';
-const String _profileImageBaseUrl = 'http://192.168.90.2:8000/storage/';
+const String _profileImageBaseUrl = 'http://127.0.0.1:8000/storage/';
 
 bool _isLocalImagePath(String path) {
   return path.startsWith('/') ||

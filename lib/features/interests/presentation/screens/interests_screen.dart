@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:library_app1/features/auth/data/models/Category_Model.dart';
 import 'package:library_app1/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:library_app1/features/auth/presentation/bloc/auth_event.dart';
 import 'package:library_app1/features/auth/presentation/bloc/auth_state.dart';
 import 'package:library_app1/features/interests/presentation/bloc/interests_bloc.dart';
 import 'package:library_app1/features/interests/presentation/bloc/interests_event.dart';
@@ -39,6 +40,10 @@ class _InterestsScreenState extends State<InterestsScreen> {
           current is InterestsSaveSuccess || current is InterestsError,
       listener: (context, state) {
         if (state is InterestsSaveSuccess) {
+          final savedCategories = state.interests
+              .map((i) => CategoryModel(id: i.id, name: i.name))
+              .toList();
+          context.read<AuthBloc>().add(UpdateUserInterestsEvent(savedCategories));
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(

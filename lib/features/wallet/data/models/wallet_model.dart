@@ -8,9 +8,19 @@ class WalletModel extends WalletEntity {
 
   factory WalletModel.fromJson(Map<String, dynamic> json) {
     return WalletModel(
-      balance: (json['balance'] as num?)?.toDouble() ?? 0.0,
+      balance: _parseAmount(json['wallet_balance']) ??
+          _parseAmount(json['balance']) ??
+          0.0,
       currency: json['currency'] as String? ?? 'SYP',
     );
+  }
+
+  static double? _parseAmount(dynamic value) {
+    if (value is num) return value.toDouble();
+    if (value is String && value.trim().isNotEmpty) {
+      return double.tryParse(value.trim());
+    }
+    return null;
   }
 
   Map<String, dynamic> toJson() {

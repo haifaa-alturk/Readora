@@ -1,3 +1,5 @@
+import 'package:library_app1/features/auth/data/models/Category_Model.dart';
+
 abstract class AuthEvent {}
 
 class LoginEvent extends AuthEvent {
@@ -18,3 +20,10 @@ class RegisterEvent extends AuthEvent {
   });
 }
 class GetCategoriesEvent extends AuthEvent {}
+
+class UpdateUserInterestsEvent extends AuthEvent {
+  final List<CategoryModel> interests;
+  UpdateUserInterestsEvent(this.interests);
+}
+
+class LogoutEvent extends AuthEvent {}

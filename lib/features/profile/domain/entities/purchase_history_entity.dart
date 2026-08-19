@@ -3,7 +3,7 @@ class PurchaseHistoryEntity {
   final String bookTitle;
   final String type;
   final double price;
-  final DateTime purchaseDate;
+  final String purchaseDate;
 
   const PurchaseHistoryEntity({
     required this.id,
@@ -13,7 +13,7 @@ class PurchaseHistoryEntity {
     required this.purchaseDate,
   });
 
-  bool get isPurchase => type == 'purchase';
-  bool get isRent => type == 'rent';
+  bool get isPurchase => type.toLowerCase() == 'purchase';
+  bool get isRent => type.toLowerCase() == 'rent';
   String get typeLabel => isPurchase ? 'Purchase' : 'Rent';
 }

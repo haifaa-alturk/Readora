@@ -48,6 +48,7 @@
 // }
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:library_app1/features/auth/domain/entities/user.dart';
 import 'package:library_app1/features/auth/domain/usecasees/get_categories_usecase.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // 1. إضافة المكتبة
 import 'package:library_app1/features/auth/domain/usecasees/login.dart';
@@ -114,8 +115,7 @@ AuthBloc(this.loginUseCase, this.registerUseCase, this.getCategoriesUseCase) : s
       } catch (e) {
         if (e is DioException) {
           print("Laravel Validation Error: ${e.response?.data}");
-          final errorMessage = e.response?.data['message'] ?? "Login failed";
-          emit(AuthError(errorMessage));
+          emit(AuthError(_extractLoginErrorMessage(e.response?.data)));
         } else {
           emit(AuthError(e.toString()));
         }
@@ -131,6 +131,53 @@ AuthBloc(this.loginUseCase, this.registerUseCase, this.getCategoriesUseCase) : s
       emit(AuthError(e.toString()));
     }
   });
+
+    //  تحديث اهتمامات المستخدم بعد حفظها من شاشة الاهتمامات
+    on<UpdateUserInterestsEvent>((event, emit) async {
+      final current = state;
+      if (current is AuthSuccess) {
+        final user = current.user;
+        emit(AuthSuccess(User(
+          token: user.token,
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          userImage: user.userImage,
+          interests: event.interests,
+        )));
+      }
+    });
+
+    //  تسجيل الخروج: مسح بيانات المستخدم من الذاكرة والعودة للحالة الأولية
+    on<LogoutEvent>((event, emit) async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('auth_token');
+      await prefs.remove('is_logged_in');
+      emit(AuthInitial());
+    });
 }
+
+  //  استخراج رسالة خطأ آمنة من استجابة لارافيل دون انهيار التطبيق
+  String _extractLoginErrorMessage(dynamic data) {
+    if (data is String && data.trim().isNotEmpty) {
+      return data;
+    }
+    if (data is Map) {
+      final message = data['message'];
+      if (message is String && message.trim().isNotEmpty) {
+        return message;
+      }
+      final errors = data['errors'];
+      if (errors is Map) {
+        for (final field in errors.keys) {
+          final value = errors[field];
+          if (value is List && value.isNotEmpty) {
+            return value.first.toString();
+          }
+        }
+      }
+    }
+    return "Login failed";
+  }
   }
   
