@@ -5,7 +5,6 @@ class IndividualChallengeQuestionModel extends IndividualChallengeQuestionEntity
     required super.id,
     required super.questionText,
     required super.options,
-    required super.correctOptionIndex,
   });
 
   factory IndividualChallengeQuestionModel.fromJson(Map<String, dynamic> json) {
@@ -13,7 +12,6 @@ class IndividualChallengeQuestionModel extends IndividualChallengeQuestionEntity
       id: json['id'] as int,
       questionText: json['question_text'] as String? ?? '',
       options: (json['options'] as List<dynamic>?)?.cast<String>() ?? [],
-      correctOptionIndex: json['correct_option_index'] as int? ?? 0,
     );
   }
 
@@ -22,7 +20,6 @@ class IndividualChallengeQuestionModel extends IndividualChallengeQuestionEntity
       'id': id,
       'question_text': questionText,
       'options': options,
-      'correct_option_index': correctOptionIndex,
     };
   }
 }

@@ -4,12 +4,26 @@ class IndividualChallengeEntity {
   final int bookId;
   final String bookTitle;
   final List<IndividualChallengeQuestionEntity> questions;
-  final int bonusPoints;
 
   const IndividualChallengeEntity({
     required this.bookId,
     required this.bookTitle,
     required this.questions,
-    this.bonusPoints = 3,
+  });
+}
+
+class QuizSubmissionResult {
+  final bool passed;
+  final int correctAnswers;
+  final int pointsEarned;
+  final int currentTotalPoints;
+  final String message;
+
+  const QuizSubmissionResult({
+    required this.passed,
+    required this.correctAnswers,
+    required this.pointsEarned,
+    required this.currentTotalPoints,
+    required this.message,
   });
 }

@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../data/datasources/individual_challenge_remote_datasource.dart';
 import '../../domain/repositories/individual_challenge_repository_interface.dart';
 import 'individual_challenge_event.dart';
 import 'individual_challenge_state.dart';
@@ -21,44 +22,82 @@ class IndividualChallengeBloc
   ) async {
     emit(const IndividualChallengeLoading());
 
-    final result = await repository.getChallenge(
-      bookId: event.bookId,
-      bookTitle: event.bookTitle,
-    );
-    result.fold(
-      (error) => emit(IndividualChallengeError(message: error)),
-      (challenge) {
-        emit(IndividualChallengeInProgress(
-          challenge: challenge,
-          currentQuestionIndex: 0,
-          selectedAnswers: List<int?>.filled(challenge.questions.length, null),
-        ));
-      },
-    );
+    try {
+      final result = await repository.getChallenge(
+        bookId: event.bookId,
+        bookTitle: event.bookTitle,
+      );
+      result.fold(
+        (error) => emit(IndividualChallengeError(message: error)),
+        (challenge) {
+          emit(IndividualChallengeInProgress(
+            challenge: challenge,
+            currentQuestionIndex: 0,
+            selectedAnswers: List<String?>.filled(challenge.questions.length, null),
+          ));
+        },
+      );
+    } on QuizAlreadyAttemptedException {
+      emit(const IndividualChallengeAlreadyAttempted());
+    } on QuizUnavailableException {
+      emit(const IndividualChallengeQuizUnavailable());
+    } catch (e) {
+      emit(IndividualChallengeError(message: e.toString()));
+    }
   }
 
-  void _onAnswerQuestion(
+  Future<void> _onAnswerQuestion(
     AnswerQuestionEvent event,
     Emitter<IndividualChallengeState> emit,
-  ) {
+  ) async {
     final state = this.state;
     if (state is! IndividualChallengeInProgress) return;
 
-    final updatedAnswers = List<int?>.from(state.selectedAnswers);
-    updatedAnswers[event.questionIndex] = event.selectedOptionIndex;
+    final updatedAnswers = List<String?>.from(state.selectedAnswers);
+    updatedAnswers[event.questionIndex] = event.selectedOptionText;
 
     final questions = state.challenge.questions;
     if (event.questionIndex == questions.length - 1) {
-      final allCorrect = updatedAnswers.asMap().entries.every((entry) {
-        final answer = entry.value;
-        return answer != null && answer == questions[entry.key].correctOptionIndex;
-      });
-      if (allCorrect) {
-        emit(IndividualChallengePassed(
-          bonusPoints: state.challenge.bonusPoints,
-        ));
-      } else {
-        emit(const IndividualChallengeFailed());
+      final answersPayload = <Map<String, dynamic>>[];
+      for (var i = 0; i < questions.length; i++) {
+        final text = updatedAnswers[i];
+        if (text != null) {
+          answersPayload.add({
+            'question_id': questions[i].id,
+            'user_answer': text,
+          });
+        }
+      }
+
+      emit(IndividualChallengeInProgress(
+        challenge: state.challenge,
+        currentQuestionIndex: state.currentQuestionIndex,
+        selectedAnswers: updatedAnswers,
+      ));
+
+      try {
+        final result = await repository.submitQuiz(
+          bookId: state.challenge.bookId,
+          answers: answersPayload,
+        );
+        result.fold(
+          (error) => emit(IndividualChallengeError(message: error)),
+          (submission) {
+            if (submission.passed) {
+              emit(IndividualChallengePassed(
+                bonusPoints: submission.pointsEarned,
+              ));
+            } else {
+              emit(const IndividualChallengeFailed());
+            }
+          },
+        );
+      } on QuizAlreadyAttemptedException {
+        emit(const IndividualChallengeAlreadyAttempted());
+      } on QuizUnavailableException {
+        emit(const IndividualChallengeQuizUnavailable());
+      } catch (e) {
+        emit(IndividualChallengeError(message: e.toString()));
       }
     } else {
       emit(IndividualChallengeInProgress(

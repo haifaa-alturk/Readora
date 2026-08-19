@@ -22,15 +22,15 @@ class LoadIndividualChallengeEvent extends IndividualChallengeEvent {
 
 class AnswerQuestionEvent extends IndividualChallengeEvent {
   final int questionIndex;
-  final int selectedOptionIndex;
+  final String selectedOptionText;
 
   const AnswerQuestionEvent({
     required this.questionIndex,
-    required this.selectedOptionIndex,
+    required this.selectedOptionText,
   });
 
   @override
-  List<Object?> get props => [questionIndex, selectedOptionIndex];
+  List<Object?> get props => [questionIndex, selectedOptionText];
 }
 
 class SkipChallengeEvent extends IndividualChallengeEvent {

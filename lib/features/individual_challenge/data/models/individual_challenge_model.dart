@@ -6,7 +6,6 @@ class IndividualChallengeModel extends IndividualChallengeEntity {
     required super.bookId,
     required super.bookTitle,
     required super.questions,
-    super.bonusPoints,
   });
 
   factory IndividualChallengeModel.fromParams({

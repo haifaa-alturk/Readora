@@ -1,18 +1,18 @@
-/// Currently valid sources: 'Quiz', 'Reward', and 'Challenge'
+/// Currently valid types: 'Quiz', 'Reward', and 'Challenge'
 /// (Challenge = points earned from winning a Group Challenge).
-/// TODO: confirm with backend that these are the only valid source types.
+/// TODO: confirm with backend that these are the only valid type values.
 class PointsHistoryEntryEntity {
-  final int id;
-  final int pointsAmount;
-  final String source;
-  final DateTime date;
+  final String type;
+  final String title;
+  final String points;
+  final String date;
 
   const PointsHistoryEntryEntity({
-    required this.id,
-    required this.pointsAmount,
-    required this.source,
+    required this.type,
+    required this.title,
+    required this.points,
     required this.date,
   });
 
-  bool get isPositive => pointsAmount >= 0;
+  bool get isPositive => !points.trimLeft().startsWith('-');
 }

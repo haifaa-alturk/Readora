@@ -20,7 +20,7 @@ class IndividualChallengeLoading extends IndividualChallengeState {
 class IndividualChallengeInProgress extends IndividualChallengeState {
   final IndividualChallengeEntity challenge;
   final int currentQuestionIndex;
-  final List<int?> selectedAnswers;
+  final List<String?> selectedAnswers;
 
   const IndividualChallengeInProgress({
     required this.challenge,
@@ -56,4 +56,12 @@ class IndividualChallengeError extends IndividualChallengeState {
 
   @override
   List<Object?> get props => [message];
+}
+
+class IndividualChallengeAlreadyAttempted extends IndividualChallengeState {
+  const IndividualChallengeAlreadyAttempted();
+}
+
+class IndividualChallengeQuizUnavailable extends IndividualChallengeState {
+  const IndividualChallengeQuizUnavailable();
 }

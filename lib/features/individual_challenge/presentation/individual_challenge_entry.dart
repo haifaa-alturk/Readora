@@ -50,8 +50,10 @@ Future<void> openIndividualChallengeFlow(
                         status: 'completed',
                       ),
                     ));
-                    // Individual Challenge always awards exactly 3 points — hardcoded intentionally per business rule, not derived from bonusPoints, to avoid any future accidental variation.
-                    context.read<PointsBloc>().add(const AddPointsEvent(amount: 3, source: 'Quiz'));
+                    // Points are awarded server-side by the quiz submission — refresh the
+                    // Points feature from the server (GET user/points_history) to pick them up,
+                    // instead of faking a local increment.
+                    context.read<PointsBloc>().add(const LoadPointsEvent());
                     // This book's Individual Challenge quiz was just passed — count it toward any Group Challenge the user has joined. Safe to call unconditionally; the Bloc ignores this if there's no active joined challenge.
                     context.read<GroupChallengeBloc>().add(const RecordBookCompletionEvent());
                     Navigator.of(quizContext).push(

@@ -186,8 +186,8 @@ void main() {
   final walletRemoteDataSource = WalletRemoteDataSourceImpl(dev3ApiClient);
   final walletRepository = WalletRepositoryImpl(walletRemoteDataSource);
 
-  // Points (dev3) — uses same Dev3ApiClient & mock data
-  final pointsRemoteDataSource = PointsRemoteDataSourceImpl(dev3ApiClient);
+  // Points — uses real ApiClient (real points history from GET /user/points_history)
+  final pointsRemoteDataSource = PointsRemoteDataSourceImpl(apiClient);
   final pointsRepository = PointsRepositoryImpl(pointsRemoteDataSource);
 
   // Wins (dev3) — uses same Dev3ApiClient & mock data
@@ -213,9 +213,9 @@ void main() {
   final groupChallengeRepository =
       GroupChallengeRepositoryImpl(groupChallengeRemoteDataSource);
 
-  // Individual Challenge (dev3) — uses same Dev3ApiClient & mock data
+  // Individual Challenge — uses real ApiClient (real quiz endpoints)
   final individualChallengeRemoteDataSource =
-      IndividualChallengeRemoteDataSourceImpl(dev3ApiClient);
+      IndividualChallengeRemoteDataSourceImpl(apiClient);
   final individualChallengeRepository =
       IndividualChallengeRepositoryImpl(individualChallengeRemoteDataSource);
 

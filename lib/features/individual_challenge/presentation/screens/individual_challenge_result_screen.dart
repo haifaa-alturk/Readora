@@ -56,7 +56,7 @@ class IndividualChallengeResultScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'You passed the challenge and earned 3 bonus points.',
+                        'You passed the challenge and earned ${bonusPoints ?? 3} bonus points.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 15,

@@ -16,7 +16,12 @@ class ProfileRemoteDataSource {
   ProfileRemoteDataSource(this._apiClient, this._realApiClient);
 
   Future<ProfileModel> getProfile() async {
-    final response = await _realApiClient.dio.get('user');
+    final userFuture = _realApiClient.dio.get('user');
+    final booksCountFuture = getBooksCount();
+
+    final response = await userFuture;
+    final booksCount = await booksCountFuture;
+
     final json = Map<String, dynamic>.from(response.data as Map);
     final previous = _cachedProfile;
 
@@ -25,9 +30,16 @@ class ProfileRemoteDataSource {
       previous: previous,
       fallbackName: previous?.name ?? 'lara',
       fallbackEmail: previous?.email ?? 'lara@test.com',
+      booksCount: booksCount,
     );
 
     return _cachedProfile!;
+  }
+
+  Future<int> getBooksCount() async {
+    final response = await _realApiClient.dio.get('user/my-books');
+    final json = Map<String, dynamic>.from(response.data as Map);
+    return json['total_books'] as int? ?? 0;
   }
 
   Future<ProfileModel> updateProfile({
@@ -105,14 +117,18 @@ class ProfileRemoteDataSource {
     String? fallbackName,
     String? fallbackEmail,
     String? fallbackImagePath,
+    int? booksCount,
   }) {
     return ProfileModel(
       userId: json['id'] as int? ?? json['user_id'] as int? ?? previous?.userId ?? 0,
       name: json['name'] as String? ?? fallbackName ?? previous?.name ?? '',
       email: json['email'] as String? ?? fallbackEmail ?? previous?.email ?? '',
       points: int.tryParse(json['points']?.toString() ?? '') ?? previous?.points ?? 0,
-      booksCount: previous?.booksCount ?? 5,
-      walletBalance: previous?.walletBalance ?? 250.0,
+      booksCount: booksCount ?? previous?.booksCount ?? 5,
+      walletBalance:
+          num.tryParse(json['wallet']?.toString() ?? '')?.toDouble() ??
+          previous?.walletBalance ??
+          250.0,
       imagePath: json['user_image'] as String? ?? fallbackImagePath ?? previous?.imagePath,
     );
   }

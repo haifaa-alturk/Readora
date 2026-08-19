@@ -23,8 +23,32 @@ class IndividualChallengeRepositoryImpl
         bookTitle: bookTitle,
         questions: result,
       ));
+    } on QuizAlreadyAttemptedException {
+      rethrow;
+    } on QuizUnavailableException {
+      rethrow;
     } catch (e) {
       return Left('Error fetching challenge: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<Either<String, QuizSubmissionResult>> submitQuiz({
+    required int bookId,
+    required List<Map<String, dynamic>> answers,
+  }) async {
+    try {
+      final result = await _remoteDataSource.submitQuiz(
+        bookId: bookId,
+        answers: answers,
+      );
+      return Right(result);
+    } on QuizAlreadyAttemptedException {
+      rethrow;
+    } on QuizUnavailableException {
+      rethrow;
+    } catch (e) {
+      return Left('Error submitting quiz: ${e.toString()}');
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../domain/entities/points_history_entry_entity.dart';
 import '../../domain/repositories/points_repository_interface.dart';
 import 'points_event.dart';
 import 'points_state.dart';
@@ -36,22 +37,24 @@ class PointsBloc extends Bloc<PointsEvent, PointsState> {
     AddPointsEvent event,
     Emitter<PointsState> emit,
   ) async {
-    final current = state;
-    if (current is! PointsLoaded) return;
+    emit(const PointsLoading());
 
-    emit(PointsLoading());
-
-    final result = await repository.addPoints(
+    final refreshResult = await repository.addPoints(
       amount: event.amount,
       source: event.source,
     );
 
-    result.fold(
+    List<PointsHistoryEntryEntity>? history;
+    refreshResult.fold(
       (error) => emit(PointsError(message: error)),
-      (history) {
-        final newTotal = current.totalPoints + event.amount;
-        emit(PointsLoaded(totalPoints: newTotal, history: history));
-      },
+      (h) => history = h,
+    );
+    if (history == null) return;
+
+    final totalResult = await repository.getTotalPoints();
+    totalResult.fold(
+      (error) => emit(PointsError(message: error)),
+      (total) => emit(PointsLoaded(totalPoints: total, history: history!)),
     );
   }
 }

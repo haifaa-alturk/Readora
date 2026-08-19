@@ -191,11 +191,12 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     emit(current.copyWith(isDarkMode: event.isDarkMode));
   }
 
-  Future<void> _onLogout(
-    LogoutRequested event,
-    Emitter<SettingsState> emit,
-  ) async {
- 
+  Future<void> _onLogout(LogoutRequested event, Emitter<SettingsState> emit) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('auth_token');
+    await prefs.remove('is_logged_in');
+    // Do NOT remove 'language_code' or 'is_dark_mode' — those are device/UI preferences,
+    // not tied to the account, and should survive logout.
     emit(const LoggedOut());
   }
 }

@@ -31,14 +31,6 @@ class _PointsScreenState extends State<PointsScreen> {
     return buffer.toString();
   }
 
-  String _formatDate(DateTime date) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return '${date.day} ${months[date.month - 1]} ${date.year}';
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -180,7 +172,7 @@ class _PointsScreenState extends State<PointsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  entry.source,
+                  entry.title,
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
@@ -189,7 +181,7 @@ class _PointsScreenState extends State<PointsScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _formatDate(entry.date),
+                  entry.date,
                   style: const TextStyle(
                     fontSize: 12,
                    
@@ -199,7 +191,7 @@ class _PointsScreenState extends State<PointsScreen> {
             ),
           ),
           Text(
-            '${isPositive ? '+' : ''}${entry.pointsAmount} pts',
+            entry.points,
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,

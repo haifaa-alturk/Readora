@@ -84,6 +84,28 @@ class _IndividualChallengeQuizScreenState
                     ),
                   );
                 }
+                if (state is IndividualChallengeAlreadyAttempted) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Text(
+                        'You have already attempted this quiz. It cannot be retaken.',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                }
+                if (state is IndividualChallengeQuizUnavailable) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Text(
+                        'No quiz is available for this book.',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                }
                 if (state is IndividualChallengeInProgress) {
                   final questions = state.challenge.questions;
                   final question = questions[_visibleQuestionIndex];
@@ -143,7 +165,7 @@ class _IndividualChallengeQuizScreenState
     required Key key,
     required dynamic question,
     required int questionIndex,
-    required int? selectedAnswer,
+    required String? selectedAnswer,
     required bool answered,
     required int totalQuestions,
   }) {
@@ -171,10 +193,8 @@ class _IndividualChallengeQuizScreenState
             ),
             const SizedBox(height: 20),
             ...List.generate(question.options.length, (index) {
-              final isSelected = selectedAnswer == index;
-              final isCorrect = index == question.correctOptionIndex;
-              final showCheck = answered && isCorrect;
-              final showCross = answered && isSelected && !isCorrect;
+              final optionText = question.options[index] as String;
+              final isSelected = selectedAnswer == optionText;
 
               return GestureDetector(
                 onTap: (_isLocked || answered)
@@ -186,7 +206,7 @@ class _IndividualChallengeQuizScreenState
                       context.read<IndividualChallengeBloc>().add(
                             AnswerQuestionEvent(
                               questionIndex: questionIndex,
-                              selectedOptionIndex: index,
+                              selectedOptionText: optionText,
                             ),
                           );
                         if (questionIndex < totalQuestions - 1) {
@@ -231,54 +251,33 @@ class _IndividualChallengeQuizScreenState
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: showCheck
-                                ? const Color(0xff2d7d2d)
-                                : showCross
-                                    ? const Color(0xffc62828)
-                                    : const Color(0xff2d2d2d)
-                                        .withValues(alpha: 0.25),
+                            color: isSelected
+                                ? const Color(0xff2d2d2d)
+                                : const Color(0xff2d2d2d).withValues(alpha: 0.25),
                             width: 2,
                           ),
-                          color: showCheck
-                              ? const Color(0xff2d7d2d)
+                          color: isSelected
+                              ? const Color(0xff2d2d2d)
                               : Colors.transparent,
                         ),
-                        child: showCheck
+                        child: isSelected
                             ? const Icon(
                                 Icons.check,
                                 size: 14,
                                 color: Colors.white,
                               )
-                            : showCross
-                                ? const Icon(
-                                    Icons.close,
-                                    size: 14,
-                                    color: Color(0xffc62828),
-                                  )
-                                : null,
+                            : null,
                       ),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Text(
-                          question.options[index],
+                          optionText,
                           style: TextStyle(
                             fontSize: 15,
                             
                           ),
                         ),
                       ),
-                      if (showCheck)
-                        const Icon(
-                          Icons.check_circle,
-                          color: Color(0xff2d7d2d),
-                          size: 22,
-                        ),
-                      if (showCross)
-                        const Icon(
-                          Icons.cancel,
-                          color: Color(0xffc62828),
-                          size: 22,
-                        ),
                     ],
                   ),
                 ),

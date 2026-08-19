@@ -7,4 +7,9 @@ abstract class IndividualChallengeRepositoryInterface {
     required int bookId,
     required String bookTitle,
   });
+
+  Future<Either<String, QuizSubmissionResult>> submitQuiz({
+    required int bookId,
+    required List<Map<String, dynamic>> answers,
+  });
 }

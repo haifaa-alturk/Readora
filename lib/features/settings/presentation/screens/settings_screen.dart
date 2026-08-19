@@ -266,6 +266,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:library_app1/core/language/app_localizations.dart';
+import 'package:library_app1/features/auth/presentation/pages/login_page.dart';
 
 // 🔴 استيراد ملف الترجمة
 // import 'package:library_app1/core/utils/app_localizations.dart'; // عدلي المسار بحسب موقع الملف لديك
@@ -317,9 +318,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SnackBar(content: Text(state.message)),
             );
           } else if (state is LoggedOut) {
-            Navigator.of(context).popUntil((route) => route.isFirst);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Logged out successfully')),
+            Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => LoginScreen()),
+              (route) => false,
             );
           }
         },
