@@ -25,7 +25,11 @@ class Endpoints {
   static String individualChallengeQuestions(int bookId) => '/books/$bookId/challenge-questions';
   static const String individualChallengeSubmit = '/challenges/individual/submit';
 
-  static const String activeGroupChallenge = '/challenges/group/active';
-  static String joinGroupChallenge(int challengeId) => '/challenges/group/$challengeId/join';
-  static String groupChallengeWinners(int challengeId) => '/challenges/group/$challengeId/winners';
+  static const String groupEventsCurrent = '/challenges/group/current';
+  static const String groupEventsEnded = '/challenges/group/ended';
+  static const String groupEventsUpcoming = '/challenges/group/upcoming';
+  static const String groupEventsMy = '/challenges/group/mine';
+  static String registerGroupEvent(int eventId) => '/challenges/group/$eventId/register';
+  static String groupEventWinners(int eventId) => '/challenges/group/$eventId/winners';
+  static const String recordGroupBookQuizResult = '/challenges/group/book-result';
 }

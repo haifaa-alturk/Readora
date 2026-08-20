@@ -3,12 +3,19 @@ import '../../../../core/mock_dev3/mock_data_provider.dart';
 import '../../../../core/network_dev3/api_client.dart';
 import '../models/group_challenge_model.dart';
 import '../models/challenge_winner_model.dart';
+import '../models/book_progress_model.dart';
 
 abstract class GroupChallengeRemoteDataSource {
-  Future<GroupChallengeModel?> getActiveChallenge();
-  Future<GroupChallengeModel> joinChallenge({required int challengeId});
-  Future<List<ChallengeWinnerModel>> getWinners({required int challengeId});
-  Future<GroupChallengeModel> incrementBookProgress({required int challengeId});
+  Future<List<GroupChallengeModel>> getCurrentEvents();
+  Future<List<GroupChallengeModel>> getEndedEvents();
+  Future<List<GroupChallengeModel>> getUpcomingEvents();
+  Future<List<GroupChallengeModel>> getMyEvents();
+  Future<GroupChallengeModel> registerForEvent({required int eventId});
+  Future<List<ChallengeWinnerModel>> getWinners({required int eventId});
+  Future<List<GroupChallengeModel>> recordBookQuizResult({
+    required int bookId,
+    required bool passed,
+  });
 }
 
 class GroupChallengeRemoteDataSourceImpl
@@ -18,101 +25,185 @@ class GroupChallengeRemoteDataSourceImpl
   // ignore: unused_field — kept for when real API call is uncommented below
   final Dev3ApiClient _apiClient;
 
-  GroupChallengeModel? _cachedChallenge;
+  List<GroupChallengeModel>? _allEvents;
 
   Future<void> _ensureLoaded() async {
-    if (_cachedChallenge != null) return;
+    if (_allEvents != null) return;
+
+    final events = <Map<String, dynamic>>[];
     if (useMockData) {
-      _cachedChallenge = GroupChallengeModel.fromJson(
-        MockDataProvider.activeGroupChallenge(),
-      );
-      return;
+      events
+        ..addAll(MockDataProvider.groupEventsCurrent())
+        ..addAll(MockDataProvider.groupEventsEnded())
+        ..addAll(MockDataProvider.groupEventsUpcoming());
+    } else {
+      // TODO: confirm real group-events endpoints with backend team.
+      // final current = await _apiClient.get('/group-events?status=current');
+      // final ended = await _apiClient.get('/group-events?status=ended');
+      // final upcoming = await _apiClient.get('/group-events?status=upcoming');
+      // ... would map each list here ...
+      events
+        ..addAll(MockDataProvider.groupEventsCurrent())
+        ..addAll(MockDataProvider.groupEventsEnded())
+        ..addAll(MockDataProvider.groupEventsUpcoming());
     }
-    // TODO: confirm real active-group-challenge endpoint URL with backend team
-    // import 'package:dev3/core/network/endpoints.dart' shows Endpoints.activeGroupChallenge
-    // final response = await _apiClient.get('/challenges/group/active');
-    // if (response.data == null) return;
-    // _cachedChallenge = GroupChallengeModel.fromJson(response.data as Map<String, dynamic>);
-    _cachedChallenge = GroupChallengeModel.fromJson(
-      MockDataProvider.activeGroupChallenge(),
-    );
+
+    _allEvents = events.map((e) => GroupChallengeModel.fromJson(e)).toList();
   }
 
   @override
-  Future<GroupChallengeModel?> getActiveChallenge() async {
+  Future<List<GroupChallengeModel>> getCurrentEvents() async {
     await _ensureLoaded();
-    return _cachedChallenge;
+    return _allEvents!.where((e) => e.status == 'current').toList();
   }
 
   @override
-  Future<GroupChallengeModel> joinChallenge({
-    required int challengeId,
+  Future<List<GroupChallengeModel>> getEndedEvents() async {
+    await _ensureLoaded();
+    return _allEvents!.where((e) => e.status == 'ended').toList();
+  }
+
+  @override
+  Future<List<GroupChallengeModel>> getUpcomingEvents() async {
+    await _ensureLoaded();
+    return _allEvents!.where((e) => e.status == 'upcoming').toList();
+  }
+
+  @override
+  Future<List<GroupChallengeModel>> getMyEvents() async {
+    await _ensureLoaded();
+    return _allEvents!.where((e) => e.isRegistered).toList();
+  }
+
+  @override
+  Future<GroupChallengeModel> registerForEvent({
+    required int eventId,
   }) async {
     await _ensureLoaded();
-    if (_cachedChallenge != null && _cachedChallenge!.id == challengeId) {
-      _cachedChallenge = GroupChallengeModel(
-        id: _cachedChallenge!.id,
-        title: _cachedChallenge!.title,
-        description: _cachedChallenge!.description,
-        bonusPoints: _cachedChallenge!.bonusPoints,
-        requiredBooks: _cachedChallenge!.requiredBooks,
-        requiredQuizzes: _cachedChallenge!.requiredQuizzes,
-        deadline: _cachedChallenge!.deadline,
-        isJoined: true,
-        userBooksCompleted: _cachedChallenge!.userBooksCompleted,
-        userQuizzesPassed: _cachedChallenge!.userQuizzesPassed,
-        status: _cachedChallenge!.status,
+    final index = _allEvents!.indexWhere((e) => e.id == eventId);
+    if (index == -1) {
+      throw Exception('Event not found');
+    }
+
+    final event = _allEvents![index];
+    late GroupChallengeModel updated;
+    if (event.status == 'current') {
+      updated = event.copyWith(
+        isRegistered: true,
+        userOutcome: 'ongoing',
+        userBookProgress: event.requiredBooks
+            .map(
+              (rb) => BookProgressModel(
+                bookId: rb.bookId,
+                title: rb.title,
+                isCompleted: false,
+                isFailed: false,
+              ),
+            )
+            .toList(),
+      );
+    } else {
+      updated = event.copyWith(
+        isRegistered: true,
+        userOutcome: 'registered',
       );
     }
-    return _cachedChallenge!;
+
+    _allEvents![index] = updated;
+    return updated;
   }
 
   @override
   Future<List<ChallengeWinnerModel>> getWinners({
-    required int challengeId,
+    required int eventId,
   }) async {
     if (useMockData) {
-      final data = MockDataProvider.groupChallengeWinners();
+      final data = MockDataProvider.groupEventWinners(eventId);
       return data.map((e) => ChallengeWinnerModel.fromJson(e)).toList();
     }
-    // TODO: confirm real challenge-winners endpoint URL with backend team
-    // import 'package:dev3/core/network/endpoints.dart' shows Endpoints.groupChallengeWinners
-    // final response = await _apiClient.get('/challenges/group/$challengeId/winners');
+    // TODO: confirm real group-events winners endpoint with backend team.
+    // final response = await _apiClient.get('/group-events/$eventId/winners');
     // final list = response.data as List<dynamic>;
     // return list
     //     .map((e) => ChallengeWinnerModel.fromJson(e as Map<String, dynamic>))
     //     .toList();
-    final data = MockDataProvider.groupChallengeWinners();
+    final data = MockDataProvider.groupEventWinners(eventId);
     return data.map((e) => ChallengeWinnerModel.fromJson(e)).toList();
   }
 
+  // NOTE: both 'won' and 'lost' are decided in real time here, not deferred to
+  // event end. 'lost' is absolute and overrides prior progress. 'won' fires the
+  // instant the last required book is completed; its rank/points use
+  // MockDataProvider.groupEventOtherFinishersCount() as a temporary local
+  // simulation of the other participants, since only the real backend can know
+  // the true finishing order once it exists.
   @override
-  Future<GroupChallengeModel> incrementBookProgress({
-    required int challengeId,
+  Future<List<GroupChallengeModel>> recordBookQuizResult({
+    required int bookId,
+    required bool passed,
   }) async {
     await _ensureLoaded();
-    // Only increment progress for a challenge the user has actually joined.
-    // Caps at the required amount so it never overshoots.
-    if (_cachedChallenge != null &&
-        _cachedChallenge!.id == challengeId &&
-        _cachedChallenge!.isJoined) {
-      final newCount =
-          (_cachedChallenge!.userBooksCompleted + 1)
-              .clamp(0, _cachedChallenge!.requiredBooks);
-      _cachedChallenge = GroupChallengeModel(
-        id: _cachedChallenge!.id,
-        title: _cachedChallenge!.title,
-        description: _cachedChallenge!.description,
-        bonusPoints: _cachedChallenge!.bonusPoints,
-        requiredBooks: _cachedChallenge!.requiredBooks,
-        requiredQuizzes: _cachedChallenge!.requiredQuizzes,
-        deadline: _cachedChallenge!.deadline,
-        isJoined: _cachedChallenge!.isJoined,
-        userBooksCompleted: newCount,
-        userQuizzesPassed: _cachedChallenge!.userQuizzesPassed,
-        status: _cachedChallenge!.status,
+
+    final updated = _allEvents!.map((event) {
+      final isCandidate = event.status == 'current' &&
+          event.isRegistered &&
+          event.userOutcome != 'lost' &&
+          event.userOutcome != 'won' &&
+          event.requiredBooks.any((rb) => rb.bookId == bookId);
+      return isCandidate ? _applyQuizResult(event, bookId, passed) : event;
+    }).toList();
+
+    _allEvents = updated;
+    return getCurrentEvents();
+  }
+
+  GroupChallengeModel _applyQuizResult(
+    GroupChallengeModel event,
+    int bookId,
+    bool passed,
+  ) {
+    final progress = event.userBookProgress
+        .map((p) => p.bookId == bookId
+            ? BookProgressModel(
+                bookId: p.bookId,
+                title: p.title,
+                isCompleted: passed,
+                isFailed: !passed,
+              )
+            : p)
+        .toList();
+
+    if (!passed) {
+      return event.copyWith(
+        userBookProgress: progress,
+        userOutcome: 'lost',
+        userWonDate: null,
+        userPointsEarned: null,
       );
     }
-    return _cachedChallenge!;
+
+    final allComplete = progress.every((p) => p.isCompleted);
+    if (allComplete) {
+      final otherFinishers = MockDataProvider.groupEventOtherFinishersCount(event.id);
+      final rank = otherFinishers + 1;
+      final points = rank == 1
+          ? event.firstPlacePoints
+          : rank == 2
+              ? event.secondPlacePoints
+              : rank == 3
+                  ? event.thirdPlacePoints
+                  : event.participantPoints;
+      return event.copyWith(
+        userBookProgress: progress,
+        userOutcome: 'won',
+        userWonDate: DateTime.now(),
+        userPointsEarned: points,
+      );
+    }
+
+    return event.copyWith(
+      userBookProgress: progress,
+      userOutcome: 'ongoing',
+    );
   }
 }

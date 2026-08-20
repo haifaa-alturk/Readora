@@ -1,100 +1,193 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../individual_challenge/presentation/individual_challenge_entry.dart';
+import '../../domain/entities/book_progress_entity.dart';
 import '../../domain/entities/group_challenge_entity.dart';
+import '../../domain/entities/required_book_entity.dart';
 import '../bloc/group_challenge_bloc.dart';
 import '../bloc/group_challenge_event.dart';
+import '../bloc/group_challenge_state.dart';
 import '../widgets/group_challenge_countdown.dart';
 
 const Color _boxOneOrange = Color(0xffFFA754);
 const Color _boxTwoGreen = Color(0xff7ED399);
 const Color _boxThreePurple = Color(0xffC299FC);
-const Color _softGray = Color(0xfff2f1ef);
 
-class GroupChallengeActiveScreen extends StatelessWidget {
-  final GroupChallengeEntity challenge;
+class CurrentEventDetailScreen extends StatelessWidget {
+  final GroupChallengeEntity event;
 
-  const GroupChallengeActiveScreen({super.key, required this.challenge});
+  const CurrentEventDetailScreen({super.key, required this.event});
+
+  GroupChallengeEntity _resolveLiveEvent(
+    GroupChallengeState state,
+    GroupChallengeEntity fallback,
+  ) {
+    final current = state.currentEvents;
+    if (current == null) return fallback;
+    for (final e in current) {
+      if (e.id == fallback.id) return e;
+    }
+    return fallback;
+  }
+
+  BookProgressEntity? _progressFor(
+    GroupChallengeEntity event,
+    RequiredBookEntity book,
+  ) {
+    for (final p in event.userBookProgress) {
+      if (p.bookId == book.bookId) return p;
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor, 
-            appBar: AppBar(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor, 
-              elevation: 0,
-              title: const Text(
-                'The Challenge Has Started!',
-                style: TextStyle(
-                 
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
+      backgroundColor: const Color(0xfffcfbfa),
+      appBar: AppBar(
+        backgroundColor: const Color(0xfffcfbfa),
+        elevation: 0,
+        title: Text(
+          event.title,
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+        ),
+      ),
+      body: BlocBuilder<GroupChallengeBloc, GroupChallengeState>(
+        builder: (context, state) {
+          final liveEvent = _resolveLiveEvent(state, event);
+          final canTakeQuiz =
+              liveEvent.userOutcome != 'won' && liveEvent.userOutcome != 'lost';
+
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              if (liveEvent.userOutcome == 'lost')
+                _buildLostBanner(),
+              if (liveEvent.userOutcome == 'won')
+                _buildWonBanner(liveEvent),
+              _buildInfoCard(
+                color: _boxOneOrange,
+                icon: Icons.info_outline,
+                heading: 'About This Competition',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      liveEvent.title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      liveEvent.description,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            body: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                _buildInfoCard(
-                  color: _boxOneOrange,
-                  icon: Icons.info_outline,
-                  heading: 'About This Challenge',
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        challenge.title,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          
-                        ),
+              _buildInfoCard(
+                color: _boxTwoGreen,
+                icon: Icons.timer,
+                heading: 'Time Remaining',
+                child: Center(
+                  child: GroupChallengeCountdown(
+                    deadline: liveEvent.endDate,
+                    onFinished: () => context
+                        .read<GroupChallengeBloc>()
+                        .add(const LoadCurrentEventsEvent()),
+                  ),
+                ),
+              ),
+              _buildInfoCard(
+                color: _boxThreePurple,
+                icon: Icons.menu_book,
+                heading: 'Required Books',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (final book in liveEvent.requiredBooks)
+                      _buildBookRow(
+                        context,
+                        liveEvent,
+                        book,
+                        canTakeQuiz: canTakeQuiz,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        challenge.description,
-                        style: TextStyle(
-                          fontSize: 14,
-                          
-                        ),
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
-                _buildInfoCard(
-                  color: _boxTwoGreen,
-                  icon: Icons.timer,
-                  heading: 'Time Remaining',
-                  child: Center(
-                    child: GroupChallengeCountdown(
-                      deadline: challenge.deadline,
-                      onFinished: () => context.read<GroupChallengeBloc>().add(const RefreshGroupChallengeEvent()),
-                    ),
-                  ),
-                ),
-                _buildInfoCard(
-                  color: _boxThreePurple,
-                  icon: Icons.emoji_events,
-                  heading: 'Why should you join this challenge?',
-                  child: Text(
-                    'Everyone who successfully completes this challenge will receive ${challenge.bonusPoints} bonus points and a commemorative achievement.\nWhy not become one of the winners?',
-                    style: TextStyle(
-                      fontSize: 14,
-                    
-                    ),
-                  ),
-                ),
-                if (challenge.isJoined)
-                  _buildProgressCard()
-                else ...[
-                  _buildJoinButtons(context),
-                ],
-              ],
-            ),
+              ),
+              if (!liveEvent.isRegistered)
+                _buildJoinButtons(context, liveEvent),
+            ],
+          );
+        },
+      ),
     );
   }
 
- Widget _buildInfoCard({
+  Widget _buildLostBanner() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xffe74c3c).withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xffe74c3c).withValues(alpha: 0.4),
+        ),
+      ),
+      child: const Row(
+        children: [
+          Icon(Icons.cancel, color: Color(0xffe74c3c)),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'You lost this competition — one of the required book quizzes was not passed.',
+              style: TextStyle(
+                color: Color(0xffe74c3c),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWonBanner(GroupChallengeEntity event) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xfffce38a).withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xfff1c40f).withValues(alpha: 0.5),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.emoji_events, color: Color(0xffb8860b)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'You won this competition! +${event.userPointsEarned} points',
+              style: const TextStyle(
+                color: Color(0xff7a5c00),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoCard({
     required Color color,
     required IconData icon,
     required String heading,
@@ -115,7 +208,6 @@ class GroupChallengeActiveScreen extends StatelessWidget {
             children: [
               Icon(icon, size: 18),
               const SizedBox(width: 8),
-              // 👈 تغليف النص بـ Expanded لمنع الـ Overflow
               Expanded(
                 child: Text(
                   heading,
@@ -134,28 +226,100 @@ class GroupChallengeActiveScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProgressCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: _softGray,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
+  Widget _buildBookRow(
+    BuildContext context,
+    GroupChallengeEntity event,
+    RequiredBookEntity book, {
+    required bool canTakeQuiz,
+  }) {
+    final progress = _progressFor(event, book);
+
+    if (event.userBookProgress.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Text(book.title, style: const TextStyle(fontSize: 14)),
+      );
+    }
+
+    final isCompleted = progress?.isCompleted ?? false;
+    final isFailed = progress?.isFailed ?? false;
+
+    if (isCompleted) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Color(0xff54a747), size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                book.title,
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+            ),
+            const Text(
+              'Completed',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: Color(0xff54a747),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (isFailed) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          children: [
+            const Icon(Icons.cancel, color: Color(0xffe74c3c), size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                book.title,
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+            ),
+            const Text(
+              'Failed',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: Color(0xffe74c3c),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
         children: [
-          _buildProgressRow(
-            '${challenge.userBooksCompleted}/${challenge.requiredBooks} books completed',
-            challenge.userBooksCompleted,
-            challenge.requiredBooks,
+          const Icon(
+            Icons.circle_outlined,
+            color: Color(0xff2d2d2d),
+            size: 18,
           ),
-          const SizedBox(height: 4),
-          Text(
-            'A book only counts once you pass its Individual Challenge quiz.',
-            style: TextStyle(
-              fontSize: 12,
-             
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(book.title, style: const TextStyle(fontSize: 14)),
+          ),
+          TextButton(
+            onPressed: canTakeQuiz
+                ? () => openIndividualChallengeFlow(
+                      context,
+                      bookId: book.bookId,
+                      bookTitle: book.title,
+                    )
+                : null,
+            child: const Text(
+              'Start Quiz',
+              style: TextStyle(fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -163,71 +327,26 @@ class GroupChallengeActiveScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProgressRow(String label, int current, int total) {
-    final progress = total > 0 ? current / total : 0.0;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // 👈 تغليف النص بـ Expanded
-            Expanded(
-              child: Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 14,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              '$current/$total',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: progress,
-            backgroundColor: const Color(0xff2d2d2d).withValues(alpha: 0.08),
-            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xff6dbf82)),
-            minHeight: 6,
+  Widget _buildJoinButtons(BuildContext context, GroupChallengeEntity event) {
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: () {
+          context.read<GroupChallengeBloc>().add(
+                RegisterForEventEvent(eventId: event.id),
+              );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xfffce38a),
+          foregroundColor: const Color(0xff2d2d2d),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
           ),
+          textStyle: const TextStyle(fontWeight: FontWeight.w600),
         ),
-      ],
-    );
-  }
-
-  Widget _buildJoinButtons(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: ElevatedButton(
-            onPressed: () {
-              context.read<GroupChallengeBloc>().add(
-                    JoinChallengeEvent(challengeId: challenge.id),
-                  );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xfffce38a),
-              foregroundColor: const Color(0xff2d2d2d),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              textStyle: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-            child: const Text('Convince Me! I Want To Join'),
-          ),
-        ),
-      ],
+        child: const Text('Convince Me! I Want To Join'),
+      ),
     );
   }
 }

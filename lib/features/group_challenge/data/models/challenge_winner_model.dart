@@ -5,6 +5,8 @@ class ChallengeWinnerModel extends ChallengeWinnerEntity {
     required super.userId,
     required super.username,
     super.avatarUrl,
+    super.rank,
+    required super.pointsAwarded,
   });
 
   factory ChallengeWinnerModel.fromJson(Map<String, dynamic> json) {
@@ -12,6 +14,8 @@ class ChallengeWinnerModel extends ChallengeWinnerEntity {
       userId: json['user_id'] as int,
       username: json['username'] as String? ?? '',
       avatarUrl: json['avatar_url'] as String?,
+      rank: json['rank'] as int?,
+      pointsAwarded: json['points_awarded'] as int? ?? 0,
     );
   }
 
@@ -20,6 +24,8 @@ class ChallengeWinnerModel extends ChallengeWinnerEntity {
       'user_id': userId,
       'username': username,
       'avatar_url': avatarUrl,
+      'rank': rank,
+      'points_awarded': pointsAwarded,
     };
   }
 }

@@ -7,23 +7,49 @@ abstract class GroupChallengeEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoadGroupChallengeEvent extends GroupChallengeEvent {
-  const LoadGroupChallengeEvent();
+class LoadCurrentEventsEvent extends GroupChallengeEvent {
+  const LoadCurrentEventsEvent();
 }
 
-class JoinChallengeEvent extends GroupChallengeEvent {
-  final int challengeId;
+class LoadEndedEventsEvent extends GroupChallengeEvent {
+  const LoadEndedEventsEvent();
+}
 
-  const JoinChallengeEvent({required this.challengeId});
+class LoadUpcomingEventsEvent extends GroupChallengeEvent {
+  const LoadUpcomingEventsEvent();
+}
+
+class LoadMyEventsEvent extends GroupChallengeEvent {
+  const LoadMyEventsEvent();
+}
+
+class RegisterForEventEvent extends GroupChallengeEvent {
+  final int eventId;
+
+  const RegisterForEventEvent({required this.eventId});
 
   @override
-  List<Object?> get props => [challengeId];
+  List<Object?> get props => [eventId];
 }
 
-class RefreshGroupChallengeEvent extends GroupChallengeEvent {
-  const RefreshGroupChallengeEvent();
+class LoadEventWinnersEvent extends GroupChallengeEvent {
+  final int eventId;
+
+  const LoadEventWinnersEvent({required this.eventId});
+
+  @override
+  List<Object?> get props => [eventId];
 }
 
-class RecordBookCompletionEvent extends GroupChallengeEvent {
-  const RecordBookCompletionEvent();
+class RecordBookQuizResultEvent extends GroupChallengeEvent {
+  final int bookId;
+  final bool passed;
+
+  const RecordBookQuizResultEvent({
+    required this.bookId,
+    required this.passed,
+  });
+
+  @override
+  List<Object?> get props => [bookId, passed];
 }

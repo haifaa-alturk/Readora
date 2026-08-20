@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../points/presentation/bloc/points_bloc.dart';
+import '../../../points/presentation/bloc/points_event.dart';
+import '../../../wins/domain/entities/win_entity.dart';
+import '../../../wins/presentation/bloc/wins_bloc.dart';
+import '../../../wins/presentation/bloc/wins_event.dart';
+import '../../domain/entities/group_challenge_entity.dart';
 import '../bloc/group_challenge_bloc.dart';
 import '../bloc/group_challenge_event.dart';
 import '../bloc/group_challenge_state.dart';
-import 'group_challenge_active_screen.dart';
-import 'group_challenge_winners_screen.dart';
-import '../../../wins/presentation/bloc/wins_bloc.dart';
-import '../../../wins/presentation/bloc/wins_event.dart';
-import '../../../wins/domain/entities/win_entity.dart';
-import '../../../profile/presentation/bloc/profile_bloc.dart';
-import '../../../profile/presentation/bloc/profile_state.dart';
-import '../../../points/presentation/bloc/points_bloc.dart';
-import '../../../points/presentation/bloc/points_event.dart';
+import 'current_events_screen.dart';
+import 'ended_events_screen.dart';
+import 'my_competitions_screen.dart';
+import 'upcoming_events_screen.dart';
 
 class GroupChallengeScreen extends StatefulWidget {
   const GroupChallengeScreen({super.key});
@@ -22,131 +23,167 @@ class GroupChallengeScreen extends StatefulWidget {
 }
 
 class _GroupChallengeScreenState extends State<GroupChallengeScreen> {
-  bool _winAlreadyRecorded = false;
+  final Set<int> _notifiedWinEventIds = {};
 
   @override
   void initState() {
     super.initState();
-    context.read<GroupChallengeBloc>().add(const LoadGroupChallengeEvent());
+    context.read<GroupChallengeBloc>().add(const LoadCurrentEventsEvent());
+    context.read<GroupChallengeBloc>().add(const LoadMyEventsEvent());
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<GroupChallengeBloc, GroupChallengeState>(
-      listener: (context, state) {
-        if (state is GroupChallengeWinnersAvailable && !_winAlreadyRecorded) {
-          final profileState = context.read<ProfileBloc>().state;
-          int? profileUserId;
-          if (profileState is ProfileLoaded) {
-            profileUserId = profileState.profile.userId;
+    return Scaffold(
+      backgroundColor: const Color(0xfffcfbfa),
+      appBar: AppBar(
+        backgroundColor: const Color(0xfffcfbfa),
+        elevation: 0,
+        title: const Text(
+          'Competitions',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+      ),
+      body: BlocListener<GroupChallengeBloc, GroupChallengeState>(
+        listener: (context, state) {
+          final wonEvents = <GroupChallengeEntity>[
+            ...?state.currentEvents,
+            ...?state.myEvents,
+          ];
+          for (final event in wonEvents) {
+            if (event.userOutcome == 'won' &&
+                !_notifiedWinEventIds.contains(event.id)) {
+              _notifiedWinEventIds.add(event.id);
+              context.read<WinsBloc>().add(ReceiveNewWinEvent(
+                    win: WinEntity(
+                      id: DateTime.now().millisecondsSinceEpoch,
+                      title: event.title,
+                      description: 'Completed',
+                      iconName: 'emoji_events',
+                      dateEarned: DateTime.now(),
+                      type: 'group_challenge',
+                      challengeId: event.id,
+                      challengeType: 'group',
+                      reward: '${event.userPointsEarned} bonus points',
+                      earnedPoints: event.userPointsEarned ?? 0,
+                      completedDate: DateTime.now(),
+                      status: 'completed',
+                    ),
+                  ));
+              context
+                  .read<PointsBloc>()
+                  .add(AddPointsEvent(
+                    amount: event.userPointsEarned ?? 0,
+                    source: 'Challenge',
+                  ));
+            }
           }
-          // TODO: replace this mock-user-id matching with a real authenticated
-          //       user id comparison once auth is implemented app-wide.
-          final isWinner = profileUserId != null &&
-              state.winners.any((w) => w.userId == profileUserId);
-          if (isWinner) {
-            _winAlreadyRecorded = true;
-            context.read<WinsBloc>().add(ReceiveNewWinEvent(
-              win: WinEntity(
-                id: DateTime.now().millisecondsSinceEpoch,
-                title: state.endedChallenge.title,
-                description: 'Completed',
-                iconName: 'emoji_events',
-                dateEarned: DateTime.now(),
-                type: 'group_challenge',
-                challengeId: state.endedChallenge.id,
-                challengeType: 'group',
-                reward:
-                    '${state.endedChallenge.bonusPoints} bonus points',
-                earnedPoints: state.endedChallenge.bonusPoints,
-                completedDate: DateTime.now(),
-                status: 'completed',
+        },
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Reading Competitions',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
               ),
-            ));
-            // Group Challenge points are admin-decided per challenge (bonusPoints), unlike Individual Challenge's fixed 3 points — always read from the challenge entity, never hardcode.
-            context.read<PointsBloc>().add(AddPointsEvent(amount: state.endedChallenge.bonusPoints, source: 'Challenge'));
-          }
-        }
-      },
-      builder: (context, state) {
-        if (state is GroupChallengeInitial || state is GroupChallengeLoading) {
-          return _buildShell(
-            child: const Center(child: CircularProgressIndicator()),
-          );
-        }
-        if (state is GroupChallengeError) {
-          return _buildShell(
-            child: Center(
-              child: Text(
-                state.message,
-
+              const SizedBox(height: 8),
+              const Text(
+                'Join live events, climb the ranks, and win bonus points.',
+                style: TextStyle(fontSize: 14),
               ),
-            ),
-          );
-        }
-        if (state is GroupChallengeEmpty) {
-          return _buildShell(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              const SizedBox(height: 28),
+              Row(
                 children: [
-                  Icon(
-                    Icons.emoji_events_outlined,
-                    size: 64,
-                  
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'No active challenge right now',
-                    style: TextStyle(
-                      fontSize: 16,
-                 
+                  Expanded(
+                    child: _buildNavCard(
+                      label: 'Current',
+                      color: const Color(0xffFFA754),
+                      icon: Icons.local_fire_department,
+                      screen: const CurrentEventsScreen(),
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Check back soon for a new challenge!',
-                    style: TextStyle(
-                      fontSize: 13,
-                      
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildNavCard(
+                      label: 'Ended',
+                      color: const Color(0xff7ED399),
+                      icon: Icons.flag,
+                      screen: const EndedEventsScreen(),
                     ),
                   ),
                 ],
               ),
-            ),
-          );
-        }
-        if (state is GroupChallengeActive) {
-          return GroupChallengeActiveScreen(challenge: state.challenge);
-        }
-        if (state is GroupChallengeWinnersAvailable) {
-          return GroupChallengeWinnersScreen(
-            winners: state.winners,
-            endedChallenge: state.endedChallenge,
-          );
-        }
-        return _buildShell(
-          child: const Center(child: CircularProgressIndicator()),
-        );
-      },
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildNavCard(
+                      label: 'Upcoming',
+                      color: const Color(0xffC299FC),
+                      icon: Icons.schedule,
+                      screen: const UpcomingEventsScreen(),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildNavCard(
+                      label: 'My Competitions',
+                      color: const Color(0xff8CD7F7),
+                      icon: Icons.emoji_events,
+                      screen: const MyCompetitionsScreen(),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
-  Widget _buildShell({required Widget child}) {
-    return Scaffold(
-            backgroundColor: const Color(0xfffcfbfa),
-            appBar: AppBar(
-              backgroundColor: const Color(0xfffcfbfa),
-              elevation: 0,
-              title: const Text(
-                'Challenge',
-                style: TextStyle(
-                
-                  fontWeight: FontWeight.w600,
+  Widget _buildNavCard({
+    required String label,
+    required Color color,
+    required IconData icon,
+    required Widget screen,
+  }) {
+    return Material(
+      color: color,
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BlocProvider.value(
+              value: context.read<GroupChallengeBloc>(),
+              child: screen,
+            ),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 40, color: Colors.white),
+              const SizedBox(height: 12),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-            ),
-            body: child,
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
