@@ -10,8 +10,9 @@ class Dev3ApiClient {
     _dio = Dio(
       BaseOptions(
         baseUrl: Endpoints.baseUrl,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 60),
+        sendTimeout: const Duration(seconds: 60),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -40,24 +41,15 @@ class Dev3ApiClient {
     );
   }
 
-  Future<Response> get(
-    String path, {
-    Map<String, dynamic>? queryParameters,
-  }) {
+  Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) {
     return _dio.get(path, queryParameters: queryParameters);
   }
 
-  Future<Response> post(
-    String path, {
-    dynamic data,
-  }) {
+  Future<Response> post(String path, {dynamic data}) {
     return _dio.post(path, data: data);
   }
 
-  Future<Response> put(
-    String path, {
-    dynamic data,
-  }) {
+  Future<Response> put(String path, {dynamic data}) {
     return _dio.put(path, data: data);
   }
 

@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:library_app1/core/language/app_localizations.dart';
 
-import 'package:library_app1/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:library_app1/features/auth/presentation/bloc/auth_state.dart';
 import 'package:library_app1/features/profile/presentation/bloc/profile_bloc.dart';
-import 'package:library_app1/features/profile/presentation/bloc/profile_event.dart';
 import 'package:library_app1/features/profile/presentation/bloc/profile_state.dart';
 import 'package:library_app1/features/profile/presentation/bloc/purchase_history_bloc.dart';
 import 'package:library_app1/features/profile/domain/entities/profile_entity.dart';
@@ -31,7 +28,7 @@ import 'package:library_app1/features/wins/presentation/bloc/wins_bloc.dart';
 import 'package:library_app1/features/wins/presentation/screens/wins_screen.dart';
 import 'package:library_app1/features/quotes/presentation/screens/my_quotes_screen.dart';
 
-const String _profileImageBaseUrl = 'http://127.0.0.1:8000/storage/';
+const String _profileImageBaseUrl = 'http://10.66.254.50:8000/storage/';
 
 bool _isLocalImagePath(String path) {
   return path.startsWith('/') ||
@@ -41,67 +38,53 @@ bool _isLocalImagePath(String path) {
 
 String _resolveProfileImageUrl(String path) {
   if (path.startsWith('http://') || path.startsWith('https://')) return path;
+
   final normalized = path.startsWith('/') ? path.substring(1) : path;
+
   return '$_profileImageBaseUrl$normalized';
 }
 
 class ProfileMainScreen extends StatelessWidget {
   const ProfileMainScreen({super.key});
 
-  
-
   @override
   Widget build(BuildContext context) {
     final settingsState = context.watch<SettingsBloc>().state;
-    final lang = settingsState is SettingsLoaded ? settingsState.language : 'en';
 
-    return BlocListener<AuthBloc, AuthState>(
-      listenWhen: (previous, current) =>
-          current is AuthSuccess &&
-          (previous is! AuthSuccess || previous.user.id != current.user.id),
-      listener: (context, state) {
-        final userId = (state as AuthSuccess).user.id;
-        final profileState = context.read<ProfileBloc>().state;
-        final loadedUserId = profileState is ProfileLoaded
-            ? profileState.profile.userId
-            : profileState is ProfileUpdateSuccess
-                ? profileState.profile.userId
-                : null;
-        if (loadedUserId != userId) {
-          context.read<ProfileBloc>().add(const LoadProfileEvent());
-        }
-      },
-      child: BlocBuilder<ProfileBloc, ProfileState>(
-        builder: (context, state) {
-          return Scaffold(
+    final lang = settingsState is SettingsLoaded
+        ? settingsState.language
+        : 'en';
+
+    return BlocBuilder<ProfileBloc, ProfileState>(
+      builder: (context, state) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          appBar: AppBar(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            appBar: AppBar(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              elevation: 0,
-              title: Text(
-                context.tr('my_profile', lang),
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              actions: [
-                if (state is ProfileLoaded)
-                  IconButton(
-                    icon: const Icon(Icons.settings, color: Color(0xfffbc4db)),
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => BlocProvider.value(
-                          value: context.read<SettingsBloc>(),
-                          child: const SettingsScreen(),
-                        ),
+            elevation: 0,
+            title: Text(
+              context.tr('my_profile', lang),
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            actions: [
+              if (state is ProfileLoaded)
+                IconButton(
+                  icon: const Icon(Icons.settings, color: Color(0xfffbc4db)),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BlocProvider.value(
+                        value: context.read<SettingsBloc>(),
+                        child: const SettingsScreen(),
                       ),
                     ),
                   ),
-              ],
-            ),
-            body: _buildBody(context, state, lang),
-          );
-        },
-      ),
+                ),
+            ],
+          ),
+          body: _buildBody(context, state, lang),
+        );
+      },
     );
   }
 
@@ -109,24 +92,27 @@ class ProfileMainScreen extends StatelessWidget {
     if (state is ProfileLoading) {
       return const Center(child: CircularProgressIndicator());
     }
+
     if (state is ProfileError) {
-      return Center(
-        child: Text(
-          state.message,
-          style: const TextStyle(),
-        ),
-      );
+      return Center(child: Text(state.message, style: const TextStyle()));
     }
+
     if (state is ProfileLoaded) {
       return _buildProfileContent(context, state.profile, lang);
     }
+
     if (state is ProfileUpdateSuccess) {
       return _buildProfileContent(context, state.profile, lang);
     }
+
     return const Center(child: CircularProgressIndicator());
   }
 
-  Widget _buildProfileContent(BuildContext context, ProfileEntity profile, String lang) {
+  Widget _buildProfileContent(
+    BuildContext context,
+    ProfileEntity profile,
+    String lang,
+  ) {
     return Center(
       child: SingleChildScrollView(
         child: Column(
@@ -135,7 +121,7 @@ class ProfileMainScreen extends StatelessWidget {
             const SizedBox(height: 24),
             _buildStatsCard(profile, lang),
             const SizedBox(height: 20),
-          _buildQuickLinksSection(context, lang), // 👈 مرري context ه
+            _buildQuickLinksSection(context, lang),
             const SizedBox(height: 24),
             _buildProfileEditButton(profile, lang),
             const SizedBox(height: 24),
@@ -149,9 +135,11 @@ class ProfileMainScreen extends StatelessWidget {
     return Builder(
       builder: (context) {
         final pointsState = context.watch<PointsBloc>().state;
+
         final livePoints = pointsState is PointsLoaded
             ? pointsState.totalPoints
             : profile.points;
+
         return Column(
           children: [
             Hero(
@@ -202,7 +190,6 @@ class ProfileMainScreen extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 36,
                             fontWeight: FontWeight.bold,
-    
                           ),
                         ),
                       ),
@@ -214,17 +201,10 @@ class ProfileMainScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               profile.name,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-    
-              ),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 4),
-            Text(
-              profile.email,
-              style: const TextStyle(fontSize: 14),
-            ),
+            Text(profile.email, style: const TextStyle(fontSize: 14)),
             const SizedBox(height: 10),
             _buildLevelBadge(ProfileEntity.levelForPoints(livePoints)),
           ],
@@ -282,9 +262,7 @@ class ProfileMainScreen extends StatelessWidget {
         return SizedBox(
           width: diameter,
           height: diameter,
-          child: const Center(
-            child: Icon(Icons.person, size: 42),
-          ),
+          child: const Center(child: Icon(Icons.person, size: 42)),
         );
       },
     );
@@ -307,18 +285,10 @@ class ProfileMainScreen extends StatelessWidget {
                 ),
               ),
             ),
-            icon: const Icon(
-              Icons.edit_outlined,
-    
-              size: 20,
-            ),
+            icon: const Icon(Icons.edit_outlined, size: 20),
             label: Text(
               context.tr('edit_profile', lang),
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-    
-              ),
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
             ),
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Color(0xfff9aabf), width: 1.5),
@@ -336,9 +306,11 @@ class ProfileMainScreen extends StatelessWidget {
     return Builder(
       builder: (context) {
         final pointsState = context.watch<PointsBloc>().state;
+
         final livePoints = pointsState is PointsLoaded
             ? pointsState.totalPoints
             : profile.points;
+
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 16),
           elevation: 0,
@@ -351,7 +323,7 @@ class ProfileMainScreen extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 👈 تم التصحيح هنا
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _statItem(
                   Icons.stars,
@@ -431,17 +403,14 @@ class ProfileMainScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 2),
-            Text(
-              label,
-              style: const TextStyle(fontSize: 13),
-            ),
+            Text(label, style: const TextStyle(fontSize: 13)),
           ],
         ),
       ),
     );
   }
 
- Widget _buildQuickLinksSection(BuildContext context, String lang) {
+  Widget _buildQuickLinksSection(BuildContext context, String lang) {
     final links = [
       _QuickLink(
         context.tr('my_purchases', lang),
@@ -478,11 +447,7 @@ class ProfileMainScreen extends StatelessWidget {
             padding: const EdgeInsets.only(left: 4, bottom: 12),
             child: Text(
               context.tr('quick_links', lang),
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-    
-              ),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
             ),
           ),
           GridView.builder(
@@ -497,18 +462,29 @@ class ProfileMainScreen extends StatelessWidget {
             ),
             itemBuilder: (context, index) {
               final link = links[index];
+
               return Container(
                 decoration: BoxDecoration(
                   color: link.backgroundColor,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color.fromARGB(255, 80, 79, 79).withValues(alpha: 0.55),
+                      color: const Color.fromARGB(
+                        255,
+                        80,
+                        79,
+                        79,
+                      ).withValues(alpha: 0.55),
                       blurRadius: 6,
                       offset: const Offset(0, 4),
                     ),
                     BoxShadow(
-                      color: const Color.fromARGB(255, 92, 92, 92).withValues(alpha: 0.35),
+                      color: const Color.fromARGB(
+                        255,
+                        92,
+                        92,
+                        92,
+                      ).withValues(alpha: 0.35),
                       blurRadius: 1,
                       offset: const Offset(0, 1),
                     ),

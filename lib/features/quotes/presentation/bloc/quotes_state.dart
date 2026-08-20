@@ -9,13 +9,25 @@ abstract class QuotesState extends Equatable {
   List<Object?> get props => [];
 }
 
+// ============================================================
+// INITIAL
+// ============================================================
+
 class QuotesInitial extends QuotesState {
   const QuotesInitial();
 }
 
+// ============================================================
+// LOADING
+// ============================================================
+
 class QuotesLoading extends QuotesState {
   const QuotesLoading();
 }
+
+// ============================================================
+// LOADED
+// ============================================================
 
 class QuotesLoaded extends QuotesState {
   final List<QuoteEntity> quotes;
@@ -26,6 +38,10 @@ class QuotesLoaded extends QuotesState {
   List<Object?> get props => [quotes];
 }
 
+// ============================================================
+// ERROR
+// ============================================================
+
 class QuotesError extends QuotesState {
   final String message;
 
@@ -35,6 +51,10 @@ class QuotesError extends QuotesState {
   List<Object?> get props => [message];
 }
 
+// ============================================================
+// DELETE SUCCESS
+// ============================================================
+
 class QuoteDeleteSuccess extends QuotesState {
   final List<QuoteEntity> quotes;
 
@@ -43,6 +63,10 @@ class QuoteDeleteSuccess extends QuotesState {
   @override
   List<Object?> get props => [quotes];
 }
+
+// ============================================================
+// ADD SUCCESS
+// ============================================================
 
 class QuoteAddSuccess extends QuotesState {
   final List<QuoteEntity> quotes;

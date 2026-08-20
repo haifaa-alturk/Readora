@@ -34,12 +34,12 @@
 //     );
 //   }
 // }
-
 import 'package:flutter/material.dart';
 import 'package:library_app1/features/home/domain/entities/book.dart';
 
 class TopRatedCard extends StatelessWidget {
   final Book book;
+
   const TopRatedCard({required this.book, super.key});
 
   @override
@@ -48,8 +48,7 @@ class TopRatedCard extends StatelessWidget {
     String imageUrl =
         book.coverImage != null && book.coverImage!.startsWith('http')
         ? book.coverImage!
-        : "http://127.0.0.1:8000/storage/${book.coverImage}";
-    //  : "http://192.168.90.2:8000/storage/${book.coverImage}";
+        : "http://10.66.254.50:8000/storage/${book.coverImage}";
 
     return Card(
       color: const Color.fromARGB(255, 240, 204, 218),
@@ -62,10 +61,10 @@ class TopRatedCard extends StatelessWidget {
           child: Image.network(
             imageUrl,
             width: 50,
-            height: 70, // تحديد ارتفاع ثابت يحمي الواجهة من التعليق
+            height: 70,
             fit: BoxFit.cover,
 
-            // حماية في حال فشل تحميل الصورة لا يتوقف التطبيق
+            // حماية في حال فشل تحميل الصورة
             errorBuilder: (context, error, stackTrace) => Container(
               width: 50,
               color: Colors.grey[300],

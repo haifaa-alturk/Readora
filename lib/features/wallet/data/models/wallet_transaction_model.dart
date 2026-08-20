@@ -10,33 +10,19 @@ class WalletTransactionModel extends WalletTransactionEntity {
   });
 
   factory WalletTransactionModel.fromJson(Map<String, dynamic> json) {
-    final rawType = (json['type'] as String? ?? '').toLowerCase();
-    final isCredit = rawType == 'recharge' || rawType == 'credit';
-    final source = rawType == 'recharge'
-        ? 'Wallet Recharge'
-        : rawType == 'purchase'
-            ? 'Book Purchase'
-            : rawType == 'borrow'
-                ? 'Book Borrow'
-                : json['source'] as String? ?? rawType;
-
     return WalletTransactionModel(
-      id: int.tryParse('${json['id']}') ?? 0,
-      amount: (_parseAmount(json['amount']) ?? 0.0).abs(),
-      source: source,
+      id: json['id'] is num
+          ? (json['id'] as num).toInt()
+          : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      amount: json['amount'] is num
+          ? (json['amount'] as num).toDouble()
+          : double.tryParse(json['amount']?.toString() ?? '0') ?? 0.0,
+      source: json['source']?.toString() ?? '',
       date: json['date'] != null
-          ? DateTime.parse(json['date'] as String)
+          ? DateTime.tryParse(json['date'].toString()) ?? DateTime.now()
           : DateTime.now(),
-      type: isCredit ? 'credit' : 'debit',
+      type: json['type']?.toString() ?? 'credit',
     );
-  }
-
-  static double? _parseAmount(dynamic value) {
-    if (value is num) return value.toDouble();
-    if (value is String && value.trim().isNotEmpty) {
-      return double.tryParse(value.trim());
-    }
-    return null;
   }
 
   Map<String, dynamic> toJson() {

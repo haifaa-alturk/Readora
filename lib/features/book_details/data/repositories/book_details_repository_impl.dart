@@ -18,8 +18,8 @@ class BookDetailsRepositoryImpl implements BookDetailsRepository {
 
       return Right(result);
     } catch (e) {
-  print("❌ Book Details Error: $e");
-  return Left("فشل تحميل تفاصيل الكتاب");
-}
+      print("❌ Book Details Error: $e");
+      return Left("فشل تحميل تفاصيل الكتاب");
+    }
   }
 }

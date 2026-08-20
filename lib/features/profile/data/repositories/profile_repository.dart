@@ -39,7 +39,9 @@ class ProfileRepositoryImpl implements ProfileRepositoryInterface {
   }
 
   @override
-  Future<Either<String, ProfileEntity>> uploadProfileImage(String filePath) async {
+  Future<Either<String, ProfileEntity>> uploadProfileImage(
+    String filePath,
+  ) async {
     try {
       final result = await _remoteDataSource.updateProfileImage(filePath);
       return Right(result);
@@ -49,7 +51,8 @@ class ProfileRepositoryImpl implements ProfileRepositoryInterface {
   }
 
   @override
-  Future<Either<String, List<PurchaseHistoryEntity>>> getPurchaseHistory() async {
+  Future<Either<String, List<PurchaseHistoryEntity>>>
+  getPurchaseHistory() async {
     try {
       final result = await _remoteDataSource.getPurchaseHistory();
       return Right(result);

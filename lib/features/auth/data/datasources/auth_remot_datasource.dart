@@ -9,8 +9,8 @@
 
 //   Future<List<CategoryModel>> getCategories() async {
 //   try {
-//     final response = await dio.get("categories"); 
-    
+//     final response = await dio.get("categories");
+
 //     if (response.statusCode == 200) {
 //       dynamic rawData = response.data;
 //       List<dynamic> list;
@@ -41,7 +41,7 @@
 //     final response = await dio.post(
 //       "login",
 //       data: {
-//       "email": email.trim().toLowerCase(), 
+//       "email": email.trim().toLowerCase(),
 //     "password": password.trim(),
 //       },
 //     );
@@ -97,14 +97,14 @@
 
 //       print("✅ Register Success Response: ${response.data}");
 //       return UserModel.fromJson(response.data);
-      
+
 //     } on DioException catch (e) {
 //       // هنا تكمن الفائدة: سيطبع لكِ بالضبط ما هو الحقل المرفوض
 //       // مثل: {"message":"The email has already been taken.","errors":{"email":["..."]}}
 //       print("❌ Register Error (422/Bad Request):");
 //       print("Status Code: ${e.response?.statusCode}");
 //       print("Error Details: ${e.response?.data}");
-      
+
 //       rethrow; // نمرر الخطأ للـ Repository ومن ثم للـ Bloc ليعرضه للمستخدم
 //     }
 //   }
@@ -119,42 +119,47 @@ class AuthRemoteDataSource {
 
   AuthRemoteDataSource(this.dio);
 
- Future<List<CategoryModel>> getCategories() async {
-  try {
-    final response = await dio.get("categories");
+  Future<List<CategoryModel>> getCategories() async {
+    try {
+      final response = await dio.get("categories");
 
-    if (response.statusCode == 200) {
-      // التعديل هنا: إذا كانت المصفوفة داخل مصفوفة، نأخذ العنصر الأول
-      dynamic rawData = response.data;
-      List rawList;
+      if (response.statusCode == 200) {
+        // التعديل هنا: إذا كانت المصفوفة داخل مصفوفة، نأخذ العنصر الأول
+        dynamic rawData = response.data;
+        List rawList;
 
-      if (rawData is List && rawData.isNotEmpty && rawData.first is List) {
-        rawList = rawData.first; // فك التغليف المزدوج [[]] -> []
-      } else if (rawData is List) {
-        rawList = rawData;
+        if (rawData is List && rawData.isNotEmpty && rawData.first is List) {
+          rawList = rawData.first; // فك التغليف المزدوج [[]] -> []
+        } else if (rawData is List) {
+          rawList = rawData;
+        } else {
+          rawList = rawData['data'] ?? [];
+        }
+
+        final List<CategoryModel> categories = [];
+        for (var item in rawList) {
+          categories.add(
+            CategoryModel.fromJson(Map<String, dynamic>.from(item)),
+          );
+        }
+
+        print("✅ Successfully parsed ${categories.length} categories");
+        return categories;
       } else {
-        rawList = rawData['data'] ?? [];
+        throw Exception("Server Error");
       }
-
-      final List<CategoryModel> categories = [];
-      for (var item in rawList) {
-        categories.add(CategoryModel.fromJson(Map<String, dynamic>.from(item)));
-      }
-      
-      print("✅ Successfully parsed ${categories.length} categories");
-      return categories;
-
-    } else {
-      throw Exception("Server Error");
+    } catch (e) {
+      print("❌ Detailed Error: $e");
+      throw Exception("Error fetching categories: $e");
     }
-  } catch (e) {
-    print("❌ Detailed Error: $e");
-    throw Exception("Error fetching categories: $e");
   }
-}
 
   // --- دالة تسجيل الدخول (تبقى كما هي) ---
-  Future<UserModel> login(String email, String password) async {
+  Future<UserModel> login(
+    String email,
+    String password,
+    String? fcmToken,
+  ) async {
     try {
       print("🚀 Sending Login Data: email: $email, password: $password");
       final response = await dio.post(
@@ -162,6 +167,7 @@ class AuthRemoteDataSource {
         data: {
           "email": email.trim().toLowerCase(),
           "password": password.trim(),
+          "fcm_token": fcmToken,
         },
       );
       print("✅ Login Success: ${response.data}");
@@ -178,6 +184,7 @@ class AuthRemoteDataSource {
     required String email,
     required String password,
     required String passwordConfirmation,
+    String? fcmToken,
     required List<int> interests,
     String? imagePath,
   }) async {
@@ -186,7 +193,9 @@ class AuthRemoteDataSource {
         "name": name,
         "email": email,
         "password": password,
-        "password_confirmation": passwordConfirmation,
+        "password_confirmation":
+            passwordConfirmation, // يمكنك تعديل هذا إذا كنت تريد تمرير FCM Token أثناء التسجيل
+        "fcm_token": fcmToken,
       };
 
       for (var id in interests) {

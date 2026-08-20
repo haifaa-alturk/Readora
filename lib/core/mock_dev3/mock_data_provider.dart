@@ -93,24 +93,23 @@ class MockDataProvider {
         'id': 1,
         'book_id': 101,
         'book_title': 'مقدمة في البرمجة',
-        'quote_text': 'جودة البرمجيات ليست مصادفة، بل هي دائماً نتيجة جهد ذكي وبناء متقن.',
+        'quote_text':
+            'جودة البرمجيات ليست مصادفة، بل هي دائماً نتيجة جهد ذكي وبناء متقن.',
         'created_at': '2026-06-17T10:00:00.000',
       },
       {
         'id': 2,
         'book_id': 102,
         'book_title': 'قواعد البيانات',
-        'quote_text': 'البيانات المنظمة بشكل جيد هي الأساس الذي تبنى عليه القرارات الذكية والأنظمة الناجحة.',
+        'quote_text':
+            'البيانات المنظمة بشكل جيد هي الأساس الذي تبنى عليه القرارات الذكية والأنظمة الناجحة.',
         'created_at': '2026-06-13T10:00:00.000',
       },
     ];
   }
 
   static Map<String, dynamic> walletBalance() {
-    return {
-      'balance': 250000.0,
-      'currency': 'SYP',
-    };
+    return {'balance': 250000.0, 'currency': 'SYP'};
   }
 
   static List<Map<String, dynamic>> walletTransactions() {
@@ -351,13 +350,17 @@ class MockDataProvider {
         'title': 'Read 3 Books in 5 Days',
         'description': 'Completed',
         'icon_name': 'emoji_events',
-        'date_earned': DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
+        'date_earned': DateTime.now()
+            .subtract(const Duration(days: 1))
+            .toIso8601String(),
         'type': 'individual_challenge',
         'challenge_id': 501,
         'challenge_type': 'individual',
         'reward': '3 bonus points',
         'earned_points': 3,
-        'completed_date': DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
+        'completed_date': DateTime.now()
+            .subtract(const Duration(days: 1))
+            .toIso8601String(),
         'status': 'completed',
       },
       {
@@ -365,13 +368,17 @@ class MockDataProvider {
         'title': 'Group Reading Sprint Winner',
         'description': 'Completed',
         'icon_name': 'emoji_events',
-        'date_earned': DateTime.now().subtract(const Duration(days: 3)).toIso8601String(),
+        'date_earned': DateTime.now()
+            .subtract(const Duration(days: 3))
+            .toIso8601String(),
         'type': 'group_challenge',
         'challenge_id': 601,
         'challenge_type': 'group',
         'reward': '5 bonus points',
         'earned_points': 5,
-        'completed_date': DateTime.now().subtract(const Duration(days: 3)).toIso8601String(),
+        'completed_date': DateTime.now()
+            .subtract(const Duration(days: 3))
+            .toIso8601String(),
         'status': 'completed',
       },
       {
@@ -479,7 +486,8 @@ class MockDataProvider {
     return [
       {
         'id': 1,
-        'question_text': 'What was the main theme of the book you just finished?',
+        'question_text':
+            'What was the main theme of the book you just finished?',
         'options': ['Personal growth', 'Cooking recipes', 'Car mechanics'],
         'correct_option_index': 0,
       },
@@ -491,9 +499,61 @@ class MockDataProvider {
       },
       {
         'id': 3,
-        'question_text': 'What should you do right after finishing a great book?',
-        'options': ['Forget about it immediately', 'Reflect and pick your next one', 'Never read again'],
+        'question_text':
+            'What should you do right after finishing a great book?',
+        'options': [
+          'Forget about it immediately',
+          'Reflect and pick your next one',
+          'Never read again',
+        ],
         'correct_option_index': 1,
+      },
+    ];
+  }
+
+  // ============================================================
+  // GROUP CHALLENGES
+  // ============================================================
+
+  static Map<String, dynamic> activeGroupChallenge() {
+    return {
+      'id': 1,
+      'title': 'The Challenge Has Started!',
+      'description':
+          'Read 3 books and successfully pass all quizzes within 5 days.',
+      'bonus_points': 5,
+      'required_books': 3,
+      'required_quizzes': 3,
+      'deadline': DateTime.now().add(const Duration(days: 5)).toIso8601String(),
+      'is_joined': false,
+      'user_books_completed': 0,
+      'user_quizzes_passed': 0,
+      'status': 'active',
+    };
+  }
+
+  static List<Map<String, dynamic>> groupChallengeWinners() {
+    return [
+      {
+        'user_id': 101,
+        'username': 'Lara',
+        'avatar_url': null,
+        'rank': 1,
+        'points_awarded': 15,
+      },
+      {
+        'user_id': 102,
+        'username': 'Omar',
+        'avatar_url': null,
+        'rank': 2,
+        'points_awarded': 10,
+      },
+      {
+        'user_id': 103,
+        'username': 'Sara',
+        'avatar_url': null,
+        'rank': 3,
+        'points_awarded': 5,
       },
     ];
   }
@@ -508,7 +568,9 @@ class MockDataProvider {
         'start_date': DateTime.now()
             .subtract(const Duration(days: 2))
             .toIso8601String(),
-        'end_date': DateTime.now().add(const Duration(days: 5)).toIso8601String(),
+        'end_date': DateTime.now()
+            .add(const Duration(days: 5))
+            .toIso8601String(),
         'required_books': [
           {'book_id': 101, 'title': 'Clean Architecture', 'cover_url': null},
           {'book_id': 102, 'title': 'Domain-Driven Design', 'cover_url': null},
@@ -540,11 +602,14 @@ class MockDataProvider {
       {
         'id': 2,
         'title': 'Refactoring Marathon',
-        'description': 'Read Refactoring and pass its quiz to stay in the running.',
+        'description':
+            'Read Refactoring and pass its quiz to stay in the running.',
         'start_date': DateTime.now()
             .subtract(const Duration(days: 1))
             .toIso8601String(),
-        'end_date': DateTime.now().add(const Duration(days: 3)).toIso8601String(),
+        'end_date': DateTime.now()
+            .add(const Duration(days: 3))
+            .toIso8601String(),
         'required_books': [
           {'book_id': 103, 'title': 'Refactoring', 'cover_url': null},
         ],
@@ -637,8 +702,12 @@ class MockDataProvider {
         'id': 21,
         'title': 'Poetry Marathon',
         'description': 'Register to take part in this upcoming event.',
-        'start_date': DateTime.now().add(const Duration(days: 2)).toIso8601String(),
-        'end_date': DateTime.now().add(const Duration(days: 9)).toIso8601String(),
+        'start_date': DateTime.now()
+            .add(const Duration(days: 2))
+            .toIso8601String(),
+        'end_date': DateTime.now()
+            .add(const Duration(days: 9))
+            .toIso8601String(),
         'required_books': [
           {'book_id': 101, 'title': 'Clean Architecture', 'cover_url': null},
         ],
@@ -657,8 +726,12 @@ class MockDataProvider {
         'id': 22,
         'title': 'Winter Reading Challenge',
         'description': 'You are already registered for this one.',
-        'start_date': DateTime.now().add(const Duration(days: 4)).toIso8601String(),
-        'end_date': DateTime.now().add(const Duration(days: 12)).toIso8601String(),
+        'start_date': DateTime.now()
+            .add(const Duration(days: 4))
+            .toIso8601String(),
+        'end_date': DateTime.now()
+            .add(const Duration(days: 12))
+            .toIso8601String(),
         'required_books': [
           {'book_id': 102, 'title': 'Domain-Driven Design', 'cover_url': null},
           {'book_id': 103, 'title': 'Refactoring', 'cover_url': null},
@@ -717,6 +790,7 @@ class MockDataProvider {
         },
       ];
     }
+
     if (eventId == 12) {
       return [
         {
@@ -756,10 +830,15 @@ class MockDataProvider {
         },
       ];
     }
+
     return [];
   }
 
-  // MOCK-ONLY: simulates how many other participants already finished all required books before this user, purely so the app can compute a live rank the instant this user finishes their last book. Delete this once the real backend returns live rankings.
+  // MOCK-ONLY:
+  // Simulates how many other participants already finished all
+  // required books before this user, purely so the app can compute
+  // a live rank the instant this user finishes their last book.
+  // Delete this once the real backend returns live rankings.
   static int groupEventOtherFinishersCount(int eventId) {
     return eventId == 1 ? 1 : 0;
   }

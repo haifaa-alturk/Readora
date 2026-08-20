@@ -1,66 +1,3 @@
-// import '../../domain/entities/book_details.dart';
-
-// class BookDetailsModel extends BookDetails {
-//   BookDetailsModel({
-//     required super.id,
-
-//     required super.bookName,
-
-//     required super.description,
-
-//     required super.language,
-
-//     required super.pages,
-
-//     required super.sellingPrice,
-
-//     required super.coverImage,
-
-//     required super.pdfFile,
-
-//     required super.previewPages,
-
-//     required super.authors,
-
-//     required super.categories,
-//   });
-
-//   factory BookDetailsModel.fromJson(Map<String, dynamic> json) {
-//     return BookDetailsModel(
-//       id: json['id'],
-
-//       bookName: json['book_name'] ?? 'بدون عنوان',
-
-//       description: json['description'] ?? '',
-
-//       language: json['language'] ?? '',
-
-//       pages: json['pages'] ?? 0,
-
-//       sellingPrice: json['selling_price'].toString(),
-
-//       coverImage: json['cover_image'] ?? '',
-
-//       pdfFile: json['pdf_file'] ?? '',
-
-//       previewPages: json['preview_pages'] != null
-//           ? List<String>.from(json['preview_pages'])
-//           : [],
-
-//       authors: json['authors'] != null
-//           ? (json['authors'] as List)
-//                 .map((e) => e['author_name'].toString())
-//                 .toList()
-//           : [],
-
-//       categories: json['categories'] != null
-//           ? (json['categories'] as List)
-//                 .map((e) => e['name'].toString())
-//                 .toList()
-//           : [],
-//     );
-//   }
-// }
 import '../../domain/entities/book_details.dart';
 
 class BookDetailsModel extends BookDetails {
@@ -72,13 +9,34 @@ class BookDetailsModel extends BookDetails {
     required super.coverImage,
     required super.pages,
     required super.rating,
+    required super.pdfFile,
     required super.authors,
     required super.categories,
+    required super.sellingPrice,
+    required super.rentalPrice,
   });
+
+  static const String _baseUrl = 'http://10.66.254.50:8000';
+
+  static String? _buildFileUrl(dynamic value) {
+    if (value == null) return null;
+
+    final path = value.toString().trim();
+
+    if (path.isEmpty) return null;
+
+    // إذا كان الرابط كاملاً أصلاً
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+
+    // إذا كان مساراً داخل storage
+    return '$_baseUrl/storage/${path.replaceFirst(RegExp(r'^/'), '')}';
+  }
 
   factory BookDetailsModel.fromJson(Map<String, dynamic> json) {
     List<String> authorNames = [];
-    
+
     if (json['authors'] != null) {
       authorNames = (json['authors'] as List)
           .map((author) => author['author_name'].toString())
@@ -96,21 +54,31 @@ class BookDetailsModel extends BookDetails {
     return BookDetailsModel(
       id: json['id'] ?? 0,
 
-      bookName: json['book_name'] ?? '',
+      bookName: json['book_name']?.toString() ?? '',
 
-      language: json['language'] ?? '',
+      language: json['language']?.toString() ?? '',
 
-      description: json['description'] ?? '',
+      description: json['description']?.toString() ?? '',
 
-      coverImage: json['cover_image'] ?? '',
+      // تحويل صورة الغلاف إلى URL كامل
+      coverImage: _buildFileUrl(json['cover_image']) ?? '',
 
-      pages: json['number_of_pages'] ?? 0,
+      pages: int.tryParse(json['number_of_pages']?.toString() ?? '0') ?? 0,
 
       rating: double.tryParse(json['rating']?.toString() ?? '0') ?? 0,
+
+      // تحويل ملف الكتاب إلى URL كامل
+      pdfFile: _buildFileUrl(json['book_file']),
 
       authors: authorNames,
 
       categories: categoryNames,
+
+      sellingPrice:
+          double.tryParse(json['selling_price']?.toString() ?? '0') ?? 0,
+
+      rentalPrice:
+          double.tryParse(json['rental_price']?.toString() ?? '0') ?? 0,
     );
   }
 }

@@ -14,6 +14,7 @@ class WalletRepositoryImpl implements WalletRepositoryInterface {
   Future<Either<String, WalletEntity>> getWalletBalance() async {
     try {
       final result = await _remoteDataSource.getWalletBalance();
+
       return Right(result);
     } catch (e) {
       return Left('Error fetching wallet balance: ${e.toString()}');
@@ -22,12 +23,30 @@ class WalletRepositoryImpl implements WalletRepositoryInterface {
 
   @override
   Future<Either<String, List<WalletTransactionEntity>>>
-      getTransactionHistory() async {
+  getTransactionHistory() async {
     try {
       final result = await _remoteDataSource.getTransactionHistory();
+
       return Right(result);
     } catch (e) {
       return Left('Error fetching transaction history: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<Either<String, String>> rechargeWallet({
+    required double amount,
+    required String receiptImagePath,
+  }) async {
+    try {
+      final result = await _remoteDataSource.rechargeWallet(
+        amount: amount,
+        receiptImagePath: receiptImagePath,
+      );
+
+      return Right(result);
+    } catch (e) {
+      return Left('Error sending recharge request: ${e.toString()}');
     }
   }
 }

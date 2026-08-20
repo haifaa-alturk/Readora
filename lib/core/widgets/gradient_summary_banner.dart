@@ -39,14 +39,20 @@ class GradientSummaryBanner extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.stars, color: Color(0xff2d2d2d), size: 22),
+                          const Icon(
+                            Icons.stars,
+                            color: Color(0xff2d2d2d),
+                            size: 22,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             label,
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xff2d2d2d).withValues(alpha: 0.7),
+                              color: const Color(
+                                0xff2d2d2d,
+                              ).withValues(alpha: 0.7),
                             ),
                           ),
                         ],
@@ -66,17 +72,16 @@ class GradientSummaryBanner extends StatelessWidget {
                           subtitle!,
                           style: TextStyle(
                             fontSize: 13,
-                            color: const Color(0xff2d2d2d).withValues(alpha: 0.6),
+                            color: const Color(
+                              0xff2d2d2d,
+                            ).withValues(alpha: 0.6),
                           ),
                         ),
                       ],
                     ],
                   ),
                 ),
-                if (trailing != null) ...[
-                  const SizedBox(width: 12),
-                  trailing!,
-                ],
+                if (trailing != null) ...[const SizedBox(width: 12), trailing!],
               ],
             ),
           ),

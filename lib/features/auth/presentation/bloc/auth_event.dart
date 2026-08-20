@@ -5,24 +5,36 @@ abstract class AuthEvent {}
 class LoginEvent extends AuthEvent {
   final String email;
   final String password;
+  final String? fcmToken;
 
-  LoginEvent(this.email, this.password);
+  LoginEvent(this.email, this.password, this.fcmToken);
 }
+
 class RegisterEvent extends AuthEvent {
-  final String name, email, password, confirmPassword;
+  final String name;
+  final String email;
+  final String password;
+  final String confirmPassword;
   final List<int> interests;
+  final String? fcmToken;
   final String? imagePath;
 
   RegisterEvent({
-    required this.name, required this.email,
-    required this.password, required this.confirmPassword,
-    required this.interests, this.imagePath,
+    required this.name,
+    required this.email,
+    required this.password,
+    required this.confirmPassword,
+    required this.interests,
+    this.imagePath,
+    this.fcmToken,
   });
 }
+
 class GetCategoriesEvent extends AuthEvent {}
 
 class UpdateUserInterestsEvent extends AuthEvent {
   final List<CategoryModel> interests;
+
   UpdateUserInterestsEvent(this.interests);
 }
 

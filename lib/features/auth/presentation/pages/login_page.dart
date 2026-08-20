@@ -1,4 +1,3 @@
-
 // import 'dart:ui';
 // import 'package:flutter/material.dart';
 // import 'package:library_app1/login/forgot_password.dart';
@@ -7,7 +6,6 @@
 //   @override
 //   State<LoginScreen> createState() => _LoginScreenState();
 // }
-
 
 // class _LoginScreenState extends State<LoginScreen> {
 //   final emailController = TextEditingController();
@@ -224,7 +222,9 @@
 //     );
 //   }
 // }
+
 import 'dart:ui';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:library_app1/features/auth/presentation/pages/signup_page.dart';
@@ -248,7 +248,7 @@ class _LoginScreenState extends State<LoginScreen> {
   // المتحكمات لقراءة النصوص
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  
+
   // مفتاح للتحقق من الحقول (Validation)
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -285,9 +285,9 @@ class _LoginScreenState extends State<LoginScreen> {
             );
           } else if (state is AuthError) {
             // عرض الخطأ
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
           }
         },
         builder: (context, state) {
@@ -306,9 +306,7 @@ class _LoginScreenState extends State<LoginScreen> {
               // 🌫️ تأثير التغبيش
               BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-                child: Container(
-                  color: Colors.black.withOpacity(0.3),
-                ),
+                child: Container(color: Colors.black.withOpacity(0.3)),
               ),
 
               // 📄 المحتوى الرئيسي
@@ -356,10 +354,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                 TextFormField(
                                   controller: emailController,
                                   style: const TextStyle(color: Colors.white),
-                                  decoration: _buildInputDecoration("Email", Icons.email),
+                                  decoration: _buildInputDecoration(
+                                    "Email",
+                                    Icons.email,
+                                  ),
                                   validator: (value) {
-                                    if (value == null || value.isEmpty) return "Email is required";
-                                    if (!value.contains('@')) return "Enter a valid email";
+                                    if (value == null || value.isEmpty)
+                                      return "Email is required";
+                                    if (!value.contains('@'))
+                                      return "Enter a valid email";
                                     return null;
                                   },
                                 ),
@@ -368,30 +371,36 @@ class _LoginScreenState extends State<LoginScreen> {
                                 // 🔒 Password Field (تمت إضافة زر العين هنا)
                                 TextFormField(
                                   controller: passwordController,
-                                  obscureText: _isPasswordObscure, // 👈 متغيرة حالة الإخفاء
+                                  obscureText:
+                                      _isPasswordObscure, // 👈 متغيرة حالة الإخفاء
                                   style: const TextStyle(color: Colors.white),
                                   decoration: _buildInputDecoration(
                                     "Password",
                                     Icons.lock,
                                     suffixIcon: IconButton(
                                       icon: Icon(
-                                        _isPasswordObscure ? Icons.visibility_off : Icons.visibility,
+                                        _isPasswordObscure
+                                            ? Icons.visibility_off
+                                            : Icons.visibility,
                                         color: Colors.white70,
                                       ),
                                       onPressed: () {
                                         setState(() {
-                                          _isPasswordObscure = !_isPasswordObscure;
+                                          _isPasswordObscure =
+                                              !_isPasswordObscure;
                                         });
                                       },
                                     ),
                                   ),
                                   validator: (value) {
-                                    if (value == null || value.isEmpty) return "Password is required";
-                                    if (value.length < 8) return "Password must be at least 8 characters";
+                                    if (value == null || value.isEmpty)
+                                      return "Password is required";
+                                    if (value.length < 8)
+                                      return "Password must be at least 8 characters";
                                     return null;
                                   },
                                 ),
-                                
+
                                 const SizedBox(height: 10),
 
                                 // ❓ Forgot Password
@@ -401,7 +410,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                     onPressed: () {
                                       Navigator.push(
                                         context,
-                                        MaterialPageRoute(builder: (_) => ForgotPasswordScreen()),
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              ForgotPasswordScreen(),
+                                        ),
                                       );
                                     },
                                     child: const Text(
@@ -414,7 +426,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                 // 🚀 Login Button
                                 state is AuthLoading
-                                    ? const CircularProgressIndicator(color: Colors.amber)
+                                    ? const CircularProgressIndicator(
+                                        color: Colors.amber,
+                                      )
                                     : _buildLoginButton(context),
 
                                 const SizedBox(height: 20),
@@ -423,16 +437,28 @@ class _LoginScreenState extends State<LoginScreen> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Text("Don't have an account? ",
-                                        style: TextStyle(color: Colors.white70)),
+                                    const Text(
+                                      "Don't have an account? ",
+                                      style: TextStyle(color: Colors.white70),
+                                    ),
                                     TextButton(
                                       onPressed: () {
-                                        Navigator.push(context, MaterialPageRoute(builder: (_) => RegisterScreen()));
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => RegisterScreen(),
+                                          ),
+                                        );
                                       },
                                       child: const Text(
                                         "Sign Up",
                                         style: TextStyle(
-                                          color: Color.fromARGB(255, 106, 12, 108),
+                                          color: Color.fromARGB(
+                                            255,
+                                            106,
+                                            12,
+                                            108,
+                                          ),
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -456,7 +482,11 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // ميثود لتنسيق المدخلات (تم إضافة suffixIcon معامِل اختياري)
-  InputDecoration _buildInputDecoration(String hint, IconData icon, {Widget? suffixIcon}) {
+  InputDecoration _buildInputDecoration(
+    String hint,
+    IconData icon, {
+    Widget? suffixIcon,
+  }) {
     return InputDecoration(
       prefixIcon: Icon(icon, color: Colors.white),
       suffixIcon: suffixIcon, // 👈 استلام زر العين
@@ -486,15 +516,19 @@ class _LoginScreenState extends State<LoginScreen> {
         borderRadius: BorderRadius.circular(15),
       ),
       child: ElevatedButton(
-        onPressed: () {
+        onPressed: () async {
           if (_formKey.currentState!.validate()) {
-            // إرسال الأكشن للـ Bloc
-            context.read<AuthBloc>().add(
-                  LoginEvent(
-                    emailController.text.trim(),
-                    passwordController.text.trim(),
-                  ),
-                );
+            String? fcmToken = await FirebaseMessaging.instance.getToken();
+            if (context.mounted) {
+              // إرسال الأكشن للـ Bloc
+              context.read<AuthBloc>().add(
+                LoginEvent(
+                  emailController.text.trim(),
+                  passwordController.text.trim(),
+                  fcmToken,
+                ),
+              );
+            }
           }
         },
         style: ElevatedButton.styleFrom(
@@ -507,7 +541,11 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         child: const Text(
           "Login",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
         ),
       ),
     );

@@ -1,56 +1,8 @@
-// import 'package:dio/dio.dart';
-// import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:library_app1/features/auth/domain/usecasees/login.dart';
-// import 'package:library_app1/features/auth/domain/usecasees/signup.dart';
-// // import '../../domain/usecases/login.dart';
-// import 'auth_event.dart';
-// import 'auth_state.dart';
-
-// class AuthBloc extends Bloc<AuthEvent, AuthState> {
-//   final LoginUseCase loginUseCase;
-// final RegisterUseCase registerUseCase; 
-// AuthBloc(this.loginUseCase, this.registerUseCase) : super(AuthInitial()) {
-  
-//   on<RegisterEvent>((event, emit) async {
-//     emit(AuthLoading());
-//     try {
-//       final user = await registerUseCase.call(
-//         name: event.name, email: event.email,
-//         password: event.password, passwordConfirmation: event.confirmPassword,
-//         interests: event.interests, imagePath: event.imagePath,
-//       );
-//       emit(AuthSuccess(user));
-//     } catch (e) {
-//       emit(AuthError(e.toString()));
-//     }
-//   });
-
-//     on<LoginEvent>((event, emit) async {
-//       emit(AuthLoading());
-
-//       try {
-//         final user = await loginUseCase(
-//           event.email,
-//           event.password,
-//         );
-
-//         emit(AuthSuccess(user));
-//     } catch (e) {
-//   if (e is DioException) {
-//     // هذا سيطبع لكِ "The email field is required" أو "Credentials do not match"
-//     print("Laravel Validation Error: ${e.response?.data}");
-//   }
-//   emit(AuthError("Login failed: Check your email or password"));
-// }
-//     });
-  
-//   }
-// }
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:library_app1/features/auth/domain/entities/user.dart';
 import 'package:library_app1/features/auth/domain/usecasees/get_categories_usecase.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // 1. إضافة المكتبة
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:library_app1/features/auth/domain/usecasees/login.dart';
 import 'package:library_app1/features/auth/domain/usecasees/signup.dart';
 import 'auth_event.dart';
@@ -59,37 +11,35 @@ import 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
   final RegisterUseCase registerUseCase;
-final GetCategoriesUseCase getCategoriesUseCase;
-AuthBloc(this.loginUseCase, this.registerUseCase, this.getCategoriesUseCase) : super(AuthInitial()) {
-    
-    // --- معالجة التسجيل (Register) ---
+  final GetCategoriesUseCase getCategoriesUseCase;
+
+  AuthBloc(this.loginUseCase, this.registerUseCase, this.getCategoriesUseCase)
+    : super(AuthInitial()) {
+    // معالجة التسجيل (Register)
     on<RegisterEvent>((event, emit) async {
       emit(AuthLoading());
+
       try {
         final user = await registerUseCase.call(
           name: event.name,
           email: event.email,
           password: event.password,
+          fcmToken: event.fcmToken,
           passwordConfirmation: event.confirmPassword,
           interests: event.interests,
           imagePath: event.imagePath,
         );
-//  الوصول للتوكن مباشرة من كائن المستخدم يلي أعاده  Use Case
+
+        // حفظ التوكن بعد نجاح التسجيل
         final prefs = await SharedPreferences.getInstance();
-        await prefs.clear(); 
-        
-        //  user.token ( أن الموديل الخاص ب يحتوي على حقل token)
+        await prefs.clear();
+
         await prefs.setString('auth_token', user.token);
         await prefs.setBool('is_logged_in', true);
-        
-        // إجبار النظام على التأكد من كتابة البيانات فوراً قبل الانتقال
+
         await prefs.reload();
 
         print("✅ New Token Saved Successfully: ${user.token}");
-        // // ✅ حفظ التوكن عند نجاح التسجيل
-        // final prefs = await SharedPreferences.getInstance();
-        // await prefs.setString('auth_token', user.token); // تأكدي أن موديل الـ User فيه حقل token
-        // await prefs.setBool('is_logged_in', true);
 
         emit(AuthSuccess(user));
       } catch (e) {
@@ -97,16 +47,18 @@ AuthBloc(this.loginUseCase, this.registerUseCase, this.getCategoriesUseCase) : s
       }
     });
 
-    //  معالجة تسجيل الدخول (Login) 
+    // معالجة تسجيل الدخول (Login)
     on<LoginEvent>((event, emit) async {
       emit(AuthLoading());
+
       try {
         final user = await loginUseCase(
           event.email,
           event.password,
+          event.fcmToken,
         );
 
-        //  حفظ التوكن عند نجاح تسجيل الدخول
+        // حفظ التوكن عند نجاح تسجيل الدخول
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', user.token);
         await prefs.setBool('is_logged_in', true);
@@ -121,63 +73,78 @@ AuthBloc(this.loginUseCase, this.registerUseCase, this.getCategoriesUseCase) : s
         }
       }
     });
-////////////////////
-    on<GetCategoriesEvent>((event, emit) async {
-    emit(CategoriesLoading()); // الحالة التي تجعلنا نظهر مؤشر تحميل أو نمنع الضغط
-    try {
-      final categories = await getCategoriesUseCase.call();
-      emit(CategoriesLoaded(categories));
-    } catch (e) {
-      emit(AuthError(e.toString()));
-    }
-  });
 
-    //  تحديث اهتمامات المستخدم بعد حفظها من شاشة الاهتمامات
-    on<UpdateUserInterestsEvent>((event, emit) async {
-      final current = state;
-      if (current is AuthSuccess) {
-        final user = current.user;
-        emit(AuthSuccess(User(
-          token: user.token,
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          userImage: user.userImage,
-          interests: event.interests,
-        )));
+    // جلب التصنيفات
+    on<GetCategoriesEvent>((event, emit) async {
+      emit(CategoriesLoading());
+
+      try {
+        final categories = await getCategoriesUseCase.call();
+        emit(CategoriesLoaded(categories));
+      } catch (e) {
+        emit(AuthError(e.toString()));
       }
     });
 
-    //  تسجيل الخروج: مسح بيانات المستخدم من الذاكرة والعودة للحالة الأولية
+    // تحديث اهتمامات المستخدم بعد حفظها من شاشة الاهتمامات
+    on<UpdateUserInterestsEvent>((event, emit) async {
+      final current = state;
+
+      if (current is AuthSuccess) {
+        final user = current.user;
+
+        emit(
+          AuthSuccess(
+            User(
+              token: user.token,
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              userImage: user.userImage,
+              interests: event.interests,
+            ),
+          ),
+        );
+      }
+    });
+
+    // تسجيل الخروج
     on<LogoutEvent>((event, emit) async {
       final prefs = await SharedPreferences.getInstance();
+
       await prefs.remove('auth_token');
       await prefs.remove('is_logged_in');
+
       emit(AuthInitial());
     });
-}
+  }
 
-  //  استخراج رسالة خطأ آمنة من استجابة لارافيل دون انهيار التطبيق
+  // استخراج رسالة خطأ آمنة من استجابة Laravel
   String _extractLoginErrorMessage(dynamic data) {
     if (data is String && data.trim().isNotEmpty) {
       return data;
     }
+
     if (data is Map) {
       final message = data['message'];
+
       if (message is String && message.trim().isNotEmpty) {
         return message;
       }
+
       final errors = data['errors'];
+
       if (errors is Map) {
         for (final field in errors.keys) {
           final value = errors[field];
+
           if (value is List && value.isNotEmpty) {
             return value.first.toString();
           }
         }
       }
     }
+
     return "Login failed";
   }
-  }
-  
+}

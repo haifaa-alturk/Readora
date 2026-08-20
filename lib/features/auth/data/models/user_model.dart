@@ -1,4 +1,3 @@
-
 // import 'package:library_app1/features/auth/data/models/Category_Model.dart';
 
 // class UserModel {
@@ -25,13 +24,13 @@
 
 //     return UserModel(
 //       // إذا كان التوكن يأتي في المستوى الأول من الـ JSON
-//       token: json['token'] ?? '', 
+//       token: json['token'] ?? '',
 //       id: userData['id'],
 //       name: userData['name'],
 //       email: userData['email'],
 //       // هنا الأسماء مطابقة تماماً للرد الذي أرسلتِه
-//       userImage: userData['user_image'], 
-//       // interests: userData['categories'], 
+//       userImage: userData['user_image'],
+//       // interests: userData['categories'],
 
 //       interests: (userData['categories'] as List?)
 //     ?.map((i) => CategoryModel.fromJson(i))
@@ -60,23 +59,20 @@ class UserModel {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-   
     final userData = json['user'];
 
     return UserModel(
-    
-      token: json['acceses token'] ?? json['token'] ?? '', 
-      
+      token: json['acceses token'] ?? json['token'] ?? '',
+
       id: userData['id'] ?? 0,
       name: userData['name'] ?? '',
       email: userData['email'] ?? '',
-      userImage: userData['user_image'], 
-      
-    
-      interests: userData['categories'] != null 
+      userImage: userData['user_image'],
+
+      interests: userData['categories'] != null
           ? (userData['categories'] as List)
-              .map((i) => CategoryModel.fromJson(i))
-              .toList()
+                .map((i) => CategoryModel.fromJson(i))
+                .toList()
           : [],
     );
   }

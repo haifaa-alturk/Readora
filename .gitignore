@@ -43,3 +43,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+android/app/google-services.json
+android/build/
+lib/main.dart.backup
+local_changes_backup.patch
+pubspec.lock.backup
+staged_changes_backup.patch

@@ -22,10 +22,7 @@ class WalletLoaded extends WalletState {
   final WalletEntity wallet;
   final List<WalletTransactionEntity> transactions;
 
-  const WalletLoaded({
-    required this.wallet,
-    required this.transactions,
-  });
+  const WalletLoaded({required this.wallet, required this.transactions});
 
   @override
   List<Object?> get props => [wallet, transactions];
@@ -35,6 +32,28 @@ class WalletError extends WalletState {
   final String message;
 
   const WalletError({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class WalletRechargeLoading extends WalletState {
+  const WalletRechargeLoading();
+}
+
+class WalletRechargeSuccess extends WalletState {
+  final String message;
+
+  const WalletRechargeSuccess({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class WalletRechargeError extends WalletState {
+  final String message;
+
+  const WalletRechargeError({required this.message});
 
   @override
   List<Object?> get props => [message];
