@@ -95,30 +95,35 @@ class _WinsScreenState extends State<WinsScreen> {
                     ),
                   );
                 }
-                if (state is WinsLoaded || state is WinsRefreshing) {
-                  final wins = state is WinsLoaded
-                      ? state.wins
-                      : (state as WinsRefreshing).currentWins;
-                  final isRefreshing = state is WinsRefreshing;
+                 if (state is WinsLoaded || state is WinsRefreshing) {
+                   final wins = state is WinsLoaded
+                       ? state.wins
+                       : (state as WinsRefreshing).currentWins;
+                   final isRefreshing = state is WinsRefreshing;
+                   final totalPoints = wins.fold<int>(
+                     0,
+                     (sum, win) => sum + (win.earnedPoints ?? 0),
+                   );
 
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      context.read<WinsBloc>().add(const RefreshWinsEvent());
-                    },
-                    child: ListView(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                      children: [
-                        GradientSummaryBanner(
-                          label: 'Total Wins',
-                          value: '${wins.length}',
-                          subtitle: 'Challenges completed & achievements earned',
-                        ),
-                        const SizedBox(height: 16),
-                        ...wins.map((win) => _buildWinCard(win)),
-                      ],
-                    ),
-                  );
-                }
+                   return RefreshIndicator(
+                     onRefresh: () async {
+                       context.read<WinsBloc>().add(const RefreshWinsEvent());
+                     },
+                     child: ListView(
+                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                       children: [
+                         GradientSummaryBanner(
+                           label: 'Total Wins',
+                           value: '${wins.length}',
+                           subtitle:
+                               'Events & quizzes won — +$totalPoints pts earned',
+                         ),
+                         const SizedBox(height: 16),
+                         ...wins.map((win) => _buildWinCard(win)),
+                       ],
+                     ),
+                   );
+                 }
                 return const Center(child: CircularProgressIndicator());
               },
             ),

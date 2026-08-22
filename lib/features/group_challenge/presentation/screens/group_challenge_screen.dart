@@ -10,6 +10,7 @@ import '../../domain/entities/group_challenge_entity.dart';
 import '../bloc/group_challenge_bloc.dart';
 import '../bloc/group_challenge_event.dart';
 import '../bloc/group_challenge_state.dart';
+import 'cancelled_events_screen.dart';
 import 'current_events_screen.dart';
 import 'ended_events_screen.dart';
 import 'my_competitions_screen.dart';
@@ -133,6 +134,19 @@ class _GroupChallengeScreenState extends State<GroupChallengeScreen> {
                       color: const Color(0xff8CD7F7),
                       icon: Icons.emoji_events,
                       screen: const MyCompetitionsScreen(),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildNavCard(
+                      label: 'Cancelled',
+                      color: const Color(0xffe74c3c),
+                      icon: Icons.event_busy,
+                      screen: const CancelledEventsScreen(),
                     ),
                   ),
                 ],

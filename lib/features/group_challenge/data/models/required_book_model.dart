@@ -7,19 +7,21 @@ class RequiredBookModel extends RequiredBookEntity {
     super.coverUrl,
   });
 
+  /// Parses a Book object from the Laravel `books` relation:
+  /// { id, book_name, cover_image, ... }
   factory RequiredBookModel.fromJson(Map<String, dynamic> json) {
     return RequiredBookModel(
-      bookId: json['book_id'] as int,
-      title: json['title'] as String? ?? '',
-      coverUrl: json['cover_url'] as String?,
+      bookId: json['id'] as int? ?? 0,
+      title: json['book_name'] as String? ?? '',
+      coverUrl: json['cover_image'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'book_id': bookId,
-      'title': title,
-      'cover_url': coverUrl,
+      'id': bookId,
+      'book_name': title,
+      'cover_image': coverUrl,
     };
   }
 }

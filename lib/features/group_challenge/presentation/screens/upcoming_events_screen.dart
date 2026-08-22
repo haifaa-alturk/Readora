@@ -95,13 +95,6 @@ class _UpcomingEventsScreenState extends State<UpcomingEventsScreen> {
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 6),
-          Text(
-            event.description,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 13),
-          ),
-          const SizedBox(height: 10),
           Row(
             children: [
               const Icon(Icons.event, size: 16),
@@ -128,28 +121,16 @@ class _UpcomingEventsScreenState extends State<UpcomingEventsScreen> {
               _buildPointsChip(
                 icon: Icons.emoji_events,
                 iconColor: const Color(0xffb8860b),
-                points: event.firstPlacePoints,
-              ),
-              const SizedBox(width: 8),
-              _buildPointsChip(
-                icon: Icons.emoji_events,
-                iconColor: const Color(0xff9e9e9e),
-                points: event.secondPlacePoints,
-              ),
-              const SizedBox(width: 8),
-              _buildPointsChip(
-                icon: Icons.emoji_events,
-                iconColor: const Color(0xffe67e22),
-                points: event.thirdPlacePoints,
+                points: event.points,
               ),
             ],
           ),
           const SizedBox(height: 14),
           Align(
             alignment: Alignment.centerRight,
-            child: event.isRegistered
-                ? _buildRegisteredPill()
-                : _buildRegisterButton(context, event),
+          child: event.isRegistered
+              ? _buildRegisteredArea(context, event)
+              : _buildRegisterButton(context, event),
           ),
         ],
       ),
@@ -178,6 +159,91 @@ class _UpcomingEventsScreenState extends State<UpcomingEventsScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  /// Resolves the participation id for a joined event. KNOWN LIMITATION:
+  /// GET events/participations does not return participation_id, so this is
+  /// only available if the user registered during the current app session.
+  int? _participationIdFor(BuildContext context, GroupChallengeEntity event) {
+    final state = context.read<GroupChallengeBloc>().state;
+    return event.participationId ?? state.participationIdsByEventId[event.id];
+  }
+
+  Future<void> _confirmLeave(
+    BuildContext context,
+    GroupChallengeEntity event,
+  ) async {
+    final participationId = _participationIdFor(context, event);
+    if (participationId == null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: const Color(0xfffcfbfa),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Leave Event',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+        ),
+        content: Text(
+          'Are you sure you want to leave "${event.title}"? You will no longer be able to win its points.',
+          style: const TextStyle(fontSize: 14, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Stay'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: TextButton.styleFrom(foregroundColor: const Color(0xffe74c3c)),
+            child: const Text(
+              'Leave',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      context.read<GroupChallengeBloc>().add(
+            CancelParticipationEvent(participationId: participationId),
+          );
+    }
+  }
+
+  Widget _buildRegisteredArea(BuildContext context, GroupChallengeEntity event) {
+    final canLeave = (event.userOutcome == 'registered' ||
+            event.userOutcome == 'ongoing') &&
+        _participationIdFor(context, event) != null;
+    if (!canLeave) return _buildRegisteredPill();
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildRegisteredPill(),
+        const SizedBox(width: 8),
+        SizedBox(
+          height: 34,
+          child: OutlinedButton(
+            onPressed: () => _confirmLeave(context, event),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xffe74c3c),
+              side: BorderSide(
+                color: const Color(0xffe74c3c).withValues(alpha: 0.5),
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              textStyle:
+                  const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+            ),
+            child: const Text('Leave event'),
+          ),
+        ),
+      ],
     );
   }
 

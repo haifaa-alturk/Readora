@@ -54,10 +54,16 @@ Future<void> openIndividualChallengeFlow(
                     // Points feature from the server (GET user/points_history) to pick them up,
                     // instead of faking a local increment.
                     context.read<PointsBloc>().add(const LoadPointsEvent());
-                    // This book's Individual Challenge quiz was just passed — count it toward any Group Challenge the user has joined. Safe to call unconditionally; the Bloc ignores this if there's no active joined challenge.
-                    context.read<GroupChallengeBloc>().add(
-                      RecordBookQuizResultEvent(bookId: bookId, passed: true),
-                    );
+                    // The backend (POST user/quiz/submit) already updated this book's
+                    // participation progress server-side. Refresh the Group Challenge
+                    // events so won/lost/ongoing state is pulled fresh from
+                    // GET events/ongoing + events/wins + events/losses.
+                    context
+                        .read<GroupChallengeBloc>()
+                        .add(const LoadCurrentEventsEvent());
+                    context
+                        .read<GroupChallengeBloc>()
+                        .add(const LoadMyEventsEvent());
                     Navigator.of(quizContext).push(
                       MaterialPageRoute(
                         builder: (_) => IndividualChallengeResultScreen(
@@ -70,9 +76,6 @@ Future<void> openIndividualChallengeFlow(
                     );
                   },
                   onFailed: () {
-                    context.read<GroupChallengeBloc>().add(
-                      RecordBookQuizResultEvent(bookId: bookId, passed: false),
-                    );
                     Navigator.of(quizContext).push(
                       MaterialPageRoute(
                         builder: (_) => IndividualChallengeResultScreen(

@@ -12,7 +12,7 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
   @override
   Future<List<BookModel>> getAllBooks() async {
     //   عرض جميع الكتب مرتبة من الأحدث للأقدم
-    final response = await dio.get('/books');
+    final response = await dio.get('books');
     return (response.data as List).map((e) => BookModel.fromJson(e)).toList();
   }
 }

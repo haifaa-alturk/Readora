@@ -190,8 +190,8 @@ void main() {
   final pointsRemoteDataSource = PointsRemoteDataSourceImpl(apiClient);
   final pointsRepository = PointsRepositoryImpl(pointsRemoteDataSource);
 
-  // Wins (dev3) — uses same Dev3ApiClient & mock data
-  final winsRemoteDataSource = WinsRemoteDataSourceImpl(dev3ApiClient);
+  // Wins — uses real ApiClient (live wins overview from GET my_wins)
+  final winsRemoteDataSource = WinsRemoteDataSourceImpl(apiClient);
   final winsRepository = WinsRepositoryImpl(winsRemoteDataSource);
 
   // Settings (dev3) — uses same Dev3ApiClient & mock data
@@ -207,9 +207,9 @@ void main() {
   final profileRemoteDataSource = ProfileRemoteDataSource(apiClient);
   final profileRepository = ProfileRepositoryImpl(profileRemoteDataSource);
 
-  // Group Challenge (dev3) — uses same Dev3ApiClient & mock data
+  // Group Challenge — uses real ApiClient (real events/participations endpoints; winners & book-progress pending backend support)
   final groupChallengeRemoteDataSource =
-      GroupChallengeRemoteDataSourceImpl(dev3ApiClient);
+      GroupChallengeRemoteDataSourceImpl(apiClient);
   final groupChallengeRepository =
       GroupChallengeRepositoryImpl(groupChallengeRemoteDataSource);
 

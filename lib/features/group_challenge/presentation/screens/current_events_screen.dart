@@ -120,13 +120,6 @@ class _CurrentEventsScreenState extends State<CurrentEventsScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  event.description,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 13),
-                ),
-                const SizedBox(height: 12),
-                Text(
                   '${_formatDate(event.startDate)} - ${_formatDate(event.endDate)}',
                   style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                 ),
@@ -149,7 +142,7 @@ class _CurrentEventsScreenState extends State<CurrentEventsScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: event.isRegistered
-                      ? _buildJoinedPill()
+                      ? _buildJoinedArea(context, event)
                       : _buildJoinButton(context, event),
                 ),
               ],
@@ -157,6 +150,91 @@ class _CurrentEventsScreenState extends State<CurrentEventsScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  /// Resolves the participation id for a joined event. KNOWN LIMITATION:
+  /// GET events/participations does not return participation_id, so this is
+  /// only available if the user registered during the current app session.
+  int? _participationIdFor(BuildContext context, GroupChallengeEntity event) {
+    final state = context.read<GroupChallengeBloc>().state;
+    return event.participationId ?? state.participationIdsByEventId[event.id];
+  }
+
+  Future<void> _confirmLeave(
+    BuildContext context,
+    GroupChallengeEntity event,
+  ) async {
+    final participationId = _participationIdFor(context, event);
+    if (participationId == null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: const Color(0xfffcfbfa),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Leave Event',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+        ),
+        content: Text(
+          'Are you sure you want to leave "${event.title}"? You will no longer be able to win its points.',
+          style: const TextStyle(fontSize: 14, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Stay'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: TextButton.styleFrom(foregroundColor: const Color(0xffe74c3c)),
+            child: const Text(
+              'Leave',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      context.read<GroupChallengeBloc>().add(
+            CancelParticipationEvent(participationId: participationId),
+          );
+    }
+  }
+
+  Widget _buildJoinedArea(BuildContext context, GroupChallengeEntity event) {
+    final canLeave = (event.userOutcome == 'ongoing' ||
+            event.userOutcome == 'registered') &&
+        _participationIdFor(context, event) != null;
+    if (!canLeave) return _buildJoinedPill();
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildJoinedPill(),
+        const SizedBox(width: 8),
+        SizedBox(
+          height: 34,
+          child: OutlinedButton(
+            onPressed: () => _confirmLeave(context, event),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xffe74c3c),
+              side: BorderSide(
+                color: const Color(0xffe74c3c).withValues(alpha: 0.5),
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              textStyle:
+                  const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+            ),
+            child: const Text('Leave event'),
+          ),
+        ),
+      ],
     );
   }
 

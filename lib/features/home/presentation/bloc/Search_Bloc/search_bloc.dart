@@ -150,7 +150,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
 
 
       final response = await apiClient.dio.get(
-        '/books/search',
+        'books/search',
         queryParameters: queryParameters,
       );
 
@@ -181,7 +181,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
 
     try {
       final response = await apiClient.dio.get(
-        '/authors/search',
+        'authors/search',
         queryParameters: {'author_name': event.query},
       );
 

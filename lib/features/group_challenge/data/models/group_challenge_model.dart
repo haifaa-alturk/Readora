@@ -2,81 +2,62 @@ import '../../domain/entities/group_challenge_entity.dart';
 import '../../domain/entities/required_book_entity.dart';
 import '../../domain/entities/book_progress_entity.dart';
 import 'required_book_model.dart';
-import 'book_progress_model.dart';
 
 class GroupChallengeModel extends GroupChallengeEntity {
   const GroupChallengeModel({
     required super.id,
     required super.title,
-    required super.description,
     required super.startDate,
     required super.endDate,
     required super.requiredBooks,
-    required super.firstPlacePoints,
-    required super.secondPlacePoints,
-    required super.thirdPlacePoints,
-    required super.participantPoints,
+    required super.points,
     required super.status,
-    required super.isRegistered,
-    required super.userBookProgress,
+    super.isRegistered = false,
+    super.userBookProgress = const [],
     super.userOutcome,
     super.userWonDate,
     super.userPointsEarned,
+    super.participationId,
+    super.joinedAt,
+    super.finishedAt,
   });
 
+  /// Parses the raw Laravel Event resource:
+  /// { id, event_name, status, start_date, end_date, points, books: [...] }
+  /// The user-specific fields (isRegistered, progress, outcome) are NOT part
+  /// of this payload; they are set locally after merging participation data.
+  /// participationId is likewise never in this payload (known limitation:
+  /// GET events/participations does not include it) — it is only populated
+  /// from the registerForEvent response.
   factory GroupChallengeModel.fromJson(Map<String, dynamic> json) {
     return GroupChallengeModel(
       id: json['id'] as int? ?? 0,
-      title: json['title'] as String? ?? '',
-      description: json['description'] as String? ?? '',
+      title: json['event_name'] as String? ?? '',
       startDate: json['start_date'] != null
           ? DateTime.parse(json['start_date'] as String)
           : DateTime.now(),
       endDate: json['end_date'] != null
           ? DateTime.parse(json['end_date'] as String)
           : DateTime.now(),
-      requiredBooks: (json['required_books'] as List<dynamic>? ?? [])
+      requiredBooks: (json['books'] as List<dynamic>? ?? [])
           .map((e) => RequiredBookModel.fromJson(Map<String, dynamic>.from(e)))
           .toList(),
-      firstPlacePoints: json['first_place_points'] as int? ?? 0,
-      secondPlacePoints: json['second_place_points'] as int? ?? 0,
-      thirdPlacePoints: json['third_place_points'] as int? ?? 0,
-      participantPoints: json['participant_points'] as int? ?? 0,
+      points: json['points'] as int? ?? 0,
       status: json['status'] as String? ?? 'upcoming',
-      isRegistered: json['is_registered'] as bool? ?? false,
-      userBookProgress: (json['user_book_progress'] as List<dynamic>? ?? [])
-          .map((e) => BookProgressModel.fromJson(Map<String, dynamic>.from(e)))
-          .toList(),
-      userOutcome: json['user_outcome'] as String?,
-      userWonDate: json['user_won_date'] != null
-          ? DateTime.parse(json['user_won_date'] as String)
-          : null,
-      userPointsEarned: json['user_points_earned'] as int?,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'title': title,
-      'description': description,
+      'event_name': title,
       'start_date': startDate.toIso8601String(),
       'end_date': endDate.toIso8601String(),
-      'required_books': requiredBooks
+      'books': requiredBooks
           .map((e) => (e as RequiredBookModel).toJson())
           .toList(),
-      'first_place_points': firstPlacePoints,
-      'second_place_points': secondPlacePoints,
-      'third_place_points': thirdPlacePoints,
-      'participant_points': participantPoints,
+      'points': points,
       'status': status,
-      'is_registered': isRegistered,
-      'user_book_progress': userBookProgress
-          .map((e) => (e as BookProgressModel).toJson())
-          .toList(),
-      'user_outcome': userOutcome,
-      'user_won_date': userWonDate?.toIso8601String(),
-      'user_points_earned': userPointsEarned,
     };
   }
 
@@ -85,32 +66,27 @@ class GroupChallengeModel extends GroupChallengeEntity {
   GroupChallengeModel copyWith({
     int? id,
     String? title,
-    String? description,
     DateTime? startDate,
     DateTime? endDate,
     List<RequiredBookEntity>? requiredBooks,
-    int? firstPlacePoints,
-    int? secondPlacePoints,
-    int? thirdPlacePoints,
-    int? participantPoints,
+    int? points,
     String? status,
     bool? isRegistered,
     List<BookProgressEntity>? userBookProgress,
     Object? userOutcome = _unset,
     Object? userWonDate = _unset,
     Object? userPointsEarned = _unset,
+    Object? participationId = _unset,
+    Object? joinedAt = _unset,
+    Object? finishedAt = _unset,
   }) {
     return GroupChallengeModel(
       id: id ?? this.id,
       title: title ?? this.title,
-      description: description ?? this.description,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       requiredBooks: requiredBooks ?? this.requiredBooks,
-      firstPlacePoints: firstPlacePoints ?? this.firstPlacePoints,
-      secondPlacePoints: secondPlacePoints ?? this.secondPlacePoints,
-      thirdPlacePoints: thirdPlacePoints ?? this.thirdPlacePoints,
-      participantPoints: participantPoints ?? this.participantPoints,
+      points: points ?? this.points,
       status: status ?? this.status,
       isRegistered: isRegistered ?? this.isRegistered,
       userBookProgress: userBookProgress ?? this.userBookProgress,
@@ -121,6 +97,13 @@ class GroupChallengeModel extends GroupChallengeEntity {
       userPointsEarned: userPointsEarned == _unset
           ? this.userPointsEarned
           : userPointsEarned as int?,
+      participationId: participationId == _unset
+          ? this.participationId
+          : participationId as int?,
+      joinedAt:
+          joinedAt == _unset ? this.joinedAt : joinedAt as DateTime?,
+      finishedAt:
+          finishedAt == _unset ? this.finishedAt : finishedAt as DateTime?,
     );
   }
 }

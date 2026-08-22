@@ -502,62 +502,30 @@ class MockDataProvider {
     return [
       {
         'id': 1,
-        'title': 'Software Craft Sprint',
-        'description':
-            'Finish the required books and pass their quizzes before time runs out.',
+        'event_name': 'Software Craft Sprint',
         'start_date': DateTime.now()
             .subtract(const Duration(days: 2))
             .toIso8601String(),
         'end_date': DateTime.now().add(const Duration(days: 5)).toIso8601String(),
-        'required_books': [
-          {'book_id': 101, 'title': 'Clean Architecture', 'cover_url': null},
-          {'book_id': 102, 'title': 'Domain-Driven Design', 'cover_url': null},
+        'books': [
+          {'id': 101, 'book_name': 'Clean Architecture', 'cover_image': null},
+          {'id': 102, 'book_name': 'Domain-Driven Design', 'cover_image': null},
         ],
-        'first_place_points': 15,
-        'second_place_points': 10,
-        'third_place_points': 5,
-        'participant_points': 3,
-        'status': 'current',
-        'is_registered': true,
-        'user_book_progress': [
-          {
-            'book_id': 101,
-            'title': 'Clean Architecture',
-            'is_completed': true,
-            'is_failed': false,
-          },
-          {
-            'book_id': 102,
-            'title': 'Domain-Driven Design',
-            'is_completed': false,
-            'is_failed': false,
-          },
-        ],
-        'user_outcome': 'ongoing',
-        'user_won_date': null,
-        'user_points_earned': null,
+        'points': 15,
+        'status': 'ongoing',
       },
       {
         'id': 2,
-        'title': 'Refactoring Marathon',
-        'description': 'Read Refactoring and pass its quiz to stay in the running.',
+        'event_name': 'Refactoring Marathon',
         'start_date': DateTime.now()
             .subtract(const Duration(days: 1))
             .toIso8601String(),
         'end_date': DateTime.now().add(const Duration(days: 3)).toIso8601String(),
-        'required_books': [
-          {'book_id': 103, 'title': 'Refactoring', 'cover_url': null},
+        'books': [
+          {'id': 103, 'book_name': 'Refactoring', 'cover_image': null},
         ],
-        'first_place_points': 20,
-        'second_place_points': 12,
-        'third_place_points': 6,
-        'participant_points': 4,
-        'status': 'current',
-        'is_registered': false,
-        'user_book_progress': [],
-        'user_outcome': null,
-        'user_won_date': null,
-        'user_points_earned': null,
+        'points': 20,
+        'status': 'ongoing',
       },
     ];
   }
@@ -566,67 +534,33 @@ class MockDataProvider {
     return [
       {
         'id': 11,
-        'title': 'Spring Reading Marathon',
-        'description': 'An ended event our demo user won.',
+        'event_name': 'Spring Reading Marathon',
         'start_date': DateTime.now()
             .subtract(const Duration(days: 30))
             .toIso8601String(),
         'end_date': DateTime.now()
             .subtract(const Duration(days: 5))
             .toIso8601String(),
-        'required_books': [
-          {'book_id': 101, 'title': 'Clean Architecture', 'cover_url': null},
+        'books': [
+          {'id': 101, 'book_name': 'Clean Architecture', 'cover_image': null},
         ],
-        'first_place_points': 15,
-        'second_place_points': 10,
-        'third_place_points': 5,
-        'participant_points': 3,
-        'status': 'ended',
-        'is_registered': true,
-        'user_book_progress': [
-          {
-            'book_id': 101,
-            'title': 'Clean Architecture',
-            'is_completed': true,
-            'is_failed': false,
-          },
-        ],
-        'user_outcome': 'won',
-        'user_won_date': DateTime.now()
-            .subtract(const Duration(days: 5))
-            .toIso8601String(),
-        'user_points_earned': 15,
+        'points': 15,
+        'status': 'completed',
       },
       {
         'id': 12,
-        'title': 'Book Club Trivia Night',
-        'description': 'An ended event our demo user did not win.',
+        'event_name': 'Book Club Trivia Night',
         'start_date': DateTime.now()
             .subtract(const Duration(days: 20))
             .toIso8601String(),
         'end_date': DateTime.now()
             .subtract(const Duration(days: 2))
             .toIso8601String(),
-        'required_books': [
-          {'book_id': 103, 'title': 'Refactoring', 'cover_url': null},
+        'books': [
+          {'id': 103, 'book_name': 'Refactoring', 'cover_image': null},
         ],
-        'first_place_points': 20,
-        'second_place_points': 12,
-        'third_place_points': 6,
-        'participant_points': 4,
-        'status': 'ended',
-        'is_registered': true,
-        'user_book_progress': [
-          {
-            'book_id': 103,
-            'title': 'Refactoring',
-            'is_completed': true,
-            'is_failed': true,
-          },
-        ],
-        'user_outcome': 'lost',
-        'user_won_date': null,
-        'user_points_earned': null,
+        'points': 20,
+        'status': 'completed',
       },
     ];
   }
@@ -635,44 +569,49 @@ class MockDataProvider {
     return [
       {
         'id': 21,
-        'title': 'Poetry Marathon',
-        'description': 'Register to take part in this upcoming event.',
+        'event_name': 'Poetry Marathon',
         'start_date': DateTime.now().add(const Duration(days: 2)).toIso8601String(),
         'end_date': DateTime.now().add(const Duration(days: 9)).toIso8601String(),
-        'required_books': [
-          {'book_id': 101, 'title': 'Clean Architecture', 'cover_url': null},
+        'books': [
+          {'id': 101, 'book_name': 'Clean Architecture', 'cover_image': null},
         ],
-        'first_place_points': 25,
-        'second_place_points': 15,
-        'third_place_points': 8,
-        'participant_points': 5,
+        'points': 25,
         'status': 'upcoming',
-        'is_registered': false,
-        'user_book_progress': [],
-        'user_outcome': null,
-        'user_won_date': null,
-        'user_points_earned': null,
       },
       {
         'id': 22,
-        'title': 'Winter Reading Challenge',
-        'description': 'You are already registered for this one.',
+        'event_name': 'Winter Reading Challenge',
         'start_date': DateTime.now().add(const Duration(days: 4)).toIso8601String(),
         'end_date': DateTime.now().add(const Duration(days: 12)).toIso8601String(),
-        'required_books': [
-          {'book_id': 102, 'title': 'Domain-Driven Design', 'cover_url': null},
-          {'book_id': 103, 'title': 'Refactoring', 'cover_url': null},
+        'books': [
+          {'id': 102, 'book_name': 'Domain-Driven Design', 'cover_image': null},
+          {'id': 103, 'book_name': 'Refactoring', 'cover_image': null},
         ],
-        'first_place_points': 30,
-        'second_place_points': 18,
-        'third_place_points': 10,
-        'participant_points': 5,
+        'points': 30,
         'status': 'upcoming',
-        'is_registered': true,
-        'user_book_progress': [],
-        'user_outcome': 'registered',
-        'user_won_date': null,
-        'user_points_earned': null,
+      },
+    ];
+  }
+
+  static List<Map<String, dynamic>> groupEventsCancelled() {
+    return [
+      {
+        'id': 31,
+        'event_name': 'Autumn Reading Relay',
+        'start_date': DateTime.now()
+            .subtract(const Duration(days: 10))
+            .toIso8601String(),
+        'updated_at': DateTime.now()
+            .subtract(const Duration(days: 3))
+            .toIso8601String(),
+      },
+      {
+        'id': 32,
+        'event_name': 'Mystery Genre Marathon',
+        'start_date': DateTime.now().add(const Duration(days: 6)).toIso8601String(),
+        'updated_at': DateTime.now()
+            .subtract(const Duration(days: 1))
+            .toIso8601String(),
       },
     ];
   }
@@ -680,87 +619,22 @@ class MockDataProvider {
   static List<Map<String, dynamic>> groupEventWinners(int eventId) {
     if (eventId == 11) {
       return [
-        {
-          'user_id': 101,
-          'username': 'Lara',
-          'avatar_url': null,
-          'rank': 1,
-          'points_awarded': 15,
-        },
-        {
-          'user_id': 102,
-          'username': 'Omar',
-          'avatar_url': null,
-          'rank': 2,
-          'points_awarded': 10,
-        },
-        {
-          'user_id': 103,
-          'username': 'Sara',
-          'avatar_url': null,
-          'rank': 3,
-          'points_awarded': 5,
-        },
-        {
-          'user_id': 104,
-          'username': 'Nour',
-          'avatar_url': null,
-          'rank': null,
-          'points_awarded': 3,
-        },
-        {
-          'user_id': 105,
-          'username': 'Hadi',
-          'avatar_url': null,
-          'rank': null,
-          'points_awarded': 3,
-        },
+        {'username': 'Lara', 'points_awarded': 15},
+        {'username': 'Omar', 'points_awarded': 15},
+        {'username': 'Sara', 'points_awarded': 15},
+        {'username': 'Nour', 'points_awarded': 15},
+        {'username': 'Hadi', 'points_awarded': 15},
       ];
     }
     if (eventId == 12) {
       return [
-        {
-          'user_id': 201,
-          'username': 'Rana',
-          'avatar_url': null,
-          'rank': 1,
-          'points_awarded': 20,
-        },
-        {
-          'user_id': 202,
-          'username': 'Khalid',
-          'avatar_url': null,
-          'rank': 2,
-          'points_awarded': 12,
-        },
-        {
-          'user_id': 203,
-          'username': 'Yara',
-          'avatar_url': null,
-          'rank': 3,
-          'points_awarded': 6,
-        },
-        {
-          'user_id': 204,
-          'username': 'Tarek',
-          'avatar_url': null,
-          'rank': null,
-          'points_awarded': 4,
-        },
-        {
-          'user_id': 205,
-          'username': 'Lina',
-          'avatar_url': null,
-          'rank': null,
-          'points_awarded': 4,
-        },
+        {'username': 'Rana', 'points_awarded': 20},
+        {'username': 'Khalid', 'points_awarded': 20},
+        {'username': 'Yara', 'points_awarded': 20},
+        {'username': 'Tarek', 'points_awarded': 20},
+        {'username': 'Lina', 'points_awarded': 20},
       ];
     }
     return [];
-  }
-
-  // MOCK-ONLY: simulates how many other participants already finished all required books before this user, purely so the app can compute a live rank the instant this user finishes their last book. Delete this once the real backend returns live rankings.
-  static int groupEventOtherFinishersCount(int eventId) {
-    return eventId == 1 ? 1 : 0;
   }
 }

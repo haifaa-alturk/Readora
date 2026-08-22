@@ -13,7 +13,7 @@ class BookDetailsRemoteDataSourceImpl implements BookDetailsRemoteDataSource {
 
   @override
   Future<BookDetailsModel> getBookDetails(int id) async {
-   final response = await dio.get('/books/details/$id');
+   final response = await dio.get('books/details/$id');
 
     return BookDetailsModel.fromJson(response.data);
   }

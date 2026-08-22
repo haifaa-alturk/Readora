@@ -13,20 +13,20 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
   @override
   Future<List<BookModel>> getRecommendedBooks() async {
-    final response = await dio.get('/books/recommended');
+    final response = await dio.get('books/recommended');
     return (response.data as List).map((e) => BookModel.fromJson(e)).toList();
   }
 
   @override
   Future<List<BookModel>> getTopRatedBooks() async {
-    final response = await dio.get('/books/top-rated');
+    final response = await dio.get('books/top-rated');
     return (response.data as List).map((e) => BookModel.fromJson(e)).toList();
   }
 
   @override
   Future<List<BookModel>> getNewBooks() async {
     // ن يعيد 30 كتاب مضاف حديثا
-    final response = await dio.get('/books/new');
+    final response = await dio.get('books/new');
     print("📡 Data from Server: ${response.data}"); 
     return (response.data as List).map((e) => BookModel.fromJson(e)).toList();
   }

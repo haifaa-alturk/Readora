@@ -23,6 +23,10 @@ class LoadMyEventsEvent extends GroupChallengeEvent {
   const LoadMyEventsEvent();
 }
 
+class LoadCancelledEventsEvent extends GroupChallengeEvent {
+  const LoadCancelledEventsEvent();
+}
+
 class RegisterForEventEvent extends GroupChallengeEvent {
   final int eventId;
 
@@ -30,6 +34,15 @@ class RegisterForEventEvent extends GroupChallengeEvent {
 
   @override
   List<Object?> get props => [eventId];
+}
+
+class CancelParticipationEvent extends GroupChallengeEvent {
+  final int participationId;
+
+  const CancelParticipationEvent({required this.participationId});
+
+  @override
+  List<Object?> get props => [participationId];
 }
 
 class LoadEventWinnersEvent extends GroupChallengeEvent {
@@ -41,15 +54,15 @@ class LoadEventWinnersEvent extends GroupChallengeEvent {
   List<Object?> get props => [eventId];
 }
 
-class RecordBookQuizResultEvent extends GroupChallengeEvent {
-  final int bookId;
-  final bool passed;
+class LoadEventDetailEvent extends GroupChallengeEvent {
+  final int eventId;
+  final String status;
 
-  const RecordBookQuizResultEvent({
-    required this.bookId,
-    required this.passed,
+  const LoadEventDetailEvent({
+    required this.eventId,
+    required this.status,
   });
 
   @override
-  List<Object?> get props => [bookId, passed];
+  List<Object?> get props => [eventId, status];
 }

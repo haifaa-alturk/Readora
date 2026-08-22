@@ -1,209 +1,198 @@
-import '../../../../core/mock_dev3/mock_config.dart';
-import '../../../../core/mock_dev3/mock_data_provider.dart';
-import '../../../../core/network_dev3/api_client.dart';
+import 'package:dio/dio.dart';
+
+import '../../../../core/api/api_client.dart';
 import '../models/group_challenge_model.dart';
+import '../models/cancelled_event_model.dart';
 import '../models/challenge_winner_model.dart';
 import '../models/book_progress_model.dart';
+
+/// Thrown when registering for an event the user has already joined
+/// (backend responds with 409).
+class AlreadyRegisteredException implements Exception {
+  const AlreadyRegisteredException();
+}
 
 abstract class GroupChallengeRemoteDataSource {
   Future<List<GroupChallengeModel>> getCurrentEvents();
   Future<List<GroupChallengeModel>> getEndedEvents();
   Future<List<GroupChallengeModel>> getUpcomingEvents();
   Future<List<GroupChallengeModel>> getMyEvents();
-  Future<GroupChallengeModel> registerForEvent({required int eventId});
+  Future<List<GroupChallengeModel>> getWinEvents();
+  Future<List<GroupChallengeModel>> getLoseEvents();
+  Future<List<CancelledEventModel>> getCancelledEvents();
   Future<List<ChallengeWinnerModel>> getWinners({required int eventId});
-  Future<List<GroupChallengeModel>> recordBookQuizResult({
-    required int bookId,
-    required bool passed,
+  Future<GroupChallengeModel> getEventDetail({
+    required int eventId,
+    required String status,
   });
+  Future<GroupChallengeModel> registerForEvent({required int eventId});
+  Future<void> cancelParticipation({required int participationId});
 }
 
 class GroupChallengeRemoteDataSourceImpl
     implements GroupChallengeRemoteDataSource {
-  GroupChallengeRemoteDataSourceImpl(this._apiClient);
+  GroupChallengeRemoteDataSourceImpl(this._realApiClient);
 
-  // ignore: unused_field — kept for when real API call is uncommented below
-  final Dev3ApiClient _apiClient;
+  final ApiClient _realApiClient;
 
-  List<GroupChallengeModel>? _allEvents;
-
-  Future<void> _ensureLoaded() async {
-    if (_allEvents != null) return;
-
-    final events = <Map<String, dynamic>>[];
-    if (useMockData) {
-      events
-        ..addAll(MockDataProvider.groupEventsCurrent())
-        ..addAll(MockDataProvider.groupEventsEnded())
-        ..addAll(MockDataProvider.groupEventsUpcoming());
-    } else {
-      // TODO: confirm real group-events endpoints with backend team.
-      // final current = await _apiClient.get('/group-events?status=current');
-      // final ended = await _apiClient.get('/group-events?status=ended');
-      // final upcoming = await _apiClient.get('/group-events?status=upcoming');
-      // ... would map each list here ...
-      events
-        ..addAll(MockDataProvider.groupEventsCurrent())
-        ..addAll(MockDataProvider.groupEventsEnded())
-        ..addAll(MockDataProvider.groupEventsUpcoming());
-    }
-
-    _allEvents = events.map((e) => GroupChallengeModel.fromJson(e)).toList();
+  List<GroupChallengeModel> _parseEventList(dynamic data) {
+    final list = data as List<dynamic>? ?? const [];
+    return list
+        .map(
+          (e) => GroupChallengeModel.fromJson(
+            Map<String, dynamic>.from(e as Map),
+          ),
+        )
+        .toList();
   }
 
   @override
   Future<List<GroupChallengeModel>> getCurrentEvents() async {
-    await _ensureLoaded();
-    return _allEvents!.where((e) => e.status == 'current').toList();
+    final response = await _realApiClient.dio.get('events/ongoing');
+    return _parseEventList(response.data);
   }
 
   @override
   Future<List<GroupChallengeModel>> getEndedEvents() async {
-    await _ensureLoaded();
-    return _allEvents!.where((e) => e.status == 'ended').toList();
+    final response = await _realApiClient.dio.get('events/completed');
+    return _parseEventList(response.data);
   }
 
   @override
   Future<List<GroupChallengeModel>> getUpcomingEvents() async {
-    await _ensureLoaded();
-    return _allEvents!.where((e) => e.status == 'upcoming').toList();
+    final response = await _realApiClient.dio.get('events/upcoming');
+    return _parseEventList(response.data);
   }
 
   @override
   Future<List<GroupChallengeModel>> getMyEvents() async {
-    await _ensureLoaded();
-    return _allEvents!.where((e) => e.isRegistered).toList();
+    final response = await _realApiClient.dio.get('events/participations');
+    return _parseEventList(response.data);
   }
 
   @override
-  Future<GroupChallengeModel> registerForEvent({
-    required int eventId,
-  }) async {
-    await _ensureLoaded();
-    final index = _allEvents!.indexWhere((e) => e.id == eventId);
-    if (index == -1) {
-      throw Exception('Event not found');
-    }
-
-    final event = _allEvents![index];
-    late GroupChallengeModel updated;
-    if (event.status == 'current') {
-      updated = event.copyWith(
-        isRegistered: true,
-        userOutcome: 'ongoing',
-        userBookProgress: event.requiredBooks
-            .map(
-              (rb) => BookProgressModel(
-                bookId: rb.bookId,
-                title: rb.title,
-                isCompleted: false,
-                isFailed: false,
-              ),
-            )
-            .toList(),
-      );
-    } else {
-      updated = event.copyWith(
-        isRegistered: true,
-        userOutcome: 'registered',
-      );
-    }
-
-    _allEvents![index] = updated;
-    return updated;
+  Future<List<GroupChallengeModel>> getWinEvents() async {
+    final response = await _realApiClient.dio.get('events/wins');
+    return _parseEventList(response.data);
   }
 
   @override
-  Future<List<ChallengeWinnerModel>> getWinners({
-    required int eventId,
-  }) async {
-    if (useMockData) {
-      final data = MockDataProvider.groupEventWinners(eventId);
-      return data.map((e) => ChallengeWinnerModel.fromJson(e)).toList();
-    }
-    // TODO: confirm real group-events winners endpoint with backend team.
-    // final response = await _apiClient.get('/group-events/$eventId/winners');
-    // final list = response.data as List<dynamic>;
-    // return list
-    //     .map((e) => ChallengeWinnerModel.fromJson(e as Map<String, dynamic>))
-    //     .toList();
-    final data = MockDataProvider.groupEventWinners(eventId);
-    return data.map((e) => ChallengeWinnerModel.fromJson(e)).toList();
+  Future<List<GroupChallengeModel>> getLoseEvents() async {
+    final response = await _realApiClient.dio.get('events/losses');
+    return _parseEventList(response.data);
   }
 
-  // NOTE: both 'won' and 'lost' are decided in real time here, not deferred to
-  // event end. 'lost' is absolute and overrides prior progress. 'won' fires the
-  // instant the last required book is completed; its rank/points use
-  // MockDataProvider.groupEventOtherFinishersCount() as a temporary local
-  // simulation of the other participants, since only the real backend can know
-  // the true finishing order once it exists.
   @override
-  Future<List<GroupChallengeModel>> recordBookQuizResult({
-    required int bookId,
-    required bool passed,
-  }) async {
-    await _ensureLoaded();
-
-    final updated = _allEvents!.map((event) {
-      final isCandidate = event.status == 'current' &&
-          event.isRegistered &&
-          event.userOutcome != 'lost' &&
-          event.userOutcome != 'won' &&
-          event.requiredBooks.any((rb) => rb.bookId == bookId);
-      return isCandidate ? _applyQuizResult(event, bookId, passed) : event;
-    }).toList();
-
-    _allEvents = updated;
-    return getCurrentEvents();
-  }
-
-  GroupChallengeModel _applyQuizResult(
-    GroupChallengeModel event,
-    int bookId,
-    bool passed,
-  ) {
-    final progress = event.userBookProgress
-        .map((p) => p.bookId == bookId
-            ? BookProgressModel(
-                bookId: p.bookId,
-                title: p.title,
-                isCompleted: passed,
-                isFailed: !passed,
-              )
-            : p)
+  Future<List<CancelledEventModel>> getCancelledEvents() async {
+    final response = await _realApiClient.dio.get('events/cancelled');
+    final list = response.data as List<dynamic>? ?? const [];
+    return list
+        .map(
+          (e) => CancelledEventModel.fromJson(
+            Map<String, dynamic>.from(e as Map),
+          ),
+        )
         .toList();
+  }
 
-    if (!passed) {
+  /// Forward-compatible winners fetch: GET events/completed/$eventId returns
+  /// the completed event with a "winners" key. Any failure (404 via
+  /// firstOrFail when the event isn't completed yet, route missing, server
+  /// error, etc.) yields an empty list instead of throwing; the bloc flags
+  /// the event as "winners unavailable" so the UI can show a placeholder.
+  @override
+  Future<List<ChallengeWinnerModel>> getWinners({required int eventId}) async {
+    try {
+      final response =
+          await _realApiClient.dio.get('events/completed/$eventId');
+      final json = Map<String, dynamic>.from(response.data as Map);
+      final winners = json['winners'] as List<dynamic>? ?? const [];
+      return winners
+          .map(
+            (e) => ChallengeWinnerModel.fromJson(
+              Map<String, dynamic>.from(e as Map),
+            ),
+          )
+          .toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  /// Fetches a single event's full detail for the given status segment
+  /// ('ongoing', 'completed', 'upcoming' or 'cancelled').
+  ///
+  /// - ongoing/completed: { "event": {...}, "books": [ ...with status... ],
+  ///   "winners": [...] (completed only) } — the event is parsed via
+  ///   GroupChallengeModel.fromJson and "books" is attached as
+  ///   userBookProgress.
+  /// - upcoming/cancelled: the flat event object directly, parsed with an
+  ///   empty userBookProgress.
+  @override
+  Future<GroupChallengeModel> getEventDetail({
+    required int eventId,
+    required String status,
+  }) async {
+    final response = await _realApiClient.dio.get('events/$status/$eventId');
+    final json = Map<String, dynamic>.from(response.data as Map);
+
+    if (status == 'ongoing' || status == 'completed') {
+      final event = GroupChallengeModel.fromJson(
+        Map<String, dynamic>.from(json['event'] as Map),
+      );
+      final books = json['books'] as List<dynamic>? ?? const [];
+      final progress = books
+          .map(
+            (e) => BookProgressModel.fromJson(
+              Map<String, dynamic>.from(e as Map),
+            ),
+          )
+          .toList();
+      // The completed payload also carries the current user's participation
+      // timestamps at the top level: joined_at / finished_at.
+      DateTime? parseDate(dynamic raw) =>
+          raw is String && raw.isNotEmpty ? DateTime.tryParse(raw) : null;
       return event.copyWith(
         userBookProgress: progress,
-        userOutcome: 'lost',
-        userWonDate: null,
-        userPointsEarned: null,
+        joinedAt: parseDate(json['joined_at']),
+        finishedAt: parseDate(json['finished_at']),
       );
     }
 
-    final allComplete = progress.every((p) => p.isCompleted);
-    if (allComplete) {
-      final otherFinishers = MockDataProvider.groupEventOtherFinishersCount(event.id);
-      final rank = otherFinishers + 1;
-      final points = rank == 1
-          ? event.firstPlacePoints
-          : rank == 2
-              ? event.secondPlacePoints
-              : rank == 3
-                  ? event.thirdPlacePoints
-                  : event.participantPoints;
-      return event.copyWith(
-        userBookProgress: progress,
-        userOutcome: 'won',
-        userWonDate: DateTime.now(),
-        userPointsEarned: points,
-      );
-    }
+    return GroupChallengeModel.fromJson(json);
+  }
 
-    return event.copyWith(
-      userBookProgress: progress,
-      userOutcome: 'ongoing',
-    );
+  @override
+  Future<GroupChallengeModel> registerForEvent({required int eventId}) async {
+    try {
+      final response = await _realApiClient.dio.post('participations/$eventId');
+      // The backend wraps the created Participation object (NOT the event):
+      // {"message": ..., "data": {id, user_id, event_id, status, joined_at}}
+      final json = Map<String, dynamic>.from(response.data as Map);
+      final participation = Map<String, dynamic>.from(json['data'] as Map);
+      // Return a minimal model carrying the event id and, crucially, the
+      // participation id needed later for DELETE participations/{id}.
+      return GroupChallengeModel(
+        id: participation['event_id'] as int? ?? eventId,
+        title: '',
+        startDate: DateTime.now(),
+        endDate: DateTime.now(),
+        requiredBooks: const [],
+        points: 0,
+        status: 'upcoming',
+        isRegistered: true,
+        participationId: participation['id'] as int?,
+      );
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 409) {
+        throw const AlreadyRegisteredException();
+      }
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> cancelParticipation({required int participationId}) async {
+    await _realApiClient.dio.delete('participations/$participationId');
   }
 }

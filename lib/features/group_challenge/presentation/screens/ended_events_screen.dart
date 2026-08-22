@@ -29,7 +29,13 @@ class _EndedEventsScreenState extends State<EndedEventsScreen> {
   String _formatDate(DateTime date) => '${_months[date.month - 1]} ${date.day}';
 
   void _openWinners(BuildContext context, GroupChallengeEntity event) {
+    // One backend call (GET events/completed/{id}) provides both the winners
+    // list and this user's per-book progress for the detail screen.
     context.read<GroupChallengeBloc>().add(LoadEventWinnersEvent(eventId: event.id));
+    context.read<GroupChallengeBloc>().add(LoadEventDetailEvent(
+          eventId: event.id,
+          status: 'completed',
+        ));
     Navigator.push(
       context,
       MaterialPageRoute(

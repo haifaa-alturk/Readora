@@ -24,6 +24,105 @@ class _MyCompetitionsScreenState extends State<MyCompetitionsScreen> {
 
   String _selectedTab = 'ongoing';
 
+  /// Won events only get their joined_at / finished_at timestamps from the
+  /// live completed-event detail endpoint (GET events/completed/{id}), so
+  /// fetch details for any won event whose dates aren't cached yet.
+  /// Dispatched post-frame to avoid modifying state during build; cards
+  /// render instantly with fallback text and update when data arrives.
+  void _ensureWonEventDetails(
+    BuildContext context,
+    GroupChallengeState state,
+    List<GroupChallengeEntity> wonEvents,
+  ) {
+    final missing = wonEvents
+        .where((e) => !state.participationDatesByEventId.containsKey(e.id))
+        .toList();
+    if (missing.isEmpty) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      for (final event in missing) {
+        context.read<GroupChallengeBloc>().add(LoadEventDetailEvent(
+              eventId: event.id,
+              status: 'completed',
+            ));
+      }
+    });
+  }
+
+  /// Resolves the participation id for a joined event. KNOWN LIMITATION:
+  /// GET events/participations does not return participation_id, so this is
+  /// only available if the user registered during the current app session
+  /// (the bloc caches the id from the register response).
+  int? _participationIdFor(BuildContext context, GroupChallengeEntity event) {
+    final state = context.read<GroupChallengeBloc>().state;
+    return event.participationId ?? state.participationIdsByEventId[event.id];
+  }
+
+  Future<void> _confirmLeave(
+    BuildContext context,
+    GroupChallengeEntity event,
+  ) async {
+    final participationId = _participationIdFor(context, event);
+    if (participationId == null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: const Color(0xfffcfbfa),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Leave Event',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+        ),
+        content: Text(
+          'Are you sure you want to leave "${event.title}"? You will no longer be able to win its points.',
+          style: const TextStyle(fontSize: 14, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Stay'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: TextButton.styleFrom(foregroundColor: const Color(0xffe74c3c)),
+            child: const Text(
+              'Leave',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      context.read<GroupChallengeBloc>().add(
+            CancelParticipationEvent(participationId: participationId),
+          );
+    }
+  }
+
+  Widget _buildLeaveButton(BuildContext context, GroupChallengeEntity event) {
+    return SizedBox(
+      height: 34,
+      child: OutlinedButton(
+        onPressed: () => _confirmLeave(context, event),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xffe74c3c),
+          side: BorderSide(
+            color: const Color(0xffe74c3c).withValues(alpha: 0.5),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+        ),
+        child: const Text('Leave event'),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -45,7 +144,13 @@ class _MyCompetitionsScreenState extends State<MyCompetitionsScreen> {
   }
 
   void _openWinners(BuildContext context, GroupChallengeEntity event) {
+    // One backend call (GET events/completed/{id}) provides both the winners
+    // list and this user's per-book progress for the detail screen.
     context.read<GroupChallengeBloc>().add(LoadEventWinnersEvent(eventId: event.id));
+    context.read<GroupChallengeBloc>().add(LoadEventDetailEvent(
+          eventId: event.id,
+          status: 'completed',
+        ));
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -101,6 +206,9 @@ class _MyCompetitionsScreenState extends State<MyCompetitionsScreen> {
           }
 
           final won = events.where((e) => e.userOutcome == 'won').toList();
+          if (won.isNotEmpty) {
+            _ensureWonEventDetails(context, state, won);
+          }
           final lost = events.where((e) => e.userOutcome == 'lost').toList();
           final ongoing = events.where((e) => e.userOutcome == 'ongoing').toList();
           final registered =
@@ -210,8 +318,22 @@ class _MyCompetitionsScreenState extends State<MyCompetitionsScreen> {
     );
   }
 
+  /// Numeric date format (DD/MM/YYYY) used on the Won card.
+  String _formatDateNumeric(DateTime date) {
+    final d = date.day.toString().padLeft(2, '0');
+    final m = date.month.toString().padLeft(2, '0');
+    return '$d/$m/${date.year}';
+  }
+
   Widget _buildWonCard(BuildContext context, GroupChallengeEntity event) {
-    final wonDate = event.userWonDate;
+    // Dates come from the live completed-event payload (joined_at /
+    // finished_at), cached in state; userWonDate is a legacy fallback.
+    final state = context.read<GroupChallengeBloc>().state;
+    final dates = event.joinedAt != null || event.finishedAt != null
+        ? (joinedAt: event.joinedAt, finishedAt: event.finishedAt)
+        : state.participationDatesByEventId[event.id];
+    final joinedDate = dates?.joinedAt;
+    final wonDate = dates?.finishedAt ?? event.userWonDate;
     return _buildCard(
       context: context,
       color: const Color(0xffC2E7D9),
@@ -231,17 +353,33 @@ class _MyCompetitionsScreenState extends State<MyCompetitionsScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  wonDate != null
-                      ? 'Won on ${_formatDate(wonDate)}'
-                      : 'Won this competition',
+                  'Started: ${_formatDateNumeric(event.startDate)}',
                   style: const TextStyle(fontSize: 13),
                 ),
+                if (joinedDate != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    'Participated since: ${_formatDateNumeric(joinedDate)}',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                ],
+                const SizedBox(height: 2),
+                if (wonDate != null)
+                  Text(
+                    'Won on: ${_formatDateNumeric(wonDate)}',
+                    style: const TextStyle(fontSize: 13),
+                  )
+                else
+                  const Text(
+                    'Won Competition',
+                    style: TextStyle(fontSize: 13),
+                  ),
               ],
             ),
           ),
           const SizedBox(width: 12),
           Text(
-            '+${event.userPointsEarned} pts',
+            '+${event.userPointsEarned ?? event.points} pts',
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
           ),
         ],
@@ -327,6 +465,16 @@ class _MyCompetitionsScreenState extends State<MyCompetitionsScreen> {
               minHeight: 6,
             ),
           ),
+          if (event.isRegistered &&
+              (event.userOutcome == 'ongoing' ||
+                  event.userOutcome == 'registered') &&
+              _participationIdFor(context, event) != null) ...[
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerRight,
+              child: _buildLeaveButton(context, event),
+            ),
+          ],
         ],
       ),
     );
@@ -340,9 +488,20 @@ class _MyCompetitionsScreenState extends State<MyCompetitionsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            event.title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  event.title,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                ),
+              ),
+              if (event.isRegistered &&
+                  (event.userOutcome == 'ongoing' ||
+                      event.userOutcome == 'registered') &&
+                  _participationIdFor(context, event) != null)
+                _buildLeaveButton(context, event),
+            ],
           ),
           const SizedBox(height: 4),
           Text(
@@ -382,8 +541,6 @@ class _MyCompetitionsScreenState extends State<MyCompetitionsScreen> {
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
-              Text(event.description, style: const TextStyle(fontSize: 14, height: 1.5)),
-              const SizedBox(height: 16),
               Row(
                 children: [
                   const Icon(Icons.event, size: 18),
@@ -412,7 +569,7 @@ class _MyCompetitionsScreenState extends State<MyCompetitionsScreen> {
               const Text('Points', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               Text(
-                '🥇 ${event.firstPlacePoints}   🥈 ${event.secondPlacePoints}   🥉 ${event.thirdPlacePoints}   •  Other finishers: ${event.participantPoints}',
+                '${event.points} pts',
                 style: const TextStyle(fontSize: 13),
               ),
               const SizedBox(height: 8),

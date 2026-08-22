@@ -14,10 +14,27 @@ const Color _boxOneOrange = Color(0xffFFA754);
 const Color _boxTwoGreen = Color(0xff7ED399);
 const Color _boxThreePurple = Color(0xffC299FC);
 
-class CurrentEventDetailScreen extends StatelessWidget {
+class CurrentEventDetailScreen extends StatefulWidget {
   final GroupChallengeEntity event;
 
   const CurrentEventDetailScreen({super.key, required this.event});
+
+  @override
+  State<CurrentEventDetailScreen> createState() =>
+      _CurrentEventDetailScreenState();
+}
+
+class _CurrentEventDetailScreenState
+    extends State<CurrentEventDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // This screen is only opened for ongoing/completed events.
+    context.read<GroupChallengeBloc>().add(LoadEventDetailEvent(
+          eventId: widget.event.id,
+          status: widget.event.status,
+        ));
+  }
 
   GroupChallengeEntity _resolveLiveEvent(
     GroupChallengeState state,
@@ -32,10 +49,10 @@ class CurrentEventDetailScreen extends StatelessWidget {
   }
 
   BookProgressEntity? _progressFor(
-    GroupChallengeEntity event,
+    List<BookProgressEntity> progressList,
     RequiredBookEntity book,
   ) {
-    for (final p in event.userBookProgress) {
+    for (final p in progressList) {
       if (p.bookId == book.bookId) return p;
     }
     return null;
@@ -49,19 +66,29 @@ class CurrentEventDetailScreen extends StatelessWidget {
         backgroundColor: const Color(0xfffcfbfa),
         elevation: 0,
         title: Text(
-          event.title,
+          widget.event.title,
           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
         ),
       ),
       body: BlocBuilder<GroupChallengeBloc, GroupChallengeState>(
         builder: (context, state) {
-          final liveEvent = _resolveLiveEvent(state, event);
+          final liveEvent = _resolveLiveEvent(state, widget.event);
           final canTakeQuiz =
               liveEvent.userOutcome != 'won' && liveEvent.userOutcome != 'lost';
+
+          // Per-book progress comes from the dedicated detail endpoint
+          // (state.eventDetail), not from the list-level calls which leave
+          // userBookProgress empty.
+          final detail = state.eventDetail;
+          final detailForThisEvent =
+              detail != null && detail.id == widget.event.id ? detail : null;
+          final progressList =
+              detailForThisEvent?.userBookProgress ?? const <BookProgressEntity>[];
 
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              _buildInstructionsBanner(),
               if (liveEvent.userOutcome == 'lost')
                 _buildLostBanner(),
               if (liveEvent.userOutcome == 'won')
@@ -82,7 +109,7 @@ class CurrentEventDetailScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      liveEvent.description,
+                      '${liveEvent.requiredBooks.length} required books',
                       style: const TextStyle(fontSize: 14),
                     ),
                   ],
@@ -108,13 +135,25 @@ class CurrentEventDetailScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    for (final book in liveEvent.requiredBooks)
-                      _buildBookRow(
-                        context,
-                        liveEvent,
-                        book,
-                        canTakeQuiz: canTakeQuiz,
-                      ),
+                    if (state.isLoadingDetail && progressList.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Center(
+                          child: SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                      )
+                    else
+                      for (final book in liveEvent.requiredBooks)
+                        _buildBookRow(
+                          context,
+                          book,
+                          progress: _progressFor(progressList, book),
+                          canTakeQuiz: canTakeQuiz,
+                        ),
                   ],
                 ),
               ),
@@ -123,6 +162,42 @@ class CurrentEventDetailScreen extends StatelessWidget {
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildInstructionsBanner() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xfff3efe6),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xff2d2d2d).withValues(alpha: 0.10),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: const Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.info_outline, size: 20, color: Color(0xff8a7a52)),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'To win the challenges, you must read all the specified books for each challenge and answer all of their quiz questions correctly and completely within the exclusively specified challenge period. Note: Missing just one question in a single quiz for any of the challenge books means you will lose the challenge. Therefore, read the books carefully so you can answer all questions correctly. We wish you an exciting experience!',
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.5,
+                color: Color(0xff4a4436),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -228,81 +303,37 @@ class CurrentEventDetailScreen extends StatelessWidget {
 
   Widget _buildBookRow(
     BuildContext context,
-    GroupChallengeEntity event,
     RequiredBookEntity book, {
+    BookProgressEntity? progress,
     required bool canTakeQuiz,
   }) {
-    final progress = _progressFor(event, book);
-
-    if (event.userBookProgress.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Text(book.title, style: const TextStyle(fontSize: 14)),
-      );
-    }
-
+    final coverUrl = book.coverUrl;
     final isCompleted = progress?.isCompleted ?? false;
-    final isFailed = progress?.isFailed ?? false;
-
-    if (isCompleted) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Color(0xff54a747), size: 20),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                book.title,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-              ),
-            ),
-            const Text(
-              'Completed',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: Color(0xff54a747),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (isFailed) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(
-          children: [
-            const Icon(Icons.cancel, color: Color(0xffe74c3c), size: 20),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                book.title,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-              ),
-            ),
-            const Text(
-              'Failed',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: Color(0xffe74c3c),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          const Icon(
-            Icons.circle_outlined,
-            color: Color(0xff2d2d2d),
+          if (coverUrl != null && coverUrl.isNotEmpty) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: Image.network(
+                coverUrl,
+                width: 34,
+                height: 48,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  width: 34,
+                  height: 48,
+                  color: const Color(0xff2d2d2d).withValues(alpha: 0.08),
+                  child: const Icon(Icons.menu_book, size: 16),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+          ],
+          Icon(
+            isCompleted ? Icons.check_circle : Icons.circle_outlined,
+            color: isCompleted ? const Color(0xff54a747) : const Color(0xff2d2d2d),
             size: 18,
           ),
           const SizedBox(width: 8),

@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../domain/entities/group_challenge_entity.dart';
 import '../../domain/repositories/group_challenge_repository_interface.dart';
 import 'group_challenge_event.dart';
 import 'group_challenge_state.dart';
@@ -14,9 +15,11 @@ class GroupChallengeBloc
     on<LoadEndedEventsEvent>(_onLoadEndedEvents);
     on<LoadUpcomingEventsEvent>(_onLoadUpcomingEvents);
     on<LoadMyEventsEvent>(_onLoadMyEvents);
+    on<LoadCancelledEventsEvent>(_onLoadCancelledEvents);
     on<RegisterForEventEvent>(_onRegisterForEvent);
+    on<CancelParticipationEvent>(_onCancelParticipation);
     on<LoadEventWinnersEvent>(_onLoadEventWinners);
-    on<RecordBookQuizResultEvent>(_onRecordBookQuizResult);
+    on<LoadEventDetailEvent>(_onLoadEventDetail);
   }
 
   Future<void> _loadCurrent(Emitter<GroupChallengeState> emit) async {
@@ -83,17 +86,97 @@ class GroupChallengeBloc
     await _loadMy(emit);
   }
 
+  Future<void> _onLoadCancelledEvents(
+    LoadCancelledEventsEvent event,
+    Emitter<GroupChallengeState> emit,
+  ) async {
+    emit(state.copyWith(isLoadingCancelled: true, cancelledError: null));
+    final result = await repository.getCancelledEvents();
+    result.fold(
+      (error) => emit(state.copyWith(
+        isLoadingCancelled: false,
+        cancelledError: error,
+      )),
+      (events) => emit(state.copyWith(
+        isLoadingCancelled: false,
+        cancelledEvents: events,
+      )),
+    );
+  }
+
   Future<void> _onRegisterForEvent(
     RegisterForEventEvent event,
     Emitter<GroupChallengeState> emit,
   ) async {
     final result =
         await repository.registerForEvent(eventId: event.eventId);
+    GroupChallengeEntity? registered;
+    result.fold(
+      (error) => null,
+      (value) => registered = value,
+    );
+    if (registered != null && registered!.participationId != null) {
+      // Cache the participation id so the Leave button can call
+      // DELETE participations/{id} later in this session.
+      emit(state.copyWith(
+        participationIdsByEventId: {
+          ...state.participationIdsByEventId,
+          event.eventId: registered!.participationId!,
+        },
+      ));
+    }
+    await _loadCurrent(emit);
+    await _loadUpcoming(emit);
+    await _loadMy(emit);
+  }
+
+  Future<void> _onLoadEventDetail(
+    LoadEventDetailEvent event,
+    Emitter<GroupChallengeState> emit,
+  ) async {
+    emit(state.copyWith(isLoadingDetail: true, detailError: null));
+    final result = await repository.getEventDetail(
+      eventId: event.eventId,
+      status: event.status,
+    );
+    result.fold(
+      (error) => emit(state.copyWith(
+        isLoadingDetail: false,
+        detailError: error,
+      )),
+      (detail) {
+        // Cache the participation timestamps (joined_at / finished_at from
+        // the completed-event payload) so the Won tab can render real dates.
+        final updatedDates = {
+          ...state.participationDatesByEventId,
+          if (detail.joinedAt != null || detail.finishedAt != null)
+            detail.id: (
+              joinedAt: detail.joinedAt,
+              finishedAt: detail.finishedAt,
+            ),
+        };
+        emit(state.copyWith(
+          isLoadingDetail: false,
+          eventDetail: detail,
+          participationDatesByEventId: updatedDates,
+        ));
+      },
+    );
+  }
+
+  Future<void> _onCancelParticipation(
+    CancelParticipationEvent event,
+    Emitter<GroupChallengeState> emit,
+  ) async {
+    final result = await repository.cancelParticipation(
+      participationId: event.participationId,
+    );
     await result.fold(
       (error) async => emit(state.copyWith(actionError: error)),
       (_) async {
         await _loadCurrent(emit);
         await _loadUpcoming(emit);
+        await _loadMy(emit);
       },
     );
   }
@@ -104,26 +187,22 @@ class GroupChallengeBloc
   ) async {
     final result = await repository.getWinners(eventId: event.eventId);
     result.fold(
-      (error) => emit(state.copyWith(actionError: error)),
-      (winners) => emit(state.copyWith(
-        winnersByEventId: {...state.winnersByEventId, event.eventId: winners},
+      (error) => emit(state.copyWith(
+        actionError: error,
+        winnersUnavailableEventIds:
+            {...state.winnersUnavailableEventIds, event.eventId},
       )),
-    );
-  }
-
-  Future<void> _onRecordBookQuizResult(
-    RecordBookQuizResultEvent event,
-    Emitter<GroupChallengeState> emit,
-  ) async {
-    final result = await repository.recordBookQuizResult(
-      bookId: event.bookId,
-      passed: event.passed,
-    );
-    await result.fold(
-      (error) async => emit(state.copyWith(actionError: error)),
-      (updatedList) async {
-        emit(state.copyWith(currentEvents: updatedList));
-        await _loadMy(emit);
+      (winners) {
+        // The winners endpoint does not exist on the backend yet, so the
+        // datasource returns an empty list on failure. Until real data flows,
+        // an empty list means "unavailable" rather than "no winners".
+        final unavailable = winners.isEmpty;
+        emit(state.copyWith(
+          winnersByEventId: {...state.winnersByEventId, event.eventId: winners},
+          winnersUnavailableEventIds: unavailable
+              ? {...state.winnersUnavailableEventIds, event.eventId}
+              : {...state.winnersUnavailableEventIds}..remove(event.eventId),
+        ));
       },
     );
   }
