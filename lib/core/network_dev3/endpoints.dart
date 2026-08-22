@@ -1,7 +1,7 @@
 class Endpoints {
   Endpoints._();
 
-  static const String baseUrl = 'http://10.66.254.50:8000/api';
+  static const String baseUrl = 'http://10.243.228.50:8000/api/';
 
   static const String user = '/user';
 

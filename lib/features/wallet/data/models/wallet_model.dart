@@ -9,22 +9,36 @@ class WalletModel extends WalletEntity {
 
   factory WalletModel.fromJson(Map<String, dynamic> json) {
     final walletValue =
-        json['wallet'] ?? json['wallet_balance'] ?? json['balance'];
+        json['wallet'] ?? json['wallet_balance'] ?? json['balance'] ?? 0;
 
     final pointsValue = json['points'] ?? json['total_points'] ?? 0;
 
+    final currencyValue = json['currency']?.toString() ?? 'SYP';
+
     return WalletModel(
-      balance: walletValue is num
-          ? walletValue.toDouble()
-          : double.tryParse(walletValue?.toString() ?? '0') ?? 0.0,
-      points: pointsValue is num
-          ? pointsValue.toInt()
-          : int.tryParse(pointsValue?.toString() ?? '0') ?? 0,
-      currency: json['currency']?.toString() ?? 'SYP',
+      balance: _parseDouble(walletValue),
+      points: _parseInt(pointsValue),
+      currency: currencyValue,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'balance': balance, 'points': points, 'currency': currency};
+    return {'wallet': balance, 'points': points, 'currency': currency};
+  }
+
+  static double _parseDouble(dynamic value) {
+    if (value is num) {
+      return value.toDouble();
+    }
+
+    return double.tryParse(value?.toString() ?? '0') ?? 0.0;
+  }
+
+  static int _parseInt(dynamic value) {
+    if (value is num) {
+      return value.toInt();
+    }
+
+    return int.tryParse(value?.toString() ?? '0') ?? 0;
   }
 }

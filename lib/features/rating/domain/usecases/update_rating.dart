@@ -2,15 +2,15 @@ import 'package:dartz/dartz.dart';
 
 import '../repositories/rating_repository.dart';
 
-class RateBook {
+class UpdateRating {
   final RatingRepository repository;
 
-  RateBook(this.repository);
+  UpdateRating(this.repository);
 
   Future<Either<String, bool>> call({
     required int bookId,
     required int rating,
   }) async {
-    return await repository.rateBook(bookId: bookId, rating: rating);
+    return await repository.updateRating(bookId: bookId, rating: rating);
   }
 }

@@ -9,15 +9,31 @@ class QuoteModel extends QuoteEntity {
     required super.createdAt,
   });
 
+  // ============================================================
+  // FROM JSON
+  // ============================================================
+
   factory QuoteModel.fromJson(Map<String, dynamic> json) {
     return QuoteModel(
-      id: json['id'] as int,
-      bookId: json['book_id'] as int,
-      bookTitle: json['book_title'] as String,
-      quoteText: json['quote_text'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      id: _parseInt(json['id']),
+
+      bookId: _parseInt(json['book_id'] ?? json['bookId']),
+
+      bookTitle:
+          json['book_title']?.toString() ??
+          json['bookTitle']?.toString() ??
+          'Unknown Book',
+
+      quoteText:
+          json['quote_text']?.toString() ?? json['quoteText']?.toString() ?? '',
+
+      createdAt: _parseDateTime(json['created_at'] ?? json['createdAt']),
     );
   }
+
+  // ============================================================
+  // TO JSON
+  // ============================================================
 
   Map<String, dynamic> toJson() {
     return {
@@ -27,5 +43,25 @@ class QuoteModel extends QuoteEntity {
       'quote_text': quoteText,
       'created_at': createdAt.toIso8601String(),
     };
+  }
+
+  // ============================================================
+  // HELPERS
+  // ============================================================
+
+  static int _parseInt(dynamic value) {
+    if (value is int) {
+      return value;
+    }
+
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  static DateTime _parseDateTime(dynamic value) {
+    if (value == null) {
+      return DateTime.now();
+    }
+
+    return DateTime.tryParse(value.toString()) ?? DateTime.now();
   }
 }

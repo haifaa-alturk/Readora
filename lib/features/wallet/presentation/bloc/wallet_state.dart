@@ -10,13 +10,25 @@ abstract class WalletState extends Equatable {
   List<Object?> get props => [];
 }
 
+// ============================================================
+// INITIAL
+// ============================================================
+
 class WalletInitial extends WalletState {
   const WalletInitial();
 }
 
+// ============================================================
+// LOADING
+// ============================================================
+
 class WalletLoading extends WalletState {
   const WalletLoading();
 }
+
+// ============================================================
+// LOADED
+// ============================================================
 
 class WalletLoaded extends WalletState {
   final WalletEntity wallet;
@@ -28,6 +40,10 @@ class WalletLoaded extends WalletState {
   List<Object?> get props => [wallet, transactions];
 }
 
+// ============================================================
+// ERROR
+// ============================================================
+
 class WalletError extends WalletState {
   final String message;
 
@@ -37,9 +53,17 @@ class WalletError extends WalletState {
   List<Object?> get props => [message];
 }
 
+// ============================================================
+// RECHARGE LOADING
+// ============================================================
+
 class WalletRechargeLoading extends WalletState {
   const WalletRechargeLoading();
 }
+
+// ============================================================
+// RECHARGE SUCCESS
+// ============================================================
 
 class WalletRechargeSuccess extends WalletState {
   final String message;
@@ -49,6 +73,10 @@ class WalletRechargeSuccess extends WalletState {
   @override
   List<Object?> get props => [message];
 }
+
+// ============================================================
+// RECHARGE ERROR
+// ============================================================
 
 class WalletRechargeError extends WalletState {
   final String message;

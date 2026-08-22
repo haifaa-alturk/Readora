@@ -44,6 +44,7 @@ class _WalletScreenState extends State<WalletScreen> {
 
   String _formatPrice(double price) {
     final value = price.toStringAsFixed(0);
+
     final parts = value.split('');
 
     final buffer = StringBuffer();
@@ -99,8 +100,10 @@ class _WalletScreenState extends State<WalletScreen> {
       final isIncrease = balanceDifference > 0;
 
       final message = isIncrease
-          ? 'تمت زيادة رصيدك بمقدار ${_formatPrice(balanceDifference.abs())} SYP ✅'
-          : 'تم خصم ${_formatPrice(balanceDifference.abs())} SYP من رصيدك 💳';
+          ? 'تمت زيادة رصيدك بمقدار '
+                '${_formatPrice(balanceDifference.abs())} SYP ✅'
+          : 'تم خصم '
+                '${_formatPrice(balanceDifference.abs())} SYP من رصيدك 💳';
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -137,13 +140,16 @@ class _WalletScreenState extends State<WalletScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
+
         title: const Text(
           'My Wallet',
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
+
         actions: [
           IconButton(
             icon: const Icon(Icons.add, color: Color(0xffe61b72)),
@@ -151,12 +157,35 @@ class _WalletScreenState extends State<WalletScreen> {
           ),
         ],
       ),
+
       body: BlocConsumer<WalletBloc, WalletState>(
         listener: (context, state) {
           if (state is WalletError) {
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(SnackBar(content: Text(state.message)));
+          }
+
+          if (state is WalletRechargeError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: const Color(0xffe61b72),
+              ),
+            );
+          }
+
+          if (state is WalletRechargeSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: const Color(0xff54a747),
+              ),
+            );
+
+            // بعد نجاح طلب الشحن نعيد جلب
+            // الرصيد والعمليات من الباك.
+            context.read<WalletBloc>().add(const LoadWalletEvent());
           }
 
           if (state is WalletLoaded) {
@@ -171,6 +200,7 @@ class _WalletScreenState extends State<WalletScreen> {
             });
           }
         },
+
         builder: (context, state) {
           if (state is WalletLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -180,17 +210,23 @@ class _WalletScreenState extends State<WalletScreen> {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
+
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+
                   children: [
                     const Icon(
                       Icons.error_outline,
                       size: 48,
                       color: Color(0xffe61b72),
                     ),
+
                     const SizedBox(height: 16),
+
                     Text(state.message, textAlign: TextAlign.center),
+
                     const SizedBox(height: 16),
+
                     ElevatedButton(
                       onPressed: () {
                         context.read<WalletBloc>().add(const LoadWalletEvent());
@@ -205,23 +241,36 @@ class _WalletScreenState extends State<WalletScreen> {
 
           if (state is WalletLoaded) {
             final wallet = state.wallet;
+
             final transactions = state.transactions;
 
             return RefreshIndicator(
               onRefresh: () async {
                 context.read<WalletBloc>().add(const LoadWalletEvent());
+
+                await Future.delayed(const Duration(milliseconds: 500));
               },
+
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
+
                 padding: const EdgeInsets.all(24),
+
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
+
                   children: [
+                    // =========================
+                    // BALANCE
+                    // =========================
                     GradientSummaryBanner(
                       label: 'Available Balance',
+
                       value:
                           '${_formatPrice(wallet.balance)} ${wallet.currency}',
+
                       subtitle: 'Your current wallet balance',
+
                       trailing: const Icon(
                         Icons.account_balance_wallet,
                         size: 38,
@@ -231,10 +280,16 @@ class _WalletScreenState extends State<WalletScreen> {
 
                     const SizedBox(height: 16),
 
+                    // =========================
+                    // POINTS
+                    // =========================
                     GradientSummaryBanner(
                       label: 'My Points',
+
                       value: '${wallet.points} Points',
+
                       subtitle: 'Your current reward points',
+
                       trailing: const Icon(
                         Icons.stars,
                         size: 38,
@@ -244,11 +299,17 @@ class _WalletScreenState extends State<WalletScreen> {
 
                     const SizedBox(height: 20),
 
+                    // =========================
+                    // RECHARGE
+                    // =========================
                     SizedBox(
                       height: 52,
+
                       child: ElevatedButton.icon(
                         onPressed: _openRechargeScreen,
+
                         icon: const Icon(Icons.add_circle_outline),
+
                         label: const Text(
                           'Recharge Wallet',
                           style: TextStyle(
@@ -256,9 +317,12 @@ class _WalletScreenState extends State<WalletScreen> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
+
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xffe61b72),
+
                           foregroundColor: Colors.white,
+
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
@@ -268,6 +332,9 @@ class _WalletScreenState extends State<WalletScreen> {
 
                     const SizedBox(height: 28),
 
+                    // =========================
+                    // TRANSACTIONS
+                    // =========================
                     _buildTransactionList(transactions),
                   ],
                 ),
@@ -284,14 +351,17 @@ class _WalletScreenState extends State<WalletScreen> {
   Widget _buildTransactionList(List<WalletTransactionEntity> transactions) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
           children: [
             const Text(
               'Transactions',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
+
             TextButton(
               onPressed: () {},
               child: const Text(
@@ -307,18 +377,25 @@ class _WalletScreenState extends State<WalletScreen> {
         if (transactions.isEmpty)
           Container(
             width: double.infinity,
+
             padding: const EdgeInsets.all(24),
+
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
+
               border: Border.all(color: Colors.grey.withValues(alpha: 0.15)),
             ),
+
             child: const Column(
               children: [
                 Icon(Icons.receipt_long_outlined, size: 40, color: Colors.grey),
+
                 SizedBox(height: 10),
+
                 Text(
-                  'Transaction history is not available yet.',
+                  'No transactions yet.',
                   textAlign: TextAlign.center,
+
                   style: TextStyle(color: Colors.grey),
                 ),
               ],
@@ -327,9 +404,13 @@ class _WalletScreenState extends State<WalletScreen> {
         else
           ListView.separated(
             shrinkWrap: true,
+
             physics: const NeverScrollableScrollPhysics(),
+
             itemCount: transactions.length,
+
             separatorBuilder: (_, __) => const SizedBox(height: 12),
+
             itemBuilder: (context, index) {
               return _buildTransactionTile(transactions[index]);
             },
@@ -341,63 +422,90 @@ class _WalletScreenState extends State<WalletScreen> {
   Widget _buildTransactionTile(WalletTransactionEntity tx) {
     final isCredit = tx.isCredit;
 
+    final displayAmount = tx.amount.abs();
+
     return Container(
       padding: const EdgeInsets.all(16),
+
       decoration: BoxDecoration(
         color: const Color.fromARGB(127, 148, 144, 144).withValues(alpha: 0.04),
+
         borderRadius: BorderRadius.circular(16),
+
         border: Border.all(
           color: const Color.fromARGB(87, 179, 174, 174).withValues(alpha: 0.1),
         ),
       ),
+
       child: Row(
         children: [
+          // =========================
+          // ICON
+          // =========================
           Container(
             width: 44,
             height: 44,
+
             decoration: BoxDecoration(
               color: isCredit
                   ? const Color(0xff54a747).withValues(alpha: 0.15)
                   : const Color(0xffe61b72).withValues(alpha: 0.15),
+
               borderRadius: BorderRadius.circular(12),
             ),
+
             child: Icon(
               isCredit ? Icons.arrow_downward : Icons.arrow_upward,
+
               color: isCredit
                   ? const Color(0xff54a747)
                   : const Color(0xffe61b72),
+
               size: 22,
             ),
           ),
 
           const SizedBox(width: 16),
 
+          // =========================
+          // INFO
+          // =========================
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+
               children: [
                 Text(
                   tx.source,
+
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+
                 const SizedBox(height: 2),
+
                 Text(
                   _formatDate(tx.date),
+
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],
             ),
           ),
 
+          // =========================
+          // AMOUNT
+          // =========================
           Text(
             '${isCredit ? '+' : '-'}'
-            '${_formatPrice(tx.amount)} SYP',
+            '${_formatPrice(displayAmount)} SYP',
+
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
+
               color: isCredit
                   ? const Color(0xff54a747)
                   : const Color(0xffe61b72),

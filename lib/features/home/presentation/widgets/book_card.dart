@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:library_app1/features/home/domain/entities/book.dart';
 import 'package:library_app1/features/home/presentation/bloc/Favorite_Bloc/favorite_bloc.dart';
 import 'package:library_app1/features/home/presentation/bloc/Favorite_Bloc/favorite_event.dart';
@@ -17,19 +18,35 @@ class BookCard extends StatefulWidget {
 }
 
 class _BookCardState extends State<BookCard> {
+  // ============================================================
+  // IMAGE URL
+  // ============================================================
+
+  String get imageUrl {
+    final image = widget.book.coverImage;
+
+    if (image == null || image.trim().isEmpty) {
+      return "";
+    }
+
+    final value = image.trim();
+
+    if (value.startsWith('http://') || value.startsWith('https://')) {
+      return value;
+    }
+
+    return "http://10.243.228.50:8000/storage/"
+        "${value.replaceFirst(RegExp(r'^/'), '')}";
+  }
+
+  // ============================================================
+  // BUILD
+  // ============================================================
+
   @override
   Widget build(BuildContext context) {
-    // رابط صورة الكتاب مع الحماية من القيمة الفارغة
-    String imageUrl =
-        (widget.book.coverImage != null && widget.book.coverImage!.isNotEmpty)
-        ? (widget.book.coverImage!.startsWith('http')
-              ? widget.book.coverImage!
-              : "http://10.66.254.50:8000/storage/${widget.book.coverImage}")
-        : "";
-
     return GestureDetector(
       onTap: () {
-        // الانتقال إلى صفحة تفاصيل الكتاب
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -38,9 +55,7 @@ class _BookCardState extends State<BookCard> {
               child: BookDetailsPage(
                 bookId: widget.book.id,
                 title: widget.book.bookName,
-                author: widget.book.authors.isNotEmpty
-                    ? widget.book.authors.join(", ")
-                    : "",
+                author: widget.book.authorsText,
                 image: imageUrl,
                 description: widget.book.description ?? "لا يوجد وصف",
                 pdfFile: widget.book.pdfFile,
@@ -50,9 +65,15 @@ class _BookCardState extends State<BookCard> {
         );
       },
       child: Container(
-        width: 100,
-        height: 100,
+        // ========================================================
+        // FIX:
+        // كان 100x100 وهذا سبب الـ OVERFLOW
+        // ========================================================
+        width: 155,
+        height: 220,
+
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+
         decoration: BoxDecoration(
           color: const Color.fromARGB(255, 240, 204, 218),
           borderRadius: BorderRadius.circular(16),
@@ -64,10 +85,13 @@ class _BookCardState extends State<BookCard> {
             ),
           ],
         ),
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // صورة الكتاب مع زر المفضلة
+            // ======================================================
+            // COVER + FAVORITE
+            // ======================================================
             Expanded(
               child: Stack(
                 children: [
@@ -75,10 +99,9 @@ class _BookCardState extends State<BookCard> {
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(16),
                     ),
-                    child: Container(
+                    child: SizedBox(
                       width: double.infinity,
                       height: double.infinity,
-                      color: const Color.fromARGB(255, 236, 236, 223),
                       child: imageUrl.isNotEmpty
                           ? Image.network(
                               imageUrl,
@@ -110,7 +133,9 @@ class _BookCardState extends State<BookCard> {
                     ),
                   ),
 
-                  // زر المفضلة
+                  // ==================================================
+                  // FAVORITE BUTTON
+                  // ==================================================
                   if (widget.showFavorite)
                     Positioned(
                       top: 8,
@@ -121,7 +146,7 @@ class _BookCardState extends State<BookCard> {
 
                           if (state is FavoriteLoaded) {
                             isFav = state.favoriteBooks.any(
-                              (b) => b.id == widget.book.id,
+                              (book) => book.id == widget.book.id,
                             );
                           }
 
@@ -155,13 +180,17 @@ class _BookCardState extends State<BookCard> {
               ),
             ),
 
-            // تفاصيل الكتاب
+            // ======================================================
+            // BOOK DETAILS
+            // ======================================================
             Padding(
-              padding: const EdgeInsets.all(10.0),
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // اسم الكتاب
+                  // ==================================================
+                  // BOOK NAME
+                  // ==================================================
                   Text(
                     widget.book.bookName,
                     maxLines: 1,
@@ -175,53 +204,58 @@ class _BookCardState extends State<BookCard> {
 
                   const SizedBox(height: 3),
 
-                  // اسم المؤلف
-                  Builder(
-                    builder: (context) {
-                      String authorText = "";
-
-                      if (widget.book.authorName != null &&
-                          widget.book.authorName!
-                              .toString()
-                              .trim()
-                              .isNotEmpty) {
-                        authorText = widget.book.authorName!;
-                      } else if (widget.book.authors.isNotEmpty) {
-                        authorText = widget.book.authors.join(", ");
-                      }
-
-                      return Text(
-                        authorText,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Color.fromARGB(255, 88, 5, 101),
-                          fontSize: 8,
-                        ),
-                      );
-                    },
+                  // ==================================================
+                  // AUTHOR
+                  // ==================================================
+                  Text(
+                    widget.book.authorsText,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Color.fromARGB(255, 88, 5, 101),
+                      fontSize: 8,
+                    ),
                   ),
 
                   const SizedBox(height: 6),
 
-                  // السعر والإيجار
+                  // ==================================================
+                  // PRICES
+                  //
+                  // FIX:
+                  // بدل Row عادي يسبب RIGHT OVERFLOW
+                  // استخدمنا Expanded + ellipsis
+                  // ==================================================
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "${widget.book.sellingPrice ?? 0} \$",
-                        style: const TextStyle(
-                          color: Color(0xFFA78BFA),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
+                      Expanded(
+                        child: Text(
+                          "${widget.book.sellingPriceValue.toStringAsFixed(2)} \$",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Color(0xFFA78BFA),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
+
                       if (widget.book.rentalPrice != null)
-                        Text(
-                          "إيجار: ${widget.book.rentalPrice}\$",
-                          style: const TextStyle(
-                            color: Color.fromARGB(255, 204, 172, 212),
-                            fontSize: 10,
+                        const SizedBox(width: 4),
+
+                      if (widget.book.rentalPrice != null)
+                        Expanded(
+                          child: Text(
+                            "إيجار: "
+                            "${widget.book.rentalPriceValue.toStringAsFixed(2)}\$",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.end,
+                            style: const TextStyle(
+                              color: Color.fromARGB(255, 204, 172, 212),
+                              fontSize: 9,
+                            ),
                           ),
                         ),
                     ],

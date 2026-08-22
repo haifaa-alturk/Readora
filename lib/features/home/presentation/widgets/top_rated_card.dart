@@ -48,7 +48,7 @@ class TopRatedCard extends StatelessWidget {
     String imageUrl =
         book.coverImage != null && book.coverImage!.startsWith('http')
         ? book.coverImage!
-        : "http://10.66.254.50:8000/storage/${book.coverImage}";
+        : "http://10.243.228.50:8000/storage/${book.coverImage}";
 
     return Card(
       color: const Color.fromARGB(255, 240, 204, 218),

@@ -1,9 +1,6 @@
 import 'package:dio/dio.dart';
 
-import '../../../../core/mock_dev3/mock_config.dart';
-import '../../../../core/mock_dev3/mock_data_provider.dart';
-import '../../../../core/network_dev3/api_client.dart';
-
+import '../../../../core/api/api_client.dart';
 import '../models/wallet_model.dart';
 import '../models/wallet_transaction_model.dart';
 
@@ -19,63 +16,127 @@ abstract class WalletRemoteDataSource {
 }
 
 class WalletRemoteDataSourceImpl implements WalletRemoteDataSource {
+  final ApiClient _apiClient;
+
   WalletRemoteDataSourceImpl(this._apiClient);
 
-  final Dev3ApiClient _apiClient;
+  // ============================================================
+  // GET WALLET + POINTS
+  // ============================================================
+  //
+  // هذا هو الـ endpoint الصحيح من الباك:
+  //
+  // GET /user/wallet_transaction
+  //
+  // ويرجع:
+  // {
+  //   "wallet_balance": 10000,
+  //   "points": 150,
+  //   "transactions": [...]
+  // }
+  //
+  // لذلك نأخذ منه الرصيد والنقاط الحقيقيين من الباك.
+  // ============================================================
 
   @override
   Future<WalletModel> getWalletBalance() async {
-    if (useMockData) {
-      return WalletModel.fromJson(MockDataProvider.walletBalance());
-    }
-
-    final response = await _apiClient.get('/user');
+    final response = await _apiClient.dio.get('user/wallet_transaction');
 
     final data = response.data;
 
-    if (data is Map<String, dynamic>) {
-      return WalletModel.fromJson(data);
+    if (data is! Map) {
+      throw Exception('Invalid wallet response from server');
     }
 
-    throw Exception('Invalid user response from server');
+    final mapData = Map<String, dynamic>.from(data);
+
+    return WalletModel.fromJson(mapData);
   }
+
+  // ============================================================
+  // TRANSACTIONS
+  // ============================================================
+  //
+  // نفس endpoint يرجع:
+  //
+  // wallet_balance
+  // points
+  // transactions
+  //
+  // ونحن هنا نأخذ فقط transactions.
+  // ============================================================
 
   @override
   Future<List<WalletTransactionModel>> getTransactionHistory() async {
-    if (useMockData) {
-      final data = MockDataProvider.walletTransactions();
+    final response = await _apiClient.dio.get('user/wallet_transaction');
 
-      return data.map((item) => WalletTransactionModel.fromJson(item)).toList();
+    final data = response.data;
+
+    if (data is List) {
+      return data
+          .whereType<Map>()
+          .map(
+            (item) => WalletTransactionModel.fromJson(
+              Map<String, dynamic>.from(item),
+            ),
+          )
+          .toList();
     }
 
-    // لا يوجد حالياً endpoint للمعاملات في الباك.
-    return <WalletTransactionModel>[];
+    if (data is! Map) {
+      throw Exception('Invalid wallet transactions response from server');
+    }
+
+    final mapData = Map<String, dynamic>.from(data);
+
+    final transactionsData = mapData['transactions'];
+
+    if (transactionsData == null) {
+      return <WalletTransactionModel>[];
+    }
+
+    if (transactionsData is! List) {
+      throw Exception('Invalid transactions data from server');
+    }
+
+    return transactionsData
+        .whereType<Map>()
+        .map(
+          (item) =>
+              WalletTransactionModel.fromJson(Map<String, dynamic>.from(item)),
+        )
+        .toList();
   }
+
+  // ============================================================
+  // RECHARGE WALLET
+  // ============================================================
 
   @override
   Future<String> rechargeWallet({
     required double amount,
     required String receiptImagePath,
   }) async {
-    if (useMockData) {
-      return 'تم إرسال طلب الشحن بنجاح، بانتظار موافقة الأدمن';
-    }
+    final fileName = receiptImagePath.split(RegExp(r'[/\\]')).last;
 
     final formData = FormData.fromMap({
       'amount': amount,
       'receipt_image': await MultipartFile.fromFile(
         receiptImagePath,
-        filename: receiptImagePath.split('/').last,
+        filename: fileName,
       ),
     });
 
-    final response = await _apiClient.post('/wallet_charge', data: formData);
+    final response = await _apiClient.dio.post('wallet_charge', data: formData);
 
     final data = response.data;
 
-    if (data is Map<String, dynamic>) {
-      return data['message']?.toString() ??
-          'تم إرسال طلب الشحن بنجاح، بانتظار موافقة الأدمن';
+    if (data is Map) {
+      final message = data['message'];
+
+      if (message != null && message.toString().trim().isNotEmpty) {
+        return message.toString();
+      }
     }
 
     return 'تم إرسال طلب الشحن بنجاح، بانتظار موافقة الأدمن';

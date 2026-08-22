@@ -12,32 +12,40 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
     on<RechargeWalletEvent>(_onRechargeWallet);
   }
 
+  // ============================================================
+  // LOAD WALLET
+  // ============================================================
+
   Future<void> _onLoadWallet(
     LoadWalletEvent event,
     Emitter<WalletState> emit,
   ) async {
     emit(const WalletLoading());
 
-    final balanceResult = await repository.getWalletBalance();
+    try {
+      final balanceResult = await repository.getWalletBalance();
 
-    final historyResult = await repository.getTransactionHistory();
+      final historyResult = await repository.getTransactionHistory();
 
-    balanceResult.fold(
-      (error) {
-        emit(WalletError(message: error));
-      },
-      (wallet) {
-        historyResult.fold(
-          (error) {
-            emit(WalletError(message: error));
-          },
-          (transactions) {
-            emit(WalletLoaded(wallet: wallet, transactions: transactions));
-          },
-        );
-      },
-    );
+      final wallet = balanceResult.fold(
+        (error) => throw Exception(error),
+        (value) => value,
+      );
+
+      final transactions = historyResult.fold(
+        (error) => throw Exception(error),
+        (value) => value,
+      );
+
+      emit(WalletLoaded(wallet: wallet, transactions: transactions));
+    } catch (e) {
+      emit(WalletError(message: 'حدث خطأ أثناء تحميل بيانات المحفظة: $e'));
+    }
   }
+
+  // ============================================================
+  // RECHARGE
+  // ============================================================
 
   Future<void> _onRechargeWallet(
     RechargeWalletEvent event,
@@ -45,18 +53,22 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
   ) async {
     emit(const WalletRechargeLoading());
 
-    final result = await repository.rechargeWallet(
-      amount: event.amount,
-      receiptImagePath: event.receiptImagePath,
-    );
+    try {
+      final result = await repository.rechargeWallet(
+        amount: event.amount,
+        receiptImagePath: event.receiptImagePath,
+      );
 
-    result.fold(
-      (error) {
-        emit(WalletRechargeError(message: error));
-      },
-      (message) {
-        emit(WalletRechargeSuccess(message: message));
-      },
-    );
+      result.fold(
+        (error) {
+          emit(WalletRechargeError(message: error));
+        },
+        (message) {
+          emit(WalletRechargeSuccess(message: message));
+        },
+      );
+    } catch (e) {
+      emit(WalletRechargeError(message: 'حدث خطأ أثناء إرسال طلب الشحن: $e'));
+    }
   }
 }

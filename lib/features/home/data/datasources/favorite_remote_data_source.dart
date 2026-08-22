@@ -7,7 +7,7 @@ import 'package:library_app1/features/home/domain/entities/book.dart';
 import '../../data/models/book_model.dart';
 
 class FavoriteRemoteDataSource {
-  final String baseUrl = "http://10.66.254.50:8000/api";
+  final String baseUrl = "http://10.243.228.50:8000/api";
 
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();

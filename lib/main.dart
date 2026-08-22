@@ -98,6 +98,14 @@ import 'package:library_app1/features/individual_challenge/data/datasources/indi
 import 'package:library_app1/features/individual_challenge/data/repositories/individual_challenge_repository_impl.dart';
 import 'package:library_app1/features/individual_challenge/domain/repositories/individual_challenge_repository_interface.dart';
 
+// ================= RATING =================
+import 'package:library_app1/features/rating/data/datasources/rating_remote_datasource.dart';
+import 'package:library_app1/features/rating/data/repositories/rating_repository_impl.dart';
+import 'package:library_app1/features/rating/domain/repositories/rating_repository.dart';
+import 'package:library_app1/features/rating/domain/usecases/rate_book.dart';
+import 'package:library_app1/features/rating/domain/usecases/update_rating.dart';
+import 'package:library_app1/features/rating/presentation/bloc/rating_bloc.dart';
+
 // ================= SPLASH =================
 import 'package:library_app1/onboarding/splash_screen.dart';
 
@@ -135,19 +143,15 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // ============================================================
-  // FIREBASE INITIALIZATION
+  // FIREBASE
   // ============================================================
 
   await Firebase.initializeApp();
 
-  // ============================================================
-  // FIREBASE MESSAGING BACKGROUND HANDLER
-  // ============================================================
-
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   // ============================================================
-  // LOCAL NOTIFICATIONS - ANDROID INITIALIZATION
+  // LOCAL NOTIFICATIONS
   // ============================================================
 
   const AndroidInitializationSettings initializationSettingsAndroid =
@@ -159,10 +163,6 @@ Future<void> main() async {
 
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
-  // ============================================================
-  // CREATE ANDROID NOTIFICATION CHANNEL
-  // ============================================================
-
   await flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin
@@ -170,16 +170,12 @@ Future<void> main() async {
       ?.createNotificationChannel(channel);
 
   // ============================================================
-  // REQUEST NOTIFICATION PERMISSION
+  // NOTIFICATION PERMISSION
   // ============================================================
 
   final FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   await messaging.requestPermission(alert: true, badge: true, sound: true);
-
-  // ============================================================
-  // FOREGROUND NOTIFICATION PRESENTATION
-  // ============================================================
 
   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
     alert: true,
@@ -198,26 +194,17 @@ Future<void> main() async {
   print('========================================');
 
   // ============================================================
-  // FOREGROUND FIREBASE MESSAGES
+  // FOREGROUND MESSAGES
   // ============================================================
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     final RemoteNotification? notification = message.notification;
-
     final AndroidNotification? android = message.notification?.android;
 
-    print(
-      'وصل إشعار والتطبيق مفتوح: '
-      '${notification?.title}',
-    );
+    print('وصل إشعار والتطبيق مفتوح: ${notification?.title}');
 
     print('عنوان الإشعار: ${notification?.title}');
-
     print('محتوى الإشعار: ${notification?.body}');
-
-    // ==========================================================
-    // SHOW LOCAL NOTIFICATION WHEN APP IS IN FOREGROUND
-    // ==========================================================
 
     if (notification != null && android != null) {
       flutterLocalNotificationsPlugin.show(
@@ -297,7 +284,7 @@ Future<void> main() async {
   final checkBookAccess = CheckBookAccess(bookAccessRepository);
 
   // ============================================================
-  // BOOK ACTIONS - PURCHASE & BORROW
+  // BOOK ACTIONS
   // ============================================================
 
   final bookActionRemoteDataSource = BookActionRemoteDataSourceImpl(
@@ -322,7 +309,7 @@ Future<void> main() async {
   // QUOTES
   // ============================================================
 
-  final quotesRemoteDataSource = QuotesRemoteDataSourceImpl(dev3ApiClient);
+  final quotesRemoteDataSource = QuotesRemoteDataSourceImpl();
 
   final quotesRepository = QuotesRepositoryImpl(quotesRemoteDataSource);
 
@@ -340,7 +327,11 @@ Future<void> main() async {
   // WALLET
   // ============================================================
 
-  final walletRemoteDataSource = WalletRemoteDataSourceImpl(dev3ApiClient);
+  // مهم جداً:
+  // WalletRemoteDataSourceImpl يحتاج ApiClient
+  // وليس Dev3ApiClient.
+
+  final walletRemoteDataSource = WalletRemoteDataSourceImpl(apiClient);
 
   final walletRepository = WalletRepositoryImpl(walletRemoteDataSource);
 
@@ -369,7 +360,7 @@ Future<void> main() async {
   final settingsRepository = SettingsRepositoryImpl(settingsRemoteDataSource);
 
   // ============================================================
-  // PERSONAL LIBRARY
+  // LIBRARY
   // ============================================================
 
   final libraryRemoteDataSource = LibraryRemoteDataSourceImpl(apiClient);
@@ -411,6 +402,20 @@ Future<void> main() async {
   );
 
   // ============================================================
+  // RATING
+  // ============================================================
+
+  final ratingRemoteDataSource = RatingRemoteDataSourceImpl(dio: apiClient.dio);
+
+  final ratingRepository = RatingRepositoryImpl(
+    remoteDataSource: ratingRemoteDataSource,
+  );
+
+  final rateBook = RateBook(ratingRepository);
+
+  final updateRating = UpdateRating(ratingRepository);
+
+  // ============================================================
   // RUN APP
   // ============================================================
 
@@ -423,37 +428,22 @@ Future<void> main() async {
       ],
       child: MultiBlocProvider(
         providers: [
-          // ======================================================
-          // FAVORITE
-          // ======================================================
           BlocProvider<FavoriteBloc>(
             create: (context) => FavoriteBloc(FavoriteRemoteDataSource()),
           ),
 
-          // ======================================================
-          // SEARCH
-          // ======================================================
           BlocProvider<SearchBloc>(create: (context) => SearchBloc()),
 
-          // ======================================================
-          // AUTH
-          // ======================================================
           BlocProvider<AuthBloc>(
             create: (context) =>
                 AuthBloc(loginUseCase, registerUseCase, getCategoriesUseCase),
           ),
 
-          // ======================================================
-          // HOME
-          // ======================================================
           BlocProvider<HomeBloc>(
             create: (context) =>
                 HomeBloc(repository: homeRepository)..add(FetchHomeData()),
           ),
 
-          // ======================================================
-          // BOOK DETAILS
-          // ======================================================
           BlocProvider<BookDetailsBloc>(
             create: (context) => BookDetailsBloc(
               getBookDetails,
@@ -463,76 +453,51 @@ Future<void> main() async {
             ),
           ),
 
-          // ======================================================
-          // QUOTES
-          // ======================================================
+          BlocProvider<RatingBloc>(
+            create: (context) =>
+                RatingBloc(rateBook: rateBook, updateRating: updateRating),
+          ),
+
           BlocProvider<QuotesBloc>(
             create: (context) => QuotesBloc(repository: quotesRepository),
           ),
 
-          // ======================================================
-          // INTERESTS
-          // ======================================================
           BlocProvider<InterestsBloc>(
             create: (context) => InterestsBloc(repository: interestsRepository),
           ),
 
-          // ======================================================
-          // WALLET
-          // ======================================================
           BlocProvider<WalletBloc>(
             create: (context) => WalletBloc(repository: walletRepository),
           ),
 
-          // ======================================================
-          // POINTS
-          // ======================================================
           BlocProvider<PointsBloc>(
             create: (context) => PointsBloc(repository: pointsRepository),
           ),
 
-          // ======================================================
-          // WINS
-          // ======================================================
           BlocProvider<WinsBloc>(
             create: (context) => WinsBloc(repository: winsRepository),
           ),
 
-          // ======================================================
-          // SETTINGS
-          // ======================================================
           BlocProvider<SettingsBloc>(
             create: (context) => SettingsBloc(repository: settingsRepository),
           ),
 
-          // ======================================================
-          // LIBRARY
-          // ======================================================
           BlocProvider<LibraryBloc>(
             create: (context) => LibraryBloc(repository: libraryRepository),
           ),
 
-          // ======================================================
-          // PROFILE
-          // ======================================================
           BlocProvider<ProfileBloc>(
             create: (context) =>
                 ProfileBloc(repository: profileRepository)
                   ..add(const LoadProfileEvent()),
           ),
 
-          // ======================================================
-          // PURCHASE HISTORY
-          // ======================================================
           BlocProvider<PurchaseHistoryBloc>(
             create: (context) =>
                 PurchaseHistoryBloc(repository: profileRepository)
                   ..add(const LoadPurchaseHistoryEvent()),
           ),
 
-          // ======================================================
-          // GROUP CHALLENGE
-          // ======================================================
           BlocProvider<GroupChallengeBloc>(
             create: (context) =>
                 GroupChallengeBloc(repository: groupChallengeRepository),
@@ -558,49 +523,28 @@ class MyApp extends StatelessWidget {
         bool isDarkMode = false;
         String language = 'en';
 
-        // ========================================================
-        // SETTINGS STATE
-        // ========================================================
-
         if (state is SettingsLoaded) {
           isDarkMode = state.isDarkMode;
           language = state.language;
         }
 
-        // ========================================================
-        // MATERIAL APP
-        // ========================================================
-
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-
           title: 'Readora App',
 
-          // ======================================================
-          // THEME MODE
-          // ======================================================
           themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
 
-          // ======================================================
-          // LIGHT THEME
-          // ======================================================
           theme: ThemeData(
             brightness: Brightness.light,
             primaryColor: const Color(0xffe61b72),
             scaffoldBackgroundColor: const Color(0xfffcfbfa),
           ),
 
-          // ======================================================
-          // DARK THEME
-          // ======================================================
           darkTheme: ThemeData(
             brightness: Brightness.dark,
             scaffoldBackgroundColor: const Color(0xFF121212),
           ),
 
-          // ======================================================
-          // LANGUAGE DIRECTION
-          // ======================================================
           builder: (context, child) {
             return Directionality(
               textDirection: language == 'ar'
@@ -610,9 +554,6 @@ class MyApp extends StatelessWidget {
             );
           },
 
-          // ======================================================
-          // START SCREEN
-          // ======================================================
           home: SplashScreen(),
         );
       },

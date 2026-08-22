@@ -6,6 +6,7 @@ import '../bloc/quotes_bloc.dart';
 import '../bloc/quotes_event.dart';
 import '../bloc/quotes_state.dart';
 import '../../domain/entities/quote_entity.dart';
+
 import 'package:library_app1/core/theme_dev3/app_theme.dart';
 
 class MyQuotesScreen extends StatefulWidget {
@@ -20,7 +21,11 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
   void initState() {
     super.initState();
 
-    context.read<QuotesBloc>().add(const LoadQuotesEvent());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      context.read<QuotesBloc>().add(const LoadQuotesEvent());
+    });
   }
 
   // ============================================================
@@ -32,7 +37,7 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
   }
 
   // ============================================================
-  // SHARE / COPY
+  // COPY QUOTE
   // ============================================================
 
   Future<void> _shareQuote(QuoteEntity quote) async {
@@ -65,9 +70,7 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
 
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(185, 203, 157, 255),
-
         elevation: 0,
-
         title: const Text(
           'My quotes',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -100,7 +103,7 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text(
-                  'The quote was successfully deleted',
+                  'The quote was successfully deleted.',
                   style: TextStyle(fontFamily: 'Cairo'),
                 ),
                 backgroundColor: Colors.green,
@@ -175,7 +178,11 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
             );
           }
 
-          return const SizedBox();
+          // ======================================================
+          // INITIAL
+          // ======================================================
+
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );
@@ -189,7 +196,7 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
     if (quotes.isEmpty) {
       return const Center(
         child: Text(
-          "No quotes have been saved yet.",
+          'No quotes have been saved yet.',
           style: TextStyle(
             color: Color.fromARGB(255, 151, 57, 144),
             fontSize: 14,
@@ -200,9 +207,7 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
 
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-
       itemCount: quotes.length,
-
       itemBuilder: (context, index) {
         final quote = quotes[index];
 
@@ -220,7 +225,6 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
-
       elevation: 0,
 
       color: isDark
@@ -229,7 +233,6 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
 
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-
         side: const BorderSide(color: AppTheme.borderLight),
       ),
 
@@ -245,7 +248,7 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
             // ==================================================
             InkWell(
               onTap: () {
-                debugPrint("Navigating to book ID: ${quote.bookId}");
+                debugPrint('Book ID: ${quote.bookId}');
               },
 
               borderRadius: BorderRadius.circular(8),
@@ -258,7 +261,6 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
 
                 decoration: BoxDecoration(
                   color: AppTheme.lightPink,
-
                   borderRadius: BorderRadius.circular(8),
                 ),
 
@@ -268,9 +270,7 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
                   children: [
                     const Icon(
                       Icons.menu_book_rounded,
-
                       size: 14,
-
                       color: AppTheme.darkPink,
                     ),
 
@@ -279,7 +279,6 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
                     Flexible(
                       child: Text(
                         quote.bookTitle,
-
                         overflow: TextOverflow.ellipsis,
 
                         style: const TextStyle(
@@ -294,9 +293,7 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
 
                     const Icon(
                       Icons.arrow_forward_ios_rounded,
-
                       size: 10,
-
                       color: AppTheme.darkPink,
                     ),
                   ],
@@ -311,7 +308,6 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
             // ==================================================
             Text(
               '"${quote.quoteText}"',
-
               style: const TextStyle(
                 fontSize: 14,
                 height: 1.5,
@@ -333,7 +329,7 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
 
               children: [
                 Text(
-                  "${quote.createdAt.day}/${quote.createdAt.month}/${quote.createdAt.year}",
+                  '${quote.createdAt.day}/${quote.createdAt.month}/${quote.createdAt.year}',
 
                   style: const TextStyle(fontSize: 11),
                 ),
@@ -346,15 +342,13 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
                     IconButton(
                       icon: const Icon(
                         Icons.share_outlined,
-
                         color: Colors.blue,
-
                         size: 20,
                       ),
 
                       onPressed: () => _shareQuote(quote),
 
-                      tooltip: "share",
+                      tooltip: 'Copy',
                     ),
 
                     // ==========================================
@@ -363,15 +357,13 @@ class _MyQuotesScreenState extends State<MyQuotesScreen> {
                     IconButton(
                       icon: const Icon(
                         Icons.delete_outline_rounded,
-
                         color: AppTheme.errorRed,
-
                         size: 20,
                       ),
 
                       onPressed: () => _deleteQuote(quote.id),
 
-                      tooltip: "delete",
+                      tooltip: 'Delete',
                     ),
                   ],
                 ),

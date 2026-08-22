@@ -7,9 +7,17 @@ abstract class WalletEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+// ============================================================
+// LOAD WALLET
+// ============================================================
+
 class LoadWalletEvent extends WalletEvent {
   const LoadWalletEvent();
 }
+
+// ============================================================
+// RECHARGE
+// ============================================================
 
 class RechargeWalletEvent extends WalletEvent {
   final double amount;

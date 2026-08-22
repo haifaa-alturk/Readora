@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pdfrx/pdfrx.dart';
+
+import '../../../quotes/domain/entities/quote_entity.dart';
 import '../../../quotes/presentation/bloc/quotes_bloc.dart';
 import '../../../quotes/presentation/bloc/quotes_event.dart';
 import '../../../quotes/presentation/bloc/quotes_state.dart';
-import '../../../quotes/domain/entities/quote_entity.dart';
 
 class BookPreviewPage extends StatefulWidget {
   final String pdfUrl;
@@ -34,7 +35,16 @@ class _BookPreviewPageState extends State<BookPreviewPage> {
   @override
   void initState() {
     super.initState();
+
     _controller = PdfViewerController();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      context.read<QuotesBloc>().add(const LoadQuotesEvent());
+    });
   }
 
   // ============================================================
@@ -42,18 +52,25 @@ class _BookPreviewPageState extends State<BookPreviewPage> {
   // ============================================================
 
   void _handlePageChanged(int? pageNumber) {
-    if (pageNumber == null) return;
-    if (_isLeaving) return;
+    if (pageNumber == null) {
+      return;
+    }
 
-    // إذا عنده وصول كامل، يستطيع قراءة جميع الصفحات
-    if (widget.hasFullAccess) return;
+    if (_isLeaving) {
+      return;
+    }
 
-    // Preview = أول 5 صفحات فقط
+    if (widget.hasFullAccess) {
+      return;
+    }
+
     if (pageNumber > 5) {
       _isLeaving = true;
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -75,11 +92,15 @@ class _BookPreviewPageState extends State<BookPreviewPage> {
     try {
       final text = await selection.getSelectedText();
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         _selectedText = text.trim();
       });
+
+      debugPrint('SELECTED TEXT: $_selectedText');
     } catch (e) {
       debugPrint('Text selection error: $e');
     }
@@ -89,7 +110,7 @@ class _BookPreviewPageState extends State<BookPreviewPage> {
   // SAVE QUOTE
   // ============================================================
 
-  Future<void> _saveQuote() async {
+  void _saveQuote() {
     final text = _selectedText.trim();
 
     if (text.isEmpty) {
@@ -100,47 +121,43 @@ class _BookPreviewPageState extends State<BookPreviewPage> {
       return;
     }
 
+    debugPrint('======================================');
+    debugPrint('SAVING PREVIEW QUOTE LOCALLY');
+    debugPrint('BOOK ID: ${widget.bookId}');
+    debugPrint('BOOK TITLE: ${widget.bookTitle}');
+    debugPrint('TEXT: $text');
+    debugPrint('======================================');
+
     setState(() {
       _isSavingQuote = true;
     });
 
-    try {
-      context.read<QuotesBloc>().add(
-        AddQuoteEvent(bookId: widget.bookId, quoteText: text),
-      );
+    context.read<QuotesBloc>().add(
+      AddQuoteEvent(
+        bookId: widget.bookId,
+        quoteText: text,
+        bookTitle: widget.bookTitle,
+      ),
+    );
+  }
 
-      try {
-        await _controller.textSelectionDelegate.clearTextSelection();
-      } catch (e) {
-        debugPrint('Clear selection error: $e');
-      }
+  // ============================================================
+  // CLEAR SELECTION
+  // ============================================================
 
-      if (!mounted) return;
-
+  Future<void> _clearSelection() async {
+    // نمسح واجهة Flutter أولًا
+    if (mounted) {
       setState(() {
         _selectedText = '';
-        _isSavingQuote = false;
       });
+    }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Quote saved successfully 📑'),
-          backgroundColor: Colors.green,
-        ),
-      );
+    // ثم نحاول مسح التحديد من PDF
+    try {
+      await _controller.textSelectionDelegate.clearTextSelection();
     } catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        _isSavingQuote = false;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to save quote: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      debugPrint('Clear selection error: $e');
     }
   }
 
@@ -196,8 +213,7 @@ class _BookPreviewPageState extends State<BookPreviewPage> {
   // ============================================================
 
   void _showSavedQuotes() {
-    final bloc = context.read<QuotesBloc>();
-    final state = bloc.state;
+    final state = context.read<QuotesBloc>().state;
 
     if (state is QuotesLoaded) {
       _openQuotesSheet(state.quotes);
@@ -214,7 +230,7 @@ class _BookPreviewPageState extends State<BookPreviewPage> {
       return;
     }
 
-    bloc.add(const LoadQuotesEvent());
+    context.read<QuotesBloc>().add(const LoadQuotesEvent());
 
     showModalBottomSheet(
       context: context,
@@ -351,9 +367,9 @@ class _BookPreviewPageState extends State<BookPreviewPage> {
                 Expanded(
                   child: ListView.separated(
                     itemCount: quotes.length,
-                    separatorBuilder: (_, __) {
-                      return const SizedBox(height: 10);
-                    },
+
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+
                     itemBuilder: (context, index) {
                       final quote = quotes[index];
 
@@ -382,10 +398,12 @@ class _BookPreviewPageState extends State<BookPreviewPage> {
 
                             IconButton(
                               tooltip: 'Delete quote',
+
                               icon: const Icon(
                                 Icons.delete_outline,
                                 color: Colors.red,
                               ),
+
                               onPressed: () {
                                 context.read<QuotesBloc>().add(
                                   DeleteQuoteEvent(quoteId: quote.id),
@@ -407,213 +425,312 @@ class _BookPreviewPageState extends State<BookPreviewPage> {
     );
   }
 
+  // ============================================================
+  // BUILD
+  // ============================================================
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(217, 240, 237, 205),
+    return BlocListener<QuotesBloc, QuotesState>(
+      listener: (context, state) async {
+        // ======================================================
+        // QUOTE SAVED
+        // ======================================================
 
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 245, 242, 196),
-        foregroundColor: Colors.black,
-        centerTitle: true,
+        if (state is QuoteAddSuccess) {
+          debugPrint('======================================');
+          debugPrint('PREVIEW QUOTE SAVED LOCALLY');
+          debugPrint('TOTAL QUOTES: ${state.quotes.length}');
+          debugPrint('======================================');
 
-        title: Column(
-          children: [
-            Text(
-              widget.bookTitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          if (!mounted) {
+            return;
+          }
+
+          // مهم:
+          // نوقف Saving مباشرة
+          setState(() {
+            _isSavingQuote = false;
+            _selectedText = '';
+          });
+
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Quote saved successfully 📑'),
+              backgroundColor: Colors.green,
             ),
+          );
 
-            const SizedBox(height: 2),
+          // محاولة مسح التحديد من PDF
+          try {
+            await _controller.textSelectionDelegate.clearTextSelection();
+          } catch (e) {
+            debugPrint('Clear PDF selection after save error: $e');
+          }
 
-            Text(
-              widget.hasFullAccess
-                  ? 'Full Book'
-                  : 'Free Preview - First 5 Pages',
-              style: TextStyle(
-                fontSize: 11,
-                color: widget.hasFullAccess ? Colors.green : Colors.orange,
-                fontWeight: FontWeight.bold,
+          return;
+        }
+
+        // ======================================================
+        // ERROR
+        // ======================================================
+
+        if (state is QuotesError) {
+          debugPrint('❌ PREVIEW QUOTE ERROR: ${state.message}');
+
+          if (!mounted) {
+            return;
+          }
+
+          setState(() {
+            _isSavingQuote = false;
+          });
+
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+          );
+
+          return;
+        }
+      },
+
+      child: Scaffold(
+        backgroundColor: const Color.fromARGB(217, 240, 237, 205),
+
+        // ======================================================
+        // APP BAR
+        // ======================================================
+        appBar: AppBar(
+          backgroundColor: const Color.fromARGB(255, 245, 242, 196),
+
+          foregroundColor: Colors.black,
+
+          centerTitle: true,
+
+          title: Column(
+            children: [
+              Text(
+                widget.bookTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+
+              const SizedBox(height: 2),
+
+              Text(
+                widget.hasFullAccess
+                    ? 'Full Book'
+                    : 'Free Preview - First 5 Pages',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: widget.hasFullAccess ? Colors.green : Colors.orange,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+
+          actions: [
+            IconButton(
+              tooltip: 'Saved Quotes',
+              onPressed: _showSavedQuotes,
+              icon: const Icon(Icons.format_quote, size: 28),
             ),
           ],
         ),
 
-        actions: [
-          IconButton(
-            tooltip: 'Saved Quotes',
-            onPressed: _showSavedQuotes,
-            icon: const Icon(Icons.format_quote, size: 28),
-          ),
-        ],
-      ),
+        // ======================================================
+        // BODY
+        // ======================================================
+        body: Stack(
+          children: [
+            PdfViewer.uri(
+              Uri.parse(widget.pdfUrl),
 
-      body: Stack(
-        children: [
-          PdfViewer.uri(
-            Uri.parse(widget.pdfUrl),
-            controller: _controller,
-            params: PdfViewerParams(
-              margin: 10,
+              controller: _controller,
 
-              backgroundColor: const Color.fromARGB(217, 240, 237, 205),
+              params: PdfViewerParams(
+                margin: 10,
 
-              textSelectionParams: PdfTextSelectionParams(
-                enabled: true,
-                enableSelectionHandles: true,
-                showContextMenuAutomatically: true,
-                onTextSelectionChange: _updateSelectedText,
-              ),
+                backgroundColor: const Color.fromARGB(217, 240, 237, 205),
 
-              onPageChanged: _handlePageChanged,
-
-              maxScale: 5.0,
-            ),
-          ),
-
-          Positioned(
-            top: 15,
-            left: 20,
-            right: 20,
-            child: IgnorePointer(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
+                textSelectionParams: PdfTextSelectionParams(
+                  enabled: true,
+                  enableSelectionHandles: true,
+                  showContextMenuAutomatically: true,
+                  onTextSelectionChange: _updateSelectedText,
                 ),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.75),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      widget.hasFullAccess ? Icons.lock_open : Icons.menu_book,
-                      color: widget.hasFullAccess
-                          ? Colors.greenAccent
-                          : Colors.amber,
-                    ),
 
-                    const SizedBox(width: 8),
+                onPageChanged: _handlePageChanged,
 
-                    Flexible(
-                      child: Text(
-                        widget.hasFullAccess
-                            ? 'Full Book - You can read all pages'
-                            : 'Free Preview - First 5 Pages',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                maxScale: 5.0,
               ),
             ),
-          ),
 
-          Positioned(
-            right: 15,
-            bottom: 25,
-            child: Column(
-              children: [
-                FloatingActionButton.small(
-                  heroTag: 'preview_zoom_in',
-                  backgroundColor: const Color.fromARGB(255, 245, 242, 196),
-                  foregroundColor: const Color.fromARGB(255, 129, 76, 7),
-                  onPressed: _zoomIn,
-                  child: const Icon(Icons.add),
-                ),
-
-                const SizedBox(height: 8),
-
-                FloatingActionButton.small(
-                  heroTag: 'preview_zoom_reset',
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  onPressed: _resetZoom,
-                  child: const Icon(Icons.fit_screen),
-                ),
-
-                const SizedBox(height: 8),
-
-                FloatingActionButton.small(
-                  heroTag: 'preview_zoom_out',
-                  backgroundColor: const Color.fromARGB(255, 245, 242, 196),
-                  foregroundColor: const Color.fromARGB(255, 129, 76, 7),
-                  onPressed: _zoomOut,
-                  child: const Icon(Icons.remove),
-                ),
-              ],
-            ),
-          ),
-
-          if (_selectedText.isNotEmpty)
+            // ==================================================
+            // READING INFO
+            // ==================================================
             Positioned(
+              top: 15,
               left: 20,
               right: 20,
-              bottom: 20,
-              child: SafeArea(
+              child: IgnorePointer(
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 15,
-                    vertical: 10,
+                    horizontal: 12,
+                    vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 129, 76, 7),
-                    borderRadius: BorderRadius.circular(18),
-                    boxShadow: const [
-                      BoxShadow(blurRadius: 10, color: Colors.black26),
-                    ],
+                    color: Colors.black.withOpacity(0.75),
+                    borderRadius: BorderRadius.circular(15),
                   ),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.format_quote, color: Colors.amber),
+                      Icon(
+                        widget.hasFullAccess
+                            ? Icons.lock_open
+                            : Icons.menu_book,
+                        color: widget.hasFullAccess
+                            ? Colors.greenAccent
+                            : Colors.amber,
+                      ),
 
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 8),
 
-                      const Expanded(
+                      Flexible(
                         child: Text(
-                          'Text selected',
-                          style: TextStyle(
+                          widget.hasFullAccess
+                              ? 'Full Book - You can read all pages'
+                              : 'Free Preview - First 5 Pages',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
+                            fontSize: 13,
                           ),
                         ),
                       ),
-
-                      ElevatedButton.icon(
-                        onPressed: _isSavingQuote ? null : _saveQuote,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.amber,
-                          foregroundColor: Colors.black,
-                        ),
-                        icon: _isSavingQuote
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.black,
-                                ),
-                              )
-                            : const Icon(Icons.bookmark_add),
-                        label: Text(
-                          _isSavingQuote ? 'Saving...' : 'Save Quote',
-                        ),
-                      ),
                     ],
                   ),
                 ),
               ),
             ),
-        ],
+
+            // ==================================================
+            // ZOOM BUTTONS
+            // ==================================================
+            Positioned(
+              right: 15,
+              bottom: 25,
+              child: Column(
+                children: [
+                  FloatingActionButton.small(
+                    heroTag: 'preview_zoom_in',
+                    backgroundColor: const Color.fromARGB(255, 245, 242, 196),
+                    foregroundColor: const Color.fromARGB(255, 129, 76, 7),
+                    onPressed: _zoomIn,
+                    child: const Icon(Icons.add),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  FloatingActionButton.small(
+                    heroTag: 'preview_zoom_reset',
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    onPressed: _resetZoom,
+                    child: const Icon(Icons.fit_screen),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  FloatingActionButton.small(
+                    heroTag: 'preview_zoom_out',
+                    backgroundColor: const Color.fromARGB(255, 245, 242, 196),
+                    foregroundColor: const Color.fromARGB(255, 129, 76, 7),
+                    onPressed: _zoomOut,
+                    child: const Icon(Icons.remove),
+                  ),
+                ],
+              ),
+            ),
+
+            // ==================================================
+            // SAVE QUOTE
+            // ==================================================
+            if (_selectedText.isNotEmpty)
+              Positioned(
+                left: 20,
+                right: 20,
+                bottom: 20,
+                child: SafeArea(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 15,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 129, 76, 7),
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: const [
+                        BoxShadow(blurRadius: 10, color: Colors.black26),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.format_quote, color: Colors.amber),
+
+                        const SizedBox(width: 10),
+
+                        const Expanded(
+                          child: Text(
+                            'Text selected',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+
+                        ElevatedButton.icon(
+                          onPressed: _isSavingQuote ? null : _saveQuote,
+
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.amber,
+                            foregroundColor: Colors.black,
+                          ),
+
+                          icon: _isSavingQuote
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.black,
+                                  ),
+                                )
+                              : const Icon(Icons.bookmark_add),
+
+                          label: Text(
+                            _isSavingQuote ? 'Saving...' : 'Save Quote',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

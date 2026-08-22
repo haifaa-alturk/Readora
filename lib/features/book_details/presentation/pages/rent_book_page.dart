@@ -256,7 +256,7 @@ class _RentBookPageState extends State<RentBookPage> {
 
     final imageUrl = image.startsWith('http')
         ? image
-        : "http://10.66.254.50:8000/storage/$image";
+        : "http://10.243.228.50:8000/storage/$image";
 
     return Container(
       width: double.infinity,

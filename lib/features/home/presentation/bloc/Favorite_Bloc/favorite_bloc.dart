@@ -9,7 +9,6 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
   List<Book> _currentFavorites = [];
 
   FavoriteBloc(this.dataSource) : super(FavoriteInitial()) {
-    
     // جلب قائمة المفضلة
     on<FetchFavoritesEvent>((event, emit) async {
       emit(FavoriteLoading());
@@ -29,13 +28,13 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
           // حذف محلي فوري لتحديث الواجهة بسرعة (Optimistic UI)
           _currentFavorites.removeWhere((book) => book.id == event.bookId);
           emit(FavoriteLoaded(List.from(_currentFavorites)));
-          
+
           // استدعاء الحذف بالتمرير الجديد للـ bookId فقط
           await dataSource.removeFromFavorite(event.bookId);
         } else {
           // استدعاء الإضافة بالتمرير الجديد للـ bookId فقط
           await dataSource.addToFavorite(event.bookId);
-          
+
           // إعادة جلب المفضلة لتحديث القائمة بالكامل
           add(FetchFavoritesEvent(""));
         }

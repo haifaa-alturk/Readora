@@ -22,11 +22,7 @@ class _RechargeWalletScreenState extends State<RechargeWalletScreen> {
 
   final ImagePicker _imagePicker = ImagePicker();
 
-  String _selectedMethod = 'Bank Transfer';
-
   String? _receiptImagePath;
-
-  static const _methods = ['Bank Transfer', 'Credit Card', 'Apple Pay'];
 
   @override
   void dispose() {
@@ -34,35 +30,54 @@ class _RechargeWalletScreenState extends State<RechargeWalletScreen> {
     super.dispose();
   }
 
+  // اختيار صورة إيصال الدفع من المعرض
   Future<void> _pickReceiptImage() async {
-    final XFile? image = await _imagePicker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 80,
-    );
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
 
-    if (image == null) return;
+      if (image == null) return;
 
-    setState(() {
-      _receiptImagePath = image.path;
-    });
+      if (!mounted) return;
+
+      setState(() {
+        _receiptImagePath = image.path;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('حدث خطأ أثناء اختيار الصورة: $e')),
+      );
+    }
   }
 
   void _submit() {
+    // التحقق من المبلغ
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
+    // التحقق من وجود صورة الإيصال
     if (_receiptImagePath == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select the payment receipt image'),
-        ),
+        const SnackBar(content: Text('يرجى اختيار صورة إيصال الدفع')),
       );
       return;
     }
 
-    final amount = double.parse(_amountController.text.trim());
+    final amount = double.tryParse(_amountController.text.trim());
 
+    if (amount == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('المبلغ غير صالح')));
+      return;
+    }
+
+    // إرسال طلب الشحن إلى الباك
     context.read<WalletBloc>().add(
       RechargeWalletEvent(amount: amount, receiptImagePath: _receiptImagePath!),
     );
@@ -72,6 +87,7 @@ class _RechargeWalletScreenState extends State<RechargeWalletScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
@@ -80,8 +96,13 @@ class _RechargeWalletScreenState extends State<RechargeWalletScreen> {
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
       ),
+
       body: BlocListener<WalletBloc, WalletState>(
         listener: (context, state) {
+          // =========================
+          // SUCCESS
+          // =========================
+
           if (state is WalletRechargeSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -90,195 +111,270 @@ class _RechargeWalletScreenState extends State<RechargeWalletScreen> {
               ),
             );
 
+            // نرجع للـ WalletScreen
+            // ونرسل true حتى يعمل Reload.
             Navigator.pop(context, true);
           }
 
+          // =========================
+          // ERROR
+          // =========================
+
           if (state is WalletRechargeError) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: const Color(0xffe61b72),
+              ),
+            );
           }
         },
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text(
-                  'Enter amount to recharge',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
 
-                const SizedBox(height: 16),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
 
-                TextFormField(
-                  controller: _amountController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
+            child: Form(
+              key: _formKey,
+
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+
+                children: [
+                  // =========================
+                  // INFORMATION
+                  // =========================
+                  const Text(
+                    'Recharge your wallet',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
                   ),
-                  decoration: InputDecoration(
-                    labelText: 'Amount (SYP)',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    prefixIcon: const Icon(Icons.payments),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter an amount';
-                    }
 
-                    final amount = double.tryParse(value);
+                  const SizedBox(height: 8),
 
-                    if (amount == null || amount < 1000) {
-                      return 'Minimum recharge amount is 1000 SYP';
-                    }
-
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 24),
-
-                const Text(
-                  'Payment Method',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-
-                const SizedBox(height: 12),
-
-                DropdownButtonFormField<String>(
-                  initialValue: _selectedMethod,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
+                  const Text(
+                    'Enter the amount you transferred and upload your payment receipt. Your request will be reviewed by the administrator.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                      height: 1.5,
                     ),
                   ),
-                  items: _methods
-                      .map(
-                        (method) => DropdownMenuItem<String>(
-                          value: method,
-                          child: Text(method),
+
+                  const SizedBox(height: 24),
+
+                  // =========================
+                  // AMOUNT
+                  // =========================
+                  const Text(
+                    'Recharge Amount',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  TextFormField(
+                    controller: _amountController,
+
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+
+                    decoration: InputDecoration(
+                      labelText: 'Amount (SYP)',
+                      hintText: 'Minimum 1000 SYP',
+
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+
+                      prefixIcon: const Icon(Icons.payments_outlined),
+                    ),
+
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter an amount';
+                      }
+
+                      final amount = double.tryParse(value.trim());
+
+                      if (amount == null) {
+                        return 'Please enter a valid amount';
+                      }
+
+                      // مطابق للباك:
+                      // 'amount'=>'required|numeric|min:1000'
+                      if (amount < 1000) {
+                        return 'Minimum recharge amount is 1000 SYP';
+                      }
+
+                      return null;
+                    },
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // =========================
+                  // RECEIPT
+                  // =========================
+                  const Text(
+                    'Payment Receipt',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  const Text(
+                    'Upload the receipt image for your payment.',
+                    style: TextStyle(fontSize: 13, color: Colors.grey),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  GestureDetector(
+                    onTap: _pickReceiptImage,
+
+                    child: Container(
+                      height: 180,
+
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+
+                        border: Border.all(
+                          color: Colors.grey.withValues(alpha: 0.4),
                         ),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    if (value == null) {
-                      return;
-                    }
+                      ),
 
-                    setState(() {
-                      _selectedMethod = value;
-                    });
-                  },
-                ),
+                      child: _receiptImagePath == null
+                          ? const Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
 
-                const SizedBox(height: 24),
+                              children: [
+                                Icon(
+                                  Icons.cloud_upload_outlined,
+                                  size: 44,
+                                  color: Color(0xffe61b72),
+                                ),
 
-                const Text(
-                  'Payment Receipt',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
+                                SizedBox(height: 10),
 
-                const SizedBox(height: 12),
+                                Text(
+                                  'Select payment receipt',
+                                  style: TextStyle(fontWeight: FontWeight.w500),
+                                ),
 
-                GestureDetector(
-                  onTap: _pickReceiptImage,
-                  child: Container(
-                    height: 160,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.grey.withValues(alpha: 0.4),
+                                SizedBox(height: 5),
+
+                                Text(
+                                  'JPG, JPEG or PNG',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+
+                                SizedBox(height: 3),
+
+                                Text(
+                                  'Maximum size: 2 MB',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+
+                              child: Image.file(
+                                File(_receiptImagePath!),
+
+                                width: double.infinity,
+
+                                height: 180,
+
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                    ),
+                  ),
+
+                  // =========================
+                  // CHANGE RECEIPT
+                  // =========================
+                  if (_receiptImagePath != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+
+                      child: TextButton.icon(
+                        onPressed: _pickReceiptImage,
+
+                        icon: const Icon(Icons.image_outlined),
+
+                        label: const Text('Change receipt'),
                       ),
                     ),
-                    child: _receiptImagePath == null
-                        ? const Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.cloud_upload_outlined,
-                                size: 40,
-                                color: Color(0xffe61b72),
-                              ),
-                              SizedBox(height: 8),
-                              Text('Select payment receipt'),
-                              SizedBox(height: 4),
-                              Text(
-                                'JPG, JPEG or PNG',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          )
-                        : ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.file(
-                              File(_receiptImagePath!),
-                              width: double.infinity,
-                              height: 160,
-                              fit: BoxFit.cover,
+
+                  const Spacer(),
+
+                  // =========================
+                  // SEND REQUEST
+                  // =========================
+                  BlocBuilder<WalletBloc, WalletState>(
+                    builder: (context, state) {
+                      final loading = state is WalletRechargeLoading;
+
+                      return SizedBox(
+                        height: 52,
+
+                        child: ElevatedButton(
+                          onPressed: loading ? null : _submit,
+
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xffe61b72),
+
+                            foregroundColor: Colors.white,
+
+                            disabledBackgroundColor: Colors.grey.shade400,
+
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                  ),
-                ),
 
-                if (_receiptImagePath != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: TextButton.icon(
-                      onPressed: _pickReceiptImage,
-                      icon: const Icon(Icons.image),
-                      label: const Text('Change receipt'),
-                    ),
-                  ),
+                          child: loading
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
 
-                const Spacer(),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  'Send Recharge Request',
 
-                BlocBuilder<WalletBloc, WalletState>(
-                  builder: (context, state) {
-                    final loading = state is WalletRechargeLoading;
-
-                    return SizedBox(
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: loading ? null : _submit,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xffe61b72),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                         ),
-                        child: loading
-                            ? const SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Text(
-                                'Send Recharge Request',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                      ),
-                    );
-                  },
-                ),
-              ],
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  const Text(
+                    'Your wallet balance will be updated after administrator approval.',
+                    textAlign: TextAlign.center,
+
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

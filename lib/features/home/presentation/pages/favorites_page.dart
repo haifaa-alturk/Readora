@@ -1,35 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:library_app1/core/language/app_localizations.dart';
+
 import 'package:library_app1/features/home/presentation/bloc/Favorite_Bloc/favorite_bloc.dart';
 import 'package:library_app1/features/home/presentation/bloc/Favorite_Bloc/favorite_event.dart';
 import 'package:library_app1/features/home/presentation/bloc/Favorite_Bloc/favorite_state.dart';
 
-// 🔴 استيراد صفحة تفاصيل الكتاب
 import 'package:library_app1/features/home/presentation/pages/book_details_page.dart';
+
 import 'package:library_app1/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:library_app1/features/settings/presentation/bloc/settings_state.dart';
 
 class FavoritesPage extends StatelessWidget {
   const FavoritesPage({super.key});
 
+  // ============================================================
+  // IMAGE URL
+  // ============================================================
+
+  String _buildImageUrl(String? image) {
+    if (image == null || image.trim().isEmpty) {
+      return "";
+    }
+
+    final value = image.trim();
+
+    if (value.startsWith('http://') || value.startsWith('https://')) {
+      return value;
+    }
+
+    return "http://10.243.228.50:8000/storage/"
+        "${value.replaceFirst(RegExp(r'^/'), '')}";
+  }
+
+  // ============================================================
+  // BUILD
+  // ============================================================
+
   @override
   Widget build(BuildContext context) {
     final settingsState = context.watch<SettingsBloc>().state;
 
-    // ignore: dead_code
     final lang = settingsState is SettingsLoaded
         ? settingsState.language
         : 'en';
 
-    // 🎨 خيارات ألوان الكروت المتبادلة (زهري وبنفسجي فاتح)
+    // ============================================================
+    // CARD COLORS
+    // ============================================================
+
     final List<Color> cardColors = [
-      const Color.fromARGB(255, 241, 203, 223), // زهري ناعم
-      const Color.fromARGB(255, 215, 195, 247), // بنفسجي فاتح
+      const Color.fromARGB(255, 241, 203, 223),
+      const Color.fromARGB(255, 215, 195, 247),
     ];
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+
+      // ==========================================================
+      // APP BAR
+      // ==========================================================
       appBar: AppBar(
         title: Text(
           context.tr('favorites', lang),
@@ -43,17 +74,37 @@ class FavoritesPage extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
       ),
+
+      // ==========================================================
+      // BODY
+      // ==========================================================
       body: BlocBuilder<FavoriteBloc, FavoriteState>(
         builder: (context, state) {
+          // ======================================================
+          // LOADING
+          // ======================================================
+
           if (state is FavoriteLoading) {
             return const Center(
               child: CircularProgressIndicator(color: Color(0xFF8B5CF6)),
             );
-          } else if (state is FavoriteLoaded) {
+          }
+
+          // ======================================================
+          // LOADED
+          // ======================================================
+
+          if (state is FavoriteLoaded) {
+            // ====================================================
+            // EMPTY
+            // ====================================================
+
             if (state.favoriteBooks.isEmpty) {
               return Center(
                 child: Text(
-                  "You haven't added any books to your favorites yet.",
+                  "You haven't added any books "
+                  "to your favorites yet.",
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Theme.of(context).brightness == Brightness.dark
                         ? const Color.fromARGB(
@@ -69,35 +120,39 @@ class FavoritesPage extends StatelessWidget {
               );
             }
 
+            // ====================================================
+            // FAVORITES LIST
+            // ====================================================
+
             return ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               itemCount: state.favoriteBooks.length,
               itemBuilder: (context, index) {
                 final book = state.favoriteBooks[index];
 
-                // 🔄 التناوب بين اللونين بناءً على الـ index
+                // ==================================================
+                // CARD COLOR
+                // ==================================================
+
                 final Color backgroundColor =
                     cardColors[index % cardColors.length];
 
-                // 🖼️ تجهيز رابط الصورة
-                String imageUrl =
-                    (book.coverImage != null && book.coverImage!.isNotEmpty)
-                    ? (book.coverImage!.startsWith('http')
-                          ? book.coverImage!
-                          : "http://10.66.254.50:8000/storage/${book.coverImage}")
-                    : "";
+                // ==================================================
+                // IMAGE
+                // ==================================================
 
-                // 👤 تجهيز اسم المؤلف
-                String authorText = "مؤلف غير معروف";
+                final String imageUrl = _buildImageUrl(book.coverImage);
 
-                if (book.authorName != null &&
-                    book.authorName!.trim().isNotEmpty) {
-                  authorText = book.authorName!;
-                } else if (book.authors.isNotEmpty) {
-                  authorText = book.authors.join(", ");
-                }
+                // ==================================================
+                // AUTHOR
+                // ==================================================
 
-                // 🔴 الانتقال إلى تفاصيل الكتاب عند الضغط
+                final String authorText = book.authorsText;
+
+                // ==================================================
+                // CARD
+                // ==================================================
+
                 return GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -109,7 +164,7 @@ class FavoritesPage extends StatelessWidget {
                             bookId: book.id,
                             title: book.bookName,
                             author: authorText,
-                            image: book.coverImage ?? '',
+                            image: imageUrl,
                             description: book.description ?? '',
                             pdfFile: book.pdfFile,
                           ),
@@ -133,7 +188,9 @@ class FavoritesPage extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        // 🖼️ صورة غلاف الكتاب
+                        // ==========================================
+                        // COVER
+                        // ==========================================
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: Container(
@@ -144,13 +201,13 @@ class FavoritesPage extends StatelessWidget {
                                 ? Image.network(
                                     imageUrl,
                                     fit: BoxFit.cover,
-                                    errorBuilder:
-                                        (context, error, stackTrace) =>
-                                            const Icon(
-                                              Icons.book,
-                                              size: 30,
-                                              color: Colors.grey,
-                                            ),
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return const Icon(
+                                        Icons.book,
+                                        size: 30,
+                                        color: Colors.grey,
+                                      );
+                                    },
                                   )
                                 : const Icon(
                                     Icons.book,
@@ -162,7 +219,9 @@ class FavoritesPage extends StatelessWidget {
 
                         const SizedBox(width: 14),
 
-                        // 📝 اسم الكتاب واسم المؤلف
+                        // ==========================================
+                        // BOOK INFO
+                        // ==========================================
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -177,24 +236,29 @@ class FavoritesPage extends StatelessWidget {
                                   fontSize: 16,
                                 ),
                               ),
+
                               const SizedBox(height: 6),
 
-                              // يمكن إظهار اسم المؤلف عند الحاجة
-                              // Text(
-                              //   authorText,
-                              //   maxLines: 1,
-                              //   overflow: TextOverflow.ellipsis,
-                              //   style: const TextStyle(
-                              //     color: Color(0xFF6B4E71),
-                              //     fontSize: 13,
-                              //     fontWeight: FontWeight.w500,
-                              //   ),
-                              // ),
+                              if (authorText.isNotEmpty)
+                                Text(
+                                  authorText,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Color(0xFF6B4E71),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
                             ],
                           ),
                         ),
 
-                        // ❤️ زر الحذف من المفضلة
+                        const SizedBox(width: 8),
+
+                        // ==========================================
+                        // REMOVE FAVORITE
+                        // ==========================================
                         GestureDetector(
                           onTap: () {
                             context.read<FavoriteBloc>().add(
@@ -224,11 +288,21 @@ class FavoritesPage extends StatelessWidget {
                 );
               },
             );
-          } else if (state is FavoriteError) {
+          }
+
+          // ======================================================
+          // ERROR
+          // ======================================================
+
+          if (state is FavoriteError) {
             return Center(
-              child: Text(
-                state.message,
-                style: const TextStyle(color: Colors.redAccent),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text(
+                  state.message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.redAccent),
+                ),
               ),
             );
           }

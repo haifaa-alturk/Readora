@@ -16,7 +16,7 @@ class BookDetailsModel extends BookDetails {
     required super.rentalPrice,
   });
 
-  static const String _baseUrl = 'http://10.66.254.50:8000';
+  static const String _baseUrl = 'http://10.243.228.50:8000';
 
   static String? _buildFileUrl(dynamic value) {
     if (value == null) return null;
@@ -25,13 +25,22 @@ class BookDetailsModel extends BookDetails {
 
     if (path.isEmpty) return null;
 
-    // إذا كان الرابط كاملاً أصلاً
     if (path.startsWith('http://') || path.startsWith('https://')) {
       return path;
     }
 
-    // إذا كان مساراً داخل storage
     return '$_baseUrl/storage/${path.replaceFirst(RegExp(r'^/'), '')}';
+  }
+
+  static double _parseRating(Map<String, dynamic> json) {
+    final value =
+        json['average_rating'] ?? json['avg_rating'] ?? json['rating'] ?? 0;
+
+    if (value is num) {
+      return value.toDouble();
+    }
+
+    return double.tryParse(value.toString()) ?? 0.0;
   }
 
   factory BookDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -60,14 +69,15 @@ class BookDetailsModel extends BookDetails {
 
       description: json['description']?.toString() ?? '',
 
-      // تحويل صورة الغلاف إلى URL كامل
       coverImage: _buildFileUrl(json['cover_image']) ?? '',
 
       pages: int.tryParse(json['number_of_pages']?.toString() ?? '0') ?? 0,
 
-      rating: double.tryParse(json['rating']?.toString() ?? '0') ?? 0,
+      // ======================================================
+      // متوسط تقييم الكتاب
+      // ======================================================
+      rating: _parseRating(json),
 
-      // تحويل ملف الكتاب إلى URL كامل
       pdfFile: _buildFileUrl(json['book_file']),
 
       authors: authorNames,

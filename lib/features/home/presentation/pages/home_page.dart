@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:library_app1/core/language/app_localizations.dart';
+
 import 'package:library_app1/features/home/presentation/bloc/Home_Bloc/home_bloc.dart';
 import 'package:library_app1/features/home/presentation/bloc/Home_Bloc/home_state.dart';
+
 import 'package:library_app1/features/home/presentation/widgets/all_books_grid.dart';
-
 import 'package:library_app1/features/home/presentation/widgets/home_header.dart';
-
 import 'package:library_app1/features/home/presentation/widgets/recommended_books_list.dart';
 import 'package:library_app1/features/home/presentation/widgets/top_rated_books_list.dart';
+
 import 'package:library_app1/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:library_app1/features/settings/presentation/bloc/settings_state.dart';
 
@@ -19,23 +20,44 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settingsState = context.watch<SettingsBloc>().state;
-    final lang = settingsState is SettingsLoaded ? settingsState.language : 'en';
+
+    final lang = settingsState is SettingsLoaded
+        ? settingsState.language
+        : 'en';
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+
       body: BlocBuilder<HomeBloc, HomeState>(
         builder: (context, state) {
+          // ======================================================
+          // LOADING
+          // ======================================================
+
           if (state is HomeLoading) {
             return const Center(child: CircularProgressIndicator());
-          } else if (state is HomeLoaded) {
+          }
+
+          // ======================================================
+          // LOADED
+          // ======================================================
+
+          if (state is HomeLoaded) {
             return SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
+
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+
                 children: [
                   const HomeHeader(points: 250),
+
+                  // ==================================================
+                  // SUGGESTED BOOKS
+                  // ==================================================
                   Padding(
                     padding: const EdgeInsets.all(16.0),
+
                     child: Text(
                       context.tr('suggested_books', lang),
                       style: const TextStyle(
@@ -45,9 +67,15 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+
                   RecommendedBooksList(books: state.recommendedBooks),
+
+                  // ==================================================
+                  // TOP RATED BOOKS
+                  // ==================================================
                   Padding(
                     padding: const EdgeInsets.all(16.0),
+
                     child: Text(
                       context.tr('top_rated_books', lang),
                       style: const TextStyle(
@@ -57,9 +85,15 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+
                   TopRatedBooksList(books: state.topRatedBooks),
+
+                  // ==================================================
+                  // NEW BOOKS
+                  // ==================================================
                   Padding(
                     padding: const EdgeInsets.all(16.0),
+
                     child: Text(
                       context.tr('new_books', lang),
                       style: const TextStyle(
@@ -69,21 +103,32 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+
                   AllBooksGrid(books: state.newBooks),
                 ],
               ),
             );
-          } else if (state is HomeError) {
+          }
+
+          // ======================================================
+          // ERROR
+          // ======================================================
+
+          if (state is HomeError) {
             return Center(
               child: Text(
                 state.message,
                 style: const TextStyle(color: Colors.red),
+                textAlign: TextAlign.center,
               ),
             );
           }
-          return Center(
-            child: Text(context.tr('tap_to_load', lang)),
-          );
+
+          // ======================================================
+          // INITIAL
+          // ======================================================
+
+          return Center(child: Text(context.tr('tap_to_load', lang)));
         },
       ),
     );

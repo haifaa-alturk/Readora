@@ -38,9 +38,11 @@ class IndividualChallengeRemoteDataSourceImpl
       final json = Map<String, dynamic>.from(response.data as Map);
       final questions = json['questions'] as List<dynamic>? ?? const [];
       return questions
-          .map((e) => IndividualChallengeQuestionModel.fromJson(
-                Map<String, dynamic>.from(e as Map),
-              ))
+          .map(
+            (e) => IndividualChallengeQuestionModel.fromJson(
+              Map<String, dynamic>.from(e as Map),
+            ),
+          )
           .toList();
     } on DioException catch (e) {
       if (e.response?.statusCode == 403) {
