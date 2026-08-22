@@ -7,9 +7,17 @@ abstract class QuotesEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+// ============================================================
+// LOAD
+// ============================================================
+
 class LoadQuotesEvent extends QuotesEvent {
   const LoadQuotesEvent();
 }
+
+// ============================================================
+// DELETE
+// ============================================================
 
 class DeleteQuoteEvent extends QuotesEvent {
   final int quoteId;
@@ -20,12 +28,23 @@ class DeleteQuoteEvent extends QuotesEvent {
   List<Object?> get props => [quoteId];
 }
 
+// ============================================================
+// ADD
+// ============================================================
+
 class AddQuoteEvent extends QuotesEvent {
   final int bookId;
+
   final String quoteText;
 
-  const AddQuoteEvent({required this.bookId, required this.quoteText});
+  final String bookTitle;
+
+  const AddQuoteEvent({
+    required this.bookId,
+    required this.quoteText,
+    this.bookTitle = '',
+  });
 
   @override
-  List<Object?> get props => [bookId, quoteText];
+  List<Object?> get props => [bookId, quoteText, bookTitle];
 }

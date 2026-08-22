@@ -1,8 +1,12 @@
 class QuoteEntity {
   final int id;
+
   final int bookId;
+
   final String bookTitle;
+
   final String quoteText;
+
   final DateTime createdAt;
 
   const QuoteEntity({

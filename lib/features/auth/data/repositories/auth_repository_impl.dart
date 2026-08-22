@@ -38,58 +38,58 @@ import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 // import '../datasources/auth_remote_datasource.dart';
 
-
-
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remote;
 
   AuthRepositoryImpl(this.remote);
 
   @override
-  Future<User> login(String email, String password) async {
-    final user = await remote.login(email, password);
+  Future<User> login(String email, String password, String? fcmToken) async {
+    final user = await remote.login(email, password, fcmToken);
 
     return User(
       token: user.token,
       id: user.id,
       name: user.name,
       email: user.email,
-      userImage: user.userImage, 
+      userImage: user.userImage,
       interests: user.interests,
     );
   }
- @override
+
+  @override
   Future<User> register({
-    required String name, 
-    required String email, 
-    required String password, 
-    required String passwordConfirmation, 
-    required List<int> interests, 
-    String? imagePath
+    required String name,
+    required String email,
+    required String password,
+    String? fcmToken,
+    required String passwordConfirmation,
+    required List<int> interests,
+    String? imagePath,
   }) async {
-    
     final userModel = await remote.register(
       name: name,
       email: email,
       password: password,
+      fcmToken: fcmToken,
       passwordConfirmation: passwordConfirmation,
       interests: interests,
       imagePath: imagePath,
     );
 
     // تحويل UserModel إلى User (Entity)
-   return User(
-  token: userModel.token,
-  id: userModel.id,
-  name: userModel.name,
-  email: userModel.email,
-  userImage: userModel.userImage, 
-  interests: userModel.interests, //  الاهتمامات
-);
+    return User(
+      token: userModel.token,
+      id: userModel.id,
+      name: userModel.name,
+      email: userModel.email,
+      userImage: userModel.userImage,
+      interests: userModel.interests, //  الاهتمامات
+    );
   }
 
   @override
-Future<List<CategoryModel>> getCategories() async {
-  return await remote.getCategories();
-}
+  Future<List<CategoryModel>> getCategories() async {
+    return await remote.getCategories();
+  }
 }

@@ -10,34 +10,111 @@ class WalletTransactionModel extends WalletTransactionEntity {
   });
 
   factory WalletTransactionModel.fromJson(Map<String, dynamic> json) {
-    final rawType = (json['type'] as String? ?? '').toLowerCase();
-    final isCredit = rawType == 'recharge' || rawType == 'credit';
-    final source = rawType == 'recharge'
-        ? 'Wallet Recharge'
-        : rawType == 'purchase'
-            ? 'Book Purchase'
-            : rawType == 'borrow'
-                ? 'Book Borrow'
-                : json['source'] as String? ?? rawType;
+    final rawAmount = json['amount'] ?? json['value'] ?? 0;
+
+    final amount = rawAmount is num
+        ? rawAmount.toDouble()
+        : double.tryParse(rawAmount.toString()) ?? 0.0;
+
+    final id = _parseId(json['id']);
+
+    final rawDate = json['date'] ?? json['created_at'] ?? json['createdAt'];
+
+    final date = rawDate != null
+        ? DateTime.tryParse(rawDate.toString()) ?? DateTime.now()
+        : DateTime.now();
+
+    final backendType =
+        (json['type'] ?? json['transaction_type'] ?? json['source'] ?? '')
+            .toString()
+            .toLowerCase();
 
     return WalletTransactionModel(
-      id: int.tryParse('${json['id']}') ?? 0,
-      amount: (_parseAmount(json['amount']) ?? 0.0).abs(),
-      source: source,
-      date: json['date'] != null
-          ? DateTime.parse(json['date'] as String)
-          : DateTime.now(),
-      type: isCredit ? 'credit' : 'debit',
+      id: id,
+      amount: amount,
+      source: _getSource(backendType, json),
+      date: date,
+      type: _getTransactionType(backendType, amount),
     );
   }
 
-  static double? _parseAmount(dynamic value) {
-    if (value is num) return value.toDouble();
-    if (value is String && value.trim().isNotEmpty) {
-      return double.tryParse(value.trim());
+  // ============================================================
+  // ID
+  // ============================================================
+
+  static int _parseId(dynamic value) {
+    if (value is num) {
+      return value.toInt();
     }
-    return null;
+
+    final stringValue = value?.toString() ?? '';
+
+    final numericId = int.tryParse(stringValue);
+
+    if (numericId != null) {
+      return numericId;
+    }
+
+    return stringValue.hashCode;
   }
+
+  // ============================================================
+  // SOURCE
+  // ============================================================
+
+  static String _getSource(String backendType, Map<String, dynamic> json) {
+    switch (backendType) {
+      case 'recharge':
+      case 'charging':
+      case 'wallet_charge':
+        return 'شحن المحفظة';
+
+      case 'purchase':
+      case 'buy':
+        return 'شراء كتاب';
+
+      case 'borrow':
+      case 'rent':
+      case 'borrowing':
+        return 'استعارة كتاب';
+
+      default:
+        final source = json['source']?.toString();
+
+        if (source != null && source.trim().isNotEmpty) {
+          return source;
+        }
+
+        return backendType.isNotEmpty ? backendType : 'عملية محفظة';
+    }
+  }
+
+  // ============================================================
+  // CREDIT / DEBIT
+  // ============================================================
+
+  static String _getTransactionType(String backendType, double amount) {
+    switch (backendType) {
+      case 'recharge':
+      case 'charging':
+      case 'wallet_charge':
+        return 'credit';
+
+      case 'purchase':
+      case 'buy':
+      case 'borrow':
+      case 'rent':
+      case 'borrowing':
+        return 'debit';
+
+      default:
+        return amount >= 0 ? 'credit' : 'debit';
+    }
+  }
+
+  // ============================================================
+  // JSON
+  // ============================================================
 
   Map<String, dynamic> toJson() {
     return {

@@ -2,13 +2,16 @@ import 'package:dio/dio.dart';
 import '../models/book_model.dart';
 
 abstract class HomeRemoteDataSource {
-  Future<List<BookModel>> getRecommendedBooks(); // حسب الاهتمامات
-  Future<List<BookModel>> getTopRatedBooks();    // أعلى تقييم
-  Future<List<BookModel>> getNewBooks();         // الأحدث (جميع الكتب)
+  Future<List<BookModel>> getRecommendedBooks();
+
+  Future<List<BookModel>> getTopRatedBooks();
+
+  Future<List<BookModel>> getNewBooks();
 }
 
 class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   final Dio dio;
+
   HomeRemoteDataSourceImpl({required this.dio});
 
   @override
@@ -27,7 +30,6 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   Future<List<BookModel>> getNewBooks() async {
     // ن يعيد 30 كتاب مضاف حديثا
     final response = await dio.get('books/new');
-    print("📡 Data from Server: ${response.data}"); 
     return (response.data as List).map((e) => BookModel.fromJson(e)).toList();
   }
 }

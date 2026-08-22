@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+
 import '../../../domain/entities/book.dart';
 
 abstract class HomeState extends Equatable {
@@ -27,6 +28,7 @@ class HomeLoaded extends HomeState {
 
 class HomeError extends HomeState {
   final String message;
+
   HomeError(this.message);
 
   @override

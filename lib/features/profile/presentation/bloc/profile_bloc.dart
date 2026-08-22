@@ -35,7 +35,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     emit(const ProfileLoading());
 
     if (event.newImage != null) {
-      final uploadResult = await repository.uploadProfileImage(event.newImage!.path);
+      final uploadResult = await repository.uploadProfileImage(
+        event.newImage!.path,
+      );
       if (uploadResult.isLeft()) {
         uploadResult.fold(
           (error) => emit(ProfileUpdateError(message: error)),
@@ -49,12 +51,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       name: event.newName,
       email: event.newEmail,
     );
-    result.fold(
-      (error) => emit(ProfileUpdateError(message: error)),
-      (updatedProfile) {
-        emit(ProfileUpdateSuccess(profile: updatedProfile));
-        emit(ProfileLoaded(profile: updatedProfile));
-      },
-    );
+    result.fold((error) => emit(ProfileUpdateError(message: error)), (
+      updatedProfile,
+    ) {
+      emit(ProfileUpdateSuccess(profile: updatedProfile));
+      emit(ProfileLoaded(profile: updatedProfile));
+    });
   }
 }

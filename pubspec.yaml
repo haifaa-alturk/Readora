@@ -31,18 +31,21 @@ dependencies:
 
   flutter:
     sdk: flutter
-  shared_preferences: ^2.3.0
+  shared_preferences: ^2.5.3
   flutter_bloc: ^9.1.1
   lottie: ^3.1.2
   cupertino_icons: ^1.0.8
   http: ^1.6.0
- 
+  pdfrx: ^2.4.7
+  image_picker: ^1.2.0
   dio: ^5.9.2
-  image_picker: ^1.2.1
   dartz: ^0.10.1
   equatable: ^2.0.8
   google_fonts: ^6.1.0
   font_awesome_flutter: ^11.0.0
+  firebase_core: ^4.13.0
+  firebase_messaging: ^16.5.0
+  flutter_local_notifications: ^17.2.1
   
 
 dev_dependencies:

@@ -4,7 +4,10 @@ import '../models/points_history_entry_model.dart';
 abstract class PointsRemoteDataSource {
   Future<int> getTotalPoints();
   Future<List<PointsHistoryEntryModel>> getPointsHistory();
-  Future<List<PointsHistoryEntryModel>> addPoints({required int amount, required String source});
+  Future<List<PointsHistoryEntryModel>> addPoints({
+    required int amount,
+    required String source,
+  });
 }
 
 class PointsRemoteDataSourceImpl implements PointsRemoteDataSource {

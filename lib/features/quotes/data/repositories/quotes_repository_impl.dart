@@ -5,40 +5,64 @@ import '../../domain/repositories/quotes_repository_interface.dart';
 import '../datasources/quotes_remote_datasource.dart';
 
 class QuotesRepositoryImpl implements QuotesRepositoryInterface {
-  final QuotesRemoteDataSource _remoteDataSource;
+  final QuotesRemoteDataSource _dataSource;
 
-  QuotesRepositoryImpl(this._remoteDataSource);
+  QuotesRepositoryImpl(this._dataSource);
+
+  // ============================================================
+  // GET QUOTES
+  // ============================================================
 
   @override
   Future<Either<String, List<QuoteEntity>>> getQuotes() async {
     try {
-      final result = await _remoteDataSource.getQuotes();
-      return Right(result);
+      final quotes = await _dataSource.getQuotes();
+
+      return Right(quotes);
     } catch (e) {
-      return Left('Error fetching quotes: ${e.toString()}');
+      return Left('Error loading quotes: ${e.toString()}');
     }
   }
+
+  // ============================================================
+  // DELETE QUOTE
+  // ============================================================
 
   @override
   Future<Either<String, bool>> deleteQuote(int quoteId) async {
     try {
-      final result = await _remoteDataSource.deleteQuote(quoteId);
-      return Right(result);
+      final success = await _dataSource.deleteQuote(quoteId);
+
+      if (!success) {
+        return const Left('Failed to delete quote.');
+      }
+
+      return const Right(true);
     } catch (e) {
       return Left('Error deleting quote: ${e.toString()}');
     }
   }
 
+  // ============================================================
+  // ADD QUOTE
+  // ============================================================
+
   @override
-  Future<Either<String, QuoteEntity>> addQuote({required int bookId, required String quoteText}) async {
+  Future<Either<String, QuoteEntity>> addQuote({
+    required int bookId,
+    required String quoteText,
+    String bookTitle = '',
+  }) async {
     try {
-      final result = await _remoteDataSource.addQuote(
+      final quote = await _dataSource.addQuote(
         bookId: bookId,
         quoteText: quoteText,
+        bookTitle: bookTitle,
       );
-      return Right(result);
+
+      return Right(quote);
     } catch (e) {
-      return Left('Error adding quote: ${e.toString()}');
+      return Left('Error saving quote: ${e.toString()}');
     }
   }
 }

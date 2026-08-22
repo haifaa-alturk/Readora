@@ -14,5 +14,6 @@ class WalletTransactionEntity {
   });
 
   bool get isCredit => type == 'credit';
+
   bool get isDebit => type == 'debit';
 }
